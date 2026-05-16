@@ -35,6 +35,98 @@ from enrich import (
     call_llm, extract_json, reconfigure_streams,
 )
 
+# Appended to every prompt — the catalog enricher's prompts are kept
+# unchanged. The catalog has tuned its prompt against thousands of entries
+# already; private imports need extra brevity discipline because Claude
+# sometimes goes verbose on songs (especially well-known ones with rich
+# context) and gets output-truncated mid-string, breaking JSON parsing.
+STRICT_SUFFIX = (
+    "\n\nCRITICAL: Output MUST be exactly one valid JSON object that ends with `}`. "
+    "search_text MUST be 30-50 words MAXIMUM — be concise. "
+    "If you find yourself listing many synonyms, stop after the most useful ones. "
+    "Never emit prose before or after the JSON."
+)
+
+
+def _balance_text(text):
+    """Walk the text once, tracking unescaped string-state and brace/bracket depth.
+    Returns (depth, brackets, in_str). Used by salvage_truncated_json."""
+    in_str = False
+    escape = False
+    depth = 0
+    brackets = 0
+    for ch in text:
+        if escape:
+            escape = False
+            continue
+        if in_str:
+            if ch == "\\":
+                escape = True
+            elif ch == '"':
+                in_str = False
+            continue
+        if ch == '"':
+            in_str = True
+        elif ch == "{":
+            depth += 1
+        elif ch == "}":
+            depth -= 1
+        elif ch == "[":
+            brackets += 1
+        elif ch == "]":
+            brackets -= 1
+    return depth, brackets, in_str
+
+
+def salvage_truncated_json(text):
+    """Best-effort recovery for LLM output that was truncated mid-string.
+
+    Walks the text once to find unbalanced quotes and braces, then appends
+    the necessary closers. Won't fix every truncation (e.g. mid-key or
+    mid-array-numeric-literal) but handles the common case where Claude
+    runs over the output budget while producing search_text.
+    Returns a parseable JSON dict, or None if salvage isn't feasible.
+    """
+    if not text:
+        return None
+    text = text.strip()
+    if text.startswith("```"):
+        text = re.sub(r"^```(?:json)?\s*", "", text)
+        text = re.sub(r"\s*```\s*$", "", text)
+    start = text.find("{")
+    if start < 0:
+        return None
+    text = text[start:]
+    depth, brackets, in_str = _balance_text(text)
+    if depth <= 0 and brackets <= 0 and not in_str:
+        # Already balanced — extract_json should have handled it. Don't salvage.
+        return None
+    salvaged = text
+    if in_str:
+        salvaged += '"'
+    while brackets > 0:
+        salvaged += "]"
+        brackets -= 1
+    while depth > 0:
+        salvaged += "}"
+        depth -= 1
+    try:
+        return json.loads(salvaged)
+    except json.JSONDecodeError:
+        return None
+
+
+def is_thin_fallback(entry, query_text):
+    """True if `entry` matches the thin-fallback shape we write on enrich failure.
+    Used by --retry-thin to identify which entries to re-process.
+    """
+    if not isinstance(entry, dict):
+        return True
+    keys = set(entry.keys())
+    if keys != {"search_text"}:
+        return False
+    return entry.get("search_text") == query_text
+
 
 def slugify(s):
     """Match storage.js's slugify so artist/song IDs are stable across rebuilds."""
@@ -76,6 +168,8 @@ def parse_args():
     p.add_argument("--model-tag", default=DEFAULT_MODEL_TAG)
     p.add_argument("--force", action="store_true",
                    help="Re-enrich entries that already have output")
+    p.add_argument("--retry-thin", action="store_true",
+                   help="Re-enrich only entries that got the thin fallback (search_text-only) in a previous run")
     p.add_argument("--limit", type=int, default=0,
                    help="Stop after N successful enrichments (0 = no limit)")
     p.add_argument("--dry-run", action="store_true",
@@ -119,8 +213,15 @@ def main():
         songs.setdefault(sid, (a, s))
 
     print(f"Loaded {len(tabs)} tabs → {len(artists)} unique artists, {len(songs)} unique songs.")
-    todo_artists = [(name, aid) for name, aid in artists.items() if aid not in state["artists"]]
-    todo_songs = [(sid, ans) for sid, ans in songs.items() if sid not in state["songs"]]
+    if args.retry_thin:
+        # Only re-process entries that match the thin-fallback shape.
+        todo_artists = [(name, aid) for name, aid in artists.items()
+                        if is_thin_fallback(state["artists"].get(aid), name.lower())]
+        todo_songs = [(sid, (a, s)) for sid, (a, s) in songs.items()
+                      if is_thin_fallback(state["songs"].get(sid), f"{s} {a}".lower())]
+    else:
+        todo_artists = [(name, aid) for name, aid in artists.items() if aid not in state["artists"]]
+        todo_songs = [(sid, ans) for sid, ans in songs.items() if sid not in state["songs"]]
     print(f"To enrich: {len(todo_artists)} artists, {len(todo_songs)} songs.")
 
     if args.dry_run:
@@ -145,17 +246,30 @@ def main():
         if len(body) > len(existing):
             body_by_song_id[sid] = body
 
+    def enrich_one(label, prompt, fallback):
+        """Call LLM, try strict parse, then salvage truncated output, else fallback."""
+        resp = None
+        try:
+            resp = call_llm(cli_cmd, prompt + STRICT_SUFFIX)
+            return extract_json(resp), False
+        except Exception as strict_err:
+            salvaged = salvage_truncated_json(resp)
+            if salvaged is not None:
+                print(f"  SALVAGED: closed truncated JSON for {label}", file=sys.stderr)
+                return salvaged, True
+            print(f"  FAIL: {strict_err}", file=sys.stderr)
+            return fallback, False
+
     # Enrich artists
     for name, aid in todo_artists:
         print(f"[artist] {name}")
-        prompt = ARTIST_PROMPT.format(name=name)
-        try:
-            resp = call_llm(cli_cmd, prompt)
-            state["artists"][aid] = extract_json(resp)
-            done += 1
-        except Exception as e:
-            print(f"  FAIL: {e}", file=sys.stderr)
-            state["artists"][aid] = {"search_text": name.lower()}
+        result, _salvaged = enrich_one(
+            label=name,
+            prompt=ARTIST_PROMPT.format(name=name),
+            fallback={"search_text": name.lower()},
+        )
+        state["artists"][aid] = result
+        done += 1
         save_state(out_path, state, args.model_tag)
         if args.limit and done >= args.limit:
             print(f"Reached --limit {args.limit}. Stopping.")
@@ -165,14 +279,13 @@ def main():
     for sid, (a, s) in todo_songs:
         print(f"[song] {a} — {s}")
         body = body_by_song_id.get(sid, "")[:800]
-        prompt = SONG_PROMPT.format(artist=a, song=s, body=body)
-        try:
-            resp = call_llm(cli_cmd, prompt)
-            state["songs"][sid] = extract_json(resp)
-            done += 1
-        except Exception as e:
-            print(f"  FAIL: {e}", file=sys.stderr)
-            state["songs"][sid] = {"search_text": f"{s} {a}".lower()}
+        result, _salvaged = enrich_one(
+            label=f"{a} — {s}",
+            prompt=SONG_PROMPT.format(artist=a, song=s, body=body),
+            fallback={"search_text": f"{s} {a}".lower()},
+        )
+        state["songs"][sid] = result
+        done += 1
         save_state(out_path, state, args.model_tag)
         if args.limit and done >= args.limit:
             print(f"Reached --limit {args.limit}. Stopping.")
