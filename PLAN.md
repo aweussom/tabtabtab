@@ -361,6 +361,38 @@ Future enrichment: LLM finds the song on YouTube, reads the video duration, writ
 
 Auto-accept threshold: **240 s**. LLM-found duration ≤ 240 s → `llm-auto`, used as default. Duration > 240 s → `needs-human`, stored but **not** used as default until a human confirms (same "ask me + save forever" pattern as scroll-start-point). This rules out live versions, extended jams, etc. as accidental defaults.
 
+### Crowd-sourced defaults via anonymous telemetry (Phase 5+)
+
+When the Azure VM API (see "Phase 5+ — Long-term vision") is in place, the browser can ship anonymous playback telemetry — *(tab_id, duration_s)* and *(tab_id, start_y_ratio)* pairs — and the server aggregates them across users. The aggregated values become the bundled defaults in the next deploy cycle, so the most-popular tabs converge to the right values without human curation or LLM guessing.
+
+**Why this is a better signal than LLM-YouTube-lookup for popular tabs:** the LLM only knows the canonical recording's duration. Real players use shorter or longer scroll times depending on their actual performance pace, capo experiments, intro length they actually played through, etc. Crowd-median captures actual playing reality. The LLM path still helps for the long tail where telemetry never accumulates enough samples.
+
+**Telemetry signals worth collecting:**
+- `duration_s` (auto-scroll length the user picked)
+- `start_y_ratio` (where the user scrolled before hitting play, normalized to body height — see "Auto-scroll scroll-start-point" below; aggregated user position is a better signal than LLM for popular tabs)
+
+**Signals NOT worth collecting** (too personal / not actionable):
+- Text scale (synshemmede vs. unge — personal)
+- Chord-mode `vise` vs `barre` (depends on player skill, not on the song)
+- Favoriter / songbook membership (private, not behavioral defaults)
+
+**Aggregation method: median over mean.** One outlier (a user setting 600 s on a 3-minute song while they grabbed coffee) skews the mean. Median is robust. Alternatively bucket-mode (round to nearest 15 s, take the most-common bucket) — captures "what most people landed on".
+
+**Sample threshold:** require ≥ N (probably 5-10) distinct samples before adopting a crowd-default over the LLM-or-hardcoded default. One user's preference is noise, not signal.
+
+**Privacy + log-hygiene rules** (extending the Azure VM ones):
+- Telemetry payload contains ONLY `(tab_id, value)` — no user-ID, no session-ID, no timestamp the server keeps.
+- Server logs neither IP nor request headers on the telemetry endpoint. Counter increments only.
+- Use `navigator.sendBeacon()` at unload, not realtime POST — minimizes both client UX impact and server load.
+- Telemetry endpoint is rate-limited per IP to prevent a single bad actor from skewing aggregates (e.g., 10 requests per minute is plenty for honest behavior).
+
+**Pipeline integration:**
+- Telemetry accumulates on the Azure VM between deploys.
+- Crawler (or a sidecar batch process) reads the aggregated counts → computes median per signal per tab → writes to `enrichment.songs[sid].playback_defaults: {duration_s: 247, start_y_ratio: 0.18, sample_count: 47}`.
+- Browser reads `playback_defaults` from enrichment when populating HUD initial state, but the user's own `nortabs:playback:v1` localStorage entry overrides always — crowd-default is a *starting point*, not a *correction*.
+
+User's own tuning always wins. Crowd-default only kicks in for tabs the user has never customized.
+
 ## Auto-scroll scroll-start-point (planned)
 
 70-90 % of tabs have "noise" at the top (uploader notes, capo info, tips). For now, auto-scroll always starts from the user's current scroll position — they scroll past the noise themselves, then hit play. Future iterations should add a smart default jump-to-line:
