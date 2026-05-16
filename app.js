@@ -1,4 +1,4 @@
-import { loadCatalog, loadEnrichment, getCatalogData } from './catalog.js';
+import { loadCatalog, loadEnrichment, loadPrivateBundle, getCatalogData } from './catalog.js';
 import { setState, subscribe } from './state.js';
 import { startRouter } from './router.js';
 import { buildIndex } from './search.js';
@@ -39,6 +39,8 @@ async function main() {
     root.textContent = `Failed to load catalog: ${err.message}`;
     return;
   }
+  // Private bundle is optional — absence is fine, app continues with just catalog.
+  await loadPrivateBundle();
   const enrichment = await loadEnrichment();
   const stats = buildIndex(getCatalogData(), enrichment);
   console.info('[search] index built:', stats);

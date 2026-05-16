@@ -1,3 +1,5 @@
+import { getPrivateSongbook } from './catalog.js';
+
 const KEY = 'nortabs:songbooks:v1';
 const PB_KEY = 'nortabs:playback:v1';
 const PB_DEFAULT_DURATION_S = 180;
@@ -109,20 +111,34 @@ function defaultData() {
 }
 
 function read() {
+  let parsed;
   try {
     const raw = localStorage.getItem(KEY);
-    if (!raw) return defaultData();
-    const parsed = JSON.parse(raw);
-    if (parsed && parsed.version === 1 && Array.isArray(parsed.songbooks)) {
-      if (!parsed.songbooks.find(s => s.id === 'fav')) {
-        parsed.songbooks.unshift({ id: 'fav', name: 'Favoritter', created_at: now(), tab_ids: [] });
-      }
-      return parsed;
+    parsed = raw ? JSON.parse(raw) : defaultData();
+    if (!parsed || parsed.version !== 1 || !Array.isArray(parsed.songbooks)) {
+      parsed = defaultData();
     }
-    return defaultData();
+    if (!parsed.songbooks.find(s => s.id === 'fav')) {
+      parsed.songbooks.unshift({ id: 'fav', name: 'Favoritter', created_at: now(), tab_ids: [] });
+    }
   } catch {
-    return defaultData();
+    parsed = defaultData();
   }
+  // Inject the bundled private-tabs songbook (currently UG imports) on first
+  // load after a private-bundle.json is shipped. Once written to localStorage,
+  // the user owns it — they can rename, reorder, or delete it like any other
+  // songbook. We won't re-inject after deletion.
+  const bundledSb = getPrivateSongbook?.();
+  if (bundledSb && !parsed.songbooks.find(s => s.id === bundledSb.id)) {
+    parsed.songbooks.push({
+      id: bundledSb.id,
+      name: bundledSb.name,
+      created_at: now(),
+      tab_ids: [...(bundledSb.tab_ids ?? [])],
+    });
+    try { write(parsed); } catch {}
+  }
+  return parsed;
 }
 
 function write(data) {

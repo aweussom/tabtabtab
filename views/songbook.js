@@ -76,11 +76,6 @@ export function render(state, root) {
 
   root.querySelector('#export-btn').addEventListener('click', () => {
     const tabs = sb.tab_ids.map(tid => {
-      if (typeof tid === 'string' && tid.startsWith('ug-')) {
-        // Private (UG-imported) tabs — placeholder for when UG import is built.
-        // For now, return null so the export shows a "missing" placeholder.
-        return null;
-      }
       const ref = getTab(tid);
       if (!ref) return null;
       return {
@@ -126,7 +121,8 @@ export function render(state, root) {
 
   for (const btn of root.querySelectorAll('button[data-action="remove"]')) {
     btn.addEventListener('click', () => {
-      const tid = Number(btn.dataset.tab);
+      const raw = btn.dataset.tab;
+      const tid = /^\d+$/.test(raw) ? Number(raw) : raw;
       removeFromSongbook(sb.id, tid);
       render(state, root);
     });
@@ -134,7 +130,8 @@ export function render(state, root) {
 
   for (const btn of root.querySelectorAll('button[data-action="up"], button[data-action="down"]')) {
     btn.addEventListener('click', () => {
-      const tid = Number(btn.dataset.tab);
+      const raw = btn.dataset.tab;
+      const tid = /^\d+$/.test(raw) ? Number(raw) : raw;
       const dir = btn.dataset.action === 'up' ? -1 : 1;
       moveTabInSongbook(sb.id, tid, dir);
       render(state, root);

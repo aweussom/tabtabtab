@@ -26,10 +26,14 @@ export function parseHash() {
   // `sb` query param: when navigating from a songbook, we propagate the
   // songbook id so the tab/song view can render a "back to songbook" button.
   const sb = query.sb || null;
+  // Catalog IDs are numeric; private (UG-imported) IDs are strings like
+  // "ug-12345". Keep them as strings; only convert pure-digit args to numbers.
+  const isNumericId = /^\d+$/.test(arg ?? '');
+  const parseId = () => (isNumericId ? Number(arg) : arg);
   if (head === 'letter' && arg) return { name: 'letter', letter: arg.toLowerCase() };
-  if (head === 'artist' && arg) return { name: 'artist', id: Number(arg) };
-  if (head === 'song' && arg) return { name: 'song', id: Number(arg), sb };
-  if (head === 'tab' && arg) return { name: 'tab', id: Number(arg), sb };
+  if (head === 'artist' && arg) return { name: 'artist', id: parseId() };
+  if (head === 'song' && arg) return { name: 'song', id: parseId(), sb };
+  if (head === 'tab' && arg) return { name: 'tab', id: parseId(), sb };
   if (head === 'songbooks') return { name: 'songbooks' };
   if (head === 'songbook' && arg) return { name: 'songbook', id: arg };
   if (head === 'share') {
