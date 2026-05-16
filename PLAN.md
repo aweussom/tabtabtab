@@ -196,7 +196,21 @@ This is a *deliberate* departure from the "no infra" decision settled in Phase 1
 2. Sharing-via-URL-hash has shown its limits in practice (probably around the multi-user-private-tabs case where shared songbook URLs can't transport bodies).
 3. A clear group of users actually wants this — not just hypothetically.
 
-When the time comes, candidates for the backend: Supabase (free tier, Postgres + auth), Firebase, or a tiny custom Cloudflare Worker + KV. The shipped GitHub Pages frontend stays as-is; backend is purely additive for users who opt in. Anonymous/offline-only usage continues to work without ever touching a server.
+**Architecture principle: NorTabs never stores user-content bodies — only LLM-output (enrichment metadata) is cached server-side.** The clean legal/architectural split that emerged from the UG-import design (see "Search asymmetry without enrichment" in the UG section above):
+
+- **User content (chord/lyric bodies for UG/Word/ChordPro imports)**: lives ONLY in the user's Google Drive (the auth + storage layer). NorTabs' backend receives bodies *transiently* during enrichment processing — request comes in, LLM analyzes it, body is dropped, only the derived metadata (`genre`, `themes`, `mood`, `era`, `key_phrases`, etc.) is returned and cached. NorTabs is a *processor*, not a *distributor* — which keeps the project on the right side of TONO / publisher rights claims that apply to redistributing copyrighted song bodies.
+- **Enrichment metadata cache**: keyed by `hash(artist + normalized(song))`, shared across users. The thousandth person to import "Wonderwall" hits the cache from the first import. Metadata isn't the work; it's *about* the work — Wikipedia-style fair-use territory.
+
+**Backend implementation: a minimal token-authenticated API on Tommy's existing Azure VM** (preferred over earlier candidate options Supabase/Firebase/Cloudflare Worker, and explicitly *not* GitHub Actions). The Azure VM already exists at zero marginal cost; the surface area is small (single HTTP endpoint, body→enrichment, cache lookup, LLM passthrough), and Tommy controls the LLM API key and rate-limit policy directly. Auth piggybacks on Google OAuth (the same flow that grants Drive access — server-side validates the bearer token). Single endpoint, single responsibility.
+
+Earlier-considered alternatives and why they didn't win:
+- **GitHub Actions + repository_dispatch**: 64 KB payload limit forces awkward "upload body to intermediate URL, trigger workflow with URL, workflow fetches" flow. Workflow logs may leak bodies if logging-hygiene slips. Three moving parts where one would do.
+- **Cloudflare Worker**: clean and stateless, but limits push hard past free tier (~$5/mo + LLM costs). Tommy's Azure VM is already paid for and idle.
+- **Supabase/Firebase**: oriented around full-CRUD apps with managed auth — overshoots when the actual need is "POST body → GET enrichment". Their auth integration is an advantage we don't need (Drive OAuth handles it).
+
+Anonymous/offline-only usage continues to work without ever touching the API — Drive auth is opt-in for users who want cross-device sync + enrichment for their imports.
+
+**Log hygiene is a hard rule:** the enrichment endpoint *never* logs body content, only `(artist, song)` pairs and tag results. Stack traces redacted via wrapper. Tested before deploy.
 
 ### Phase 4 — Polish
 1. Responsive layout (this needs to work well on a phone in front of a music stand).

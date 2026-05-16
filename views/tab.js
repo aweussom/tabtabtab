@@ -80,10 +80,22 @@ export function render(state, root) {
     root.innerHTML = `<p><a href="#/">&larr; Letters</a></p><p>Tab not found.</p>`;
     return;
   }
-  renderTabUI(root, result, {
-    href: `#/song/${result.song.id}`,
-    label: result.song.name,
-  }, { songbookId: state.route.sb });
+  // When the user navigated from a songbook (?sb= in URL), the natural
+  // "back" target is the songbook — especially for songs with only one
+  // tab version (UG imports always, catalog sometimes), where the
+  // intermediate song page would be a useless single-row list. The
+  // separate "Tilbake til <songbook>"-button below is suppressed in that
+  // case to avoid two identical navigation paths.
+  const sbId = state.route.sb;
+  const sb = sbId ? getSongbook(sbId) : null;
+  const singleTab = (result.song.tabs?.length ?? 0) <= 1;
+  const backToSongbook = sb && singleTab;
+  const backLink = backToSongbook
+    ? { href: `#/songbook/${encodeURIComponent(sb.id)}`, label: sb.name }
+    : { href: `#/song/${result.song.id}`, label: result.song.name };
+  renderTabUI(root, result, backLink, {
+    songbookId: backToSongbook ? null : sbId,
+  });
 }
 
 /**

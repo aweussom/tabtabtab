@@ -106,12 +106,13 @@ NorTabs runs a GitHub Action that listens for `repository_dispatch` events. User
 - **Cons**: Tommy is bottleneck. Privacy: user's tab list visible to Tommy. Doesn't scale beyond friend-group.
 - **Model requirement**: cheapest passing-quality model wins. Quality > speed.
 
-### C. Real Phase 5+ backend
-Cloudflare Worker + KV (or Supabase + Postgres). User uploads → worker enriches via Ollama Cloud → result stored, served back. Optional: shared cache across users (one person's Hotel California enrichment serves everyone).
+### C. Real Phase 5+ backend (current preferred path — Azure VM API)
+Token-authenticated HTTP endpoint on Tommy's existing Azure VM. User's browser POSTs `{artist, song, body}` → API calls cloud LLM → returns `{enrichment: {...}}`. Server-side cache keyed by `hash(artist + normalized(song))` means popular bookmarks (Hotel California, Wonderwall, etc.) hit cache from second user onward. **Bodies are transient — processed and dropped, never stored.** See PLAN.md "Architecture principle" under Phase 5+ for the legal rationale.
 
-- **Pros**: Scales. Shared cache amortizes cost. Real product surface.
-- **Cons**: Real backend (PLAN.md "Phase 5+" considerations). Real ops (rate-limit, abuse, billing if it grows).
-- **Model requirement**: best cost/quality ratio. Throughput matters too — worker timeouts cap per-request work.
+- **Pros**: Tommy controls LLM API key + rate limits + cache directly. Shared cache amortizes cost massively for overlapping repertoire. Real product surface. Azure VM already exists at zero marginal cost.
+- **Cons**: Real ops (uptime, security patching, abuse handling). Single point of failure vs. distributed alternatives.
+- **Model requirement**: best cost/quality ratio. Latency matters less than for synchronous user-facing flows since browser can `fetch()` and show a "henter enrichment..." spinner.
+- **Why this beat the alternatives** (Cloudflare Worker, Supabase, GitHub Actions): see PLAN.md Phase 5+ "Earlier-considered alternatives" — short version: GH Actions' payload limits force awkward indirection, Cloudflare Worker hits free-tier limits, Supabase/Firebase overshoot the actual scope.
 
 ## Open questions
 
