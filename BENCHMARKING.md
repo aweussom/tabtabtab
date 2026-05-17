@@ -10,6 +10,22 @@ The proposed cloud-API path solves a *different* problem: when a user (any user,
 
 Three plausible architectures, each with different model requirements (see "Architecture options" below). Benchmarking has to inform that choice, not just "which model is best in the abstract."
 
+## Phase 2.5 update (2026-05-17): most of this is parked
+
+The Phase 2.5 thin LLM proxy (see PLAN.md) now points at **local Qwen3.6 on Tommy's RTX 5090** via the existing OpenAI-compat Ollama endpoint, validated end-to-end on real English UG tabs. That collapses the open-cost-vs-quality matrix this doc was built to navigate:
+
+- **Cost is zero at the margin.** Local Ollama, Tommy's hardware, no per-token bill. The "Cost per 100 entries" criterion below becomes moot for the proxy path.
+- **Language scope is English-only** (PLAN.md "Language scope" decision). UG bookmarks are ~99.9% English; Norwegian content stays on the public-catalog enrichment pipeline. The "make-or-break Norwegian-language quality" criterion below **does not apply** to the proxy path. The "Norwegian region accuracy ≥80 %" and "Norwegian genre accuracy ≥75 %" pass/fail thresholds also do not apply.
+- **Quality target is "better than UG's own search, free at the margin"** (PLAN.md "Quality target"), not "matches Claude/GPT-4 frontier output." Qwen3.6's mid-frontier wrongness (e.g. attributing Tecumseh Valley to John Prine) is acceptable; structural JSON correctness and verbatim `key_phrases` matter much more.
+
+The rest of this document — candidate-model survey, gold-standard dataset construction, `enrich-bench.py` design, pass/fail criteria — remains valid for **a hypothetical future** where one of these reactivates:
+
+1. We want to enrich Norwegian content via cloud LLMs (e.g. replacing the nightly Claude/OpenAI pipeline). Then Norwegian-language criteria come back as the make-or-break gate.
+2. Local Ollama on Tommy's machine stops being available (hardware change, multi-user load), forcing a hosted-cloud fallback for the proxy. Then cost/quality cloud comparison matters.
+3. Phase 5+ enrichment-as-a-service kicks off for a real user base. Then dedup + shared cache + per-user budgeting reshape the cost calculus entirely.
+
+Until one of those triggers, do not invest in benchmark harness work. The rest of the doc stays as parked design notes.
+
 ## Why benchmark at all
 
 The current catalog uses Claude Sonnet and GPT-4-class models. These are expensive (~$50-150 per full catalog enrichment) and Tommy's personal subscriptions absorb the cost. For *user-import* enrichment, scaling per-user-bookmarks-at-Tommy's-cost doesn't work — costs grow linearly with user count.

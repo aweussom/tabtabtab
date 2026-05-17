@@ -1,0 +1,5 @@
+node_modules/
+*.log
+.env
+enrichment-cache.json
+enrichment-cache.json.tmp

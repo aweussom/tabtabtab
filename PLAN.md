@@ -182,6 +182,56 @@ Concept: a **songbook** is a named, ordered collection of tabs. "Favorites" is j
 - **Search weighting**: tabs in any of the user's local songbooks get a large score boost. Effectively: "if I've bookmarked Bjørn Eidsvåg, his name should win over a less-known same-letter artist."
 - Future (Phase 4+ maybe): if we later add a backend for discovery/listing other people's public songbooks, the URL-hash share continues to work for private collections.
 
+### Phase 2.5 — Thin LLM proxy for UG-import enrichment (pinned 2026-05-17)
+
+A minimal Node 24 backend on Tommy's Azure VM that lets the browser-side UG-import flow do real LLM-enrichment without ever shipping API keys to the client. This is the *thin* form of the Phase 5+ architecture — single endpoint, no auth, no persistence beyond a shared metadata cache. Magic-link auth + per-user rate limits get added later if/when traffic demands.
+
+**Why now, why this shape**: in-browser UG-import is the main differentiator beyond the shipped NorTabs catalog. The browser can't call cloud LLMs directly — every cloud LLM API blocks browser-origin via CORS deliberately (verified on Ollama Cloud 2026-05-17; Mimo V2 Pro and Claude/OpenAI/Anthropic share the same posture). Local Ollama works only for the user themselves on the machine they're sitting at; WebLLM is a 1-2 GB download with quality below Mimo/Claude. The thin proxy is therefore not optional, only its scope is.
+
+**Architecture principle (binding)**: bodies are transient; only metadata is persisted server-side. Server logs `(artist, song, model, cache_hit, ms_taken, token_count)` — never the body. Same legal posture as Phase 5+.
+
+**Endpoint contract**:
+- `POST /enrich-tab` — body `{artist, song, body, chordnames?}` → returns `{enrichment, cache: 'hit' | 'miss', model_used}`.
+- Server hashes `(artist, normalized(song))` to derive the cache key, checks the JSON cache, returns cached enrichment or calls LLM and stores result. Per-tab not bulk; browser orchestrates parallelism (3-4 in-flight via `Promise.all`-batches).
+- CORS allowlist: `https://aweussom.github.io` (prod) + `http://localhost:8000` (dev). Origin-checked in middleware. Not open-CORS.
+
+**Cache deduplication is per song, not per prompt-or-model**. Wonderwall enriched via Mimo and Wonderwall enriched via Ollama Cloud hash to the same key; the 1000th user hits cache regardless of which model produced the original entry. Trade-off: prompt experimentation during development needs an `X-Force-Refresh: 1` header or manual `DELETE /cache/<key>` to bypass. Acceptable cost.
+
+**Cache storage: plain JSON file** (decided 2026-05-17). One human-readable file (`enrichment-cache.json`), atomic tmp+rename writes on every put/del, full in-memory mirror at startup. Chosen over SQLite (which the first sketch used) for *portability*: easy to inspect, diff, scp between hosts, or bundle into the static web app if we ever want to ship pre-warmed enrichment with the site. Survives LLM swaps unchanged — the key is `hash(artist, normalized(song))`, so an entry written by Qwen3.6 is reused as-is when we later swap in Mimo or DeepSeek. Dataset is small enough (target single-digit thousands of entries) that synchronous write-through is irrelevant.
+
+**Stack — modern minimal Node 24**:
+- ESM modules (`"type": "module"` in `package.json`), no bundler, no transpiler, no TypeScript build step.
+- Built-in `node:http`, `node:fs`, `fetch`, `crypto` (for `sha256` cache keys).
+- Zero npm dependencies. Cache is a JSON file written through `node:fs`; no native build step.
+- Node 24 (LTS 2025-10+) chosen specifically to avoid GitHub Actions deprecation warnings on older versions.
+- Folder `proxy/` in this repo. Shared logic (`normalize.js`, `hash-key.js`) lives in `proxy/shared/` and is imported verbatim by both server and client — single source of truth for the cache key so server and client can never drift.
+
+**Model selection**: server-side env var (`PROXY_MODEL`, `PROXY_API_BASE`, `PROXY_API_KEY`). One-line swap between Mimo V2 Pro ($16/mo, ~unlimited credits for this workload), Ollama Cloud (insane free quota for the relevant Deepseek-class models), and local Ollama (Tommy's RTX 5090 + `qwen3.6:latest`, zero marginal cost). A/B-test quality without touching client. **Validated 2026-05-17**: local Qwen3.6 produces schema-compliant JSON for English UG tabs end-to-end (cold-call latency ~24 s, ~3.85 k tokens per song, cache hit returns instantly). Occasional factual ding (e.g. attributed Tecumseh Valley to John Prine instead of Townes Van Zandt) is the expected mid-frontier-model wrongness BENCHMARKING.md predicted — doesn't break parseability or `key_phrases` accuracy.
+
+**Language scope** (settled 2026-05-17): the proxy enriches **English content only**. UG bookmarks are ~99.9% English in practice; users who want Norwegian-language tabs are served by the public NorTabs catalog and its existing Claude/OpenAI nightly enrichment pipeline (`crawler/enrich.py` + `crawler/enrich-gpt.py`), which is already paid for via Tommy's personal Max + API subs. This collapses two follow-ons: (a) `proxy/enrich.js` SYSTEM_PROMPT no longer asks for cross-language synonyms — tighter prompt, cleaner output, less work for a "pretty good, not fantastic" model like Qwen3.6; (b) BENCHMARKING.md's "make-or-break Norwegian-language quality" criterion does not apply to this path. If/when a future architecture wants cloud-LLM enrichment for the public catalog itself (replacing the nightly pipeline), that criterion comes back; for the UG-import proxy, it does not.
+
+**Quality target** (settled 2026-05-17): "better than anyone else, preferably at no cost." The reference quality bar is UG's own search (which has no semantic/vibe layer at all), not Claude/GPT-4 frontier output. Local Qwen3.6 on Tommy's RTX 5090 clears that bar at $0 marginal cost. Don't tune for "perfect" — tune for "obviously useful, free at the margin."
+
+**Client-side surface**:
+- New route `#/import/ug` (existing `#/songbook/ug-import-main` untouched).
+- User drops UG-JSON → app iterates tabs → calls `POST /enrich-tab` 3-4 in parallel → live progress bar → results land in `nortabs:private-enrichment:v1` (localStorage, with IDB migration when payload exceeds ~5 MB — see Personal Library Import for that cutover).
+- `search.js` indexer grafts private-enrichment into the same indexes that consume `enrichment.json` (matches "Tommy-personal escape hatch" already spec'd in the UG-import backlog entry).
+
+**Deployment — local-first, then VM**:
+- PoC runs on Tommy's Windows machine (PowerShell 7) for the first weeks. `node proxy/server.js` with a stub mode that returns canned enrichment when no API key is configured, so the server / cache / browser flow can be developed end-to-end without burning credits.
+- Production deploy: **Tommy's existing Azure free-tier VM**, on the same Tailscale network as the RTX 5090 workstation. Two upstream-LLM layouts that fall out of this:
+  1. **Hosted LLM (Mimo, Ollama Cloud, DeepSeek)** — proxy runs on Azure VM and calls a public LLM endpoint over the internet. Simple, no dependency on Tommy's workstation being awake. Cost = whichever provider's bill applies.
+  2. **Workstation LLM (RTX 5090 + Qwen3.6 via Ollama)** — proxy on Azure VM calls `http://<workstation-tailscale-ip>:11434/v1/chat/completions` over the Tailscale tunnel. Zero LLM cost at the margin, but enrichment is only available when the workstation is awake + Ollama is running. Tailscale handles auth + encryption + NAT transparently, so this is genuinely one env var (`PROXY_API_BASE`) away from the hosted layout.
+  
+  Production deploy mechanics: `systemd` unit on the Azure VM, reverse-proxied via nginx for HTTPS termination on a subdomain (e.g. `enrich.nortabs.<domain>`). Single Node process. No Docker, no orchestration. The JSON cache file lives on the VM's disk; backups are `scp enrichment-cache.json` to wherever Tommy wants.
+
+**Known deferred items** (pinned here so we don't forget):
+- Magic-link auth + per-user rate limit — add when shared-key cost or abuse becomes a real concern. Not at PoC time.
+- Brotli on responses — small payload (~few KB enrichment JSON), gzip via nginx is enough for prod, no need at PoC.
+- Observability beyond `console.log` — add when prod traffic is non-zero.
+
+**Out of scope for Phase 2.5**: enrichment of the shipped public catalog (still produced by `crawler/enrich.py` on Tommy's machine against Claude/GPT subscriptions). The proxy serves user-imported private tabs only. Public-catalog enrichment continues to flow into `enrichment.json`; private-tab enrichment flows into `nortabs:private-enrichment:v1` client-side and the shared JSON cache (`enrichment-cache.json`) server-side.
+
 ### Phase 3 — Full crawler + automation
 1. `crawler/crawl.py` — Python script that mirrors `nortabs-app/api.py` endpoints to produce `catalog.json`. Politeness delay configurable (default 100 ms). Outputs deterministic JSON (sorted keys) so git diffs are minimal. Supports `--incremental`, which loads the existing `catalog.json`, seeds per-letter checkpoints from it (so a partial run still merges into a complete catalog), then diffs `/collections/browse` against the previous state and only fetches changed artists/songs/tabs. Empties existing tab metadata is reused for unchanged tab IDs — only new tab IDs trigger a `/tabs/tab` body fetch.
 2. `.github/workflows/crawl.yml` — two cron triggers in one workflow: **Mon-Sat 03:00 UTC** runs `--incremental` (typical ~1 min); **Sun 03:00 UTC** runs a full crawl (~52 min) to catch tab-body edits and same-count tab swaps that incremental can't detect. Plus `workflow_dispatch` with a `mode` choice for manual rebuilds. Single `concurrency: catalog-crawl` group prevents overlap. Bumps `version.js` (cache-bust epoch) in the same commit when `catalog.json` changes. Requires the repo's "Workflow permissions" to be set to "Read and write" so `GITHUB_TOKEN` can push.
@@ -345,6 +395,10 @@ Anonymous/offline-only usage continues to work without ever touching the API —
     **Tommy-personal escape hatch (optional Phase 2.5):** `enrich.py` could grow a `--private-tabs nortabs:private-tabs:v1.json` input mode that reads a UG-export JSON, calls Claude on the same per-song-and-per-artist prompts, and writes to a sidecar `nortabs:private-enrichment:v1` localStorage key (or future IndexedDB store). NorTabs' search index loader would check this sidecar at startup and graft its entries into the same indexes the public `enrichment.json` feeds. Asymmetric — only people who run their own pipeline get enriched private tabs — but valid for Tommy + power users.
     
     **Phase 5+ enrichment-as-a-service** (when backend exists, see "Long-term vision"): user uploads UG-export → backend deduplicates against existing enrichment cache (many users share the same UG bookmarks for popular songs) → enriches uncached entries via the same Claude pipeline → returns enriched JSON → app stores it alongside private tabs. Crosses the same legal/licensing line as "shared catalog content" did, but lighter — *metadata* about songs is different from *content* of songs. Probably defensible. Defer the decision until Phase 5+ actually starts.
+
+- **Narrow down exactly what is needed for iOS chord-wrap fix** (parked — shotgun accepted, debug HUD removed 2026-05-17):
+  - Five overlapping defenses landed together and verified the bug fixed on a real iPhone. The CLAUDE.md "iOS chord-wrap: defensive shotgun in place" section enumerates them with rationale; not duplicated here. Bisection would identify the minimum-necessary subset (likely 1 + one of {3,4} + 5), but the iOS user count for this app is effectively zero and the shotgun cost is near-nothing, so the work is parked indefinitely.
+  - If/when someone does want to minimize: revert one defense at a time on a branch and re-test rotation + A−/A+ on a physical iPhone. The yellow debug HUD has been removed; re-add it (last seen in commit history) for measurement visibility without Safari Web Inspector. (1) is fundamental — PC needs it too — so it always stays.
 
 ## Auto-scroll playback duration (planned)
 
