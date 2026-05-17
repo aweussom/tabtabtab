@@ -216,13 +216,30 @@ function wireChordWrap(root, rawBody) {
     preEl.textContent = wrapTabBody(rawBody, cols);
   };
   apply();
-  // Re-wrap on viewport change (orientation, browser-chrome show/hide, etc.).
-  let timer = null;
-  _resizeHandler = () => {
-    clearTimeout(timer);
-    timer = setTimeout(apply, 120);
+  // iOS Safari fires `resize` mid-rotation-animation, *before* viewport
+  // width / media-query state / computed font metrics have settled. A
+  // single 120 ms debounce was racy: portrait→landscape would measure
+  // pre-settle and lock in a too-narrow budget that no later event would
+  // refresh (asymmetry: only the "budget should grow" direction is
+  // affected). Fix is to re-apply across multiple frames so at least one
+  // measurement lands after Safari has caught up. Each `apply()` re-reads
+  // fresh dimensions, so duplicate runs are cheap and idempotent.
+  // Also listen to `orientationchange` and `visualViewport.resize` —
+  // both are more reliable than `window.resize` on iOS for the
+  // rotation case, and visualViewport additionally covers
+  // browser-chrome show/hide.
+  const scheduleSettleApply = () => {
+    apply();
+    requestAnimationFrame(() => requestAnimationFrame(apply));
+    setTimeout(apply, 250);
+    setTimeout(apply, 600);
   };
+  _resizeHandler = scheduleSettleApply;
   window.addEventListener('resize', _resizeHandler, { passive: true });
+  window.addEventListener('orientationchange', _resizeHandler);
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', _resizeHandler, { passive: true });
+  }
   return apply;
 }
 
@@ -239,7 +256,11 @@ function wireTextSize(root, applyWrap) {
     preEl.style.setProperty('--tab-text-scale', String(scale));
     if (minus) minus.disabled = scale <= TEXT_SCALE_MIN + 1e-6;
     if (plus) plus.disabled = scale >= TEXT_SCALE_MAX - 1e-6;
-    applyWrap();
+    // Defer wrap to next frame: writing `--tab-text-scale` doesn't update
+    // getComputedStyle's font metrics until the browser reflows. Same-tick
+    // applyWrap would read the *old* charW on iOS, producing the
+    // zoom-out-doesn't-widen asymmetry observed during debugging.
+    requestAnimationFrame(applyWrap);
   };
 
   ctl.addEventListener('click', (e) => {
@@ -451,6 +472,10 @@ export function teardownTabBindings() {
   }
   if (_resizeHandler) {
     window.removeEventListener('resize', _resizeHandler);
+    window.removeEventListener('orientationchange', _resizeHandler);
+    if (window.visualViewport) {
+      window.visualViewport.removeEventListener('resize', _resizeHandler);
+    }
     _resizeHandler = null;
   }
   if (playback.isActive()) playback.stop();

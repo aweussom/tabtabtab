@@ -116,11 +116,27 @@ export function measureMaxCols(preEl) {
   const cs = getComputedStyle(preEl);
   const padL = parseFloat(cs.paddingLeft) || 0;
   const padR = parseFloat(cs.paddingRight) || 0;
-  const availPx = preEl.clientWidth - padL - padR;
+  const borderL = parseFloat(cs.borderLeftWidth) || 0;
+  const borderR = parseFloat(cs.borderRightWidth) || 0;
+  // Measure the parent's inner width, not the pre's own — after wrap, the
+  // pre shrinks to fit (flex auto-basis in portrait, `width: max-content`
+  // in bleed mode), so reading preEl.clientWidth creates a feedback loop:
+  // a wider viewport (e.g. iPhone rotated to landscape) doesn't give a
+  // bigger budget because clientWidth still mirrors the prior wrap.
+  const container = preEl.parentElement;
+  const outerWidth = container ? container.clientWidth : preEl.clientWidth;
+  const availPx = outerWidth - padL - padR - borderL - borderR;
   if (availPx <= 0) return 80;
   const span = document.createElement('span');
   span.style.cssText = 'visibility:hidden;position:absolute;left:0;top:0;white-space:pre';
-  span.style.font = cs.font;
+  // Copy individual font longhands — `cs.font` shorthand returns "" on
+  // WebKit/Safari when any inherited longhand isn't set explicitly, and
+  // we'd silently fall through to body's proportional default.
+  span.style.fontFamily = cs.fontFamily;
+  span.style.fontSize = cs.fontSize;
+  span.style.fontWeight = cs.fontWeight;
+  span.style.fontStyle = cs.fontStyle;
+  span.style.letterSpacing = cs.letterSpacing;
   span.textContent = 'M'.repeat(40);
   document.body.appendChild(span);
   const totalW = span.getBoundingClientRect().width;
