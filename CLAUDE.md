@@ -8,22 +8,27 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository state
 
-This is a **greenfield project**. As of this writing the repo contains only `PLAN.md` and a sample `catalog.json` (letter-A crawl, ~159 KB). There is no code yet, no `package.json`, no build step, no test runner, no lint config. Do not invent build/test commands — there are none until someone writes them.
+Phases 1-2 are shipped and the app is live at [aweussom.github.io/nortabs-web](https://aweussom.github.io/nortabs-web/). Active work is in the UG-import phase (private-bundle pipeline + UI polish on the `tommy-tester-ug` branch). Stack is still **vanilla JS modules + HTML + CSS, no bundler** — no `package.json`, no build step, no test runner, no lint config. Do not invent build/test commands; opening `index.html` (or serving with `python -m http.server`) is the dev loop. Do not introduce node tooling without asking.
 
-When Phase 1 begins, the stack is **vanilla JS modules + HTML + CSS, no bundler**. Opening `index.html` in a browser is the dev loop. Local serving (when needed for ES module CORS) is `python -m http.server` from the repo root — do not introduce node tooling without asking.
+## Architecture
 
-## Architecture (when files start existing)
-
-Per PLAN.md the intended module layout is flat:
+Flat module layout:
 
 - `index.html` — single `<div id="app">`, loads `app.js` as a module.
 - `state.js` — central state + `getState()` / `setState(patch)` / `subscribe(fn)`. Re-render the current view on change.
 - `router.js` — parses `location.hash`, dispatches to a view, updates state.
-- `catalog.js` — **in-memory catalog accessor**. Loads `catalog.json` once, indexes by id. It does **not** hit nortabs.net. (Deliberately *not* called `api.js` — the shipped web app makes no network calls; only the Phase-3 Python crawler does.)
+- `catalog.js` — **in-memory catalog accessor**. Loads `catalog.json` once, indexes by id. It does **not** hit nortabs.net. (Deliberately *not* called `api.js` — the shipped web app makes no network calls; only the Python crawler does.)
+- `search.js` — three inverted indexes + IDF + token aliases. README has the full tour.
+- `chord-wrap.js` — context-sensitive line wrapping for chord-over-lyric tabs on narrow viewports.
+- `chord-data.js` + `chord-diagrams.js` — fingerings (with vise↔barré alts) and SVG renderer.
+- `storage.js` — localStorage for songbooks, favorites, playback, chord-mode, text-scale.
+- `playback.js` — auto-scroll engine with countdown / pause / resume / variable speed.
+- `exporter.js` — songbook → standalone HTML export.
+- `sw.js` — service worker, see "Cache-busting + service worker" below.
 - `views/` — one file per screen, each exports `render(state, root)`.
-- `crawler/` (Phase 3) — Python; the **only** code in the project that calls nortabs.net.
+- `crawler/` — Python; the **only** code in the project that calls nortabs.net.
 
-The hard architectural rule: **the shipped web app never makes network calls to nortabs.net's API.** All browsing is served from the embedded `catalog.json`. Only the nightly GitHub Action crawler talks to the upstream API. Preserve this boundary — it's the whole reason the project exists.
+The hard architectural rule: **the shipped web app never makes network calls to nortabs.net's API.** All browsing is served from the embedded `catalog.json` (+ optional `enrichment.json`, `private-bundle.json`). Only the nightly GitHub Action crawler talks to the upstream API. Preserve this boundary — it's the whole reason the project exists.
 
 ## Reference: the Python app at `C:\devel\python\nortabs-app`
 
@@ -47,9 +52,11 @@ The Python app is a **frozen reference**, not a sibling to keep in sync.
 
 `catalog.json` is `{ crawled_at, letters: { a: {artists: [...]}, b: {...}, ... } }`. Per-letter buckets — partial crawls remain valid. `catalog.js` is the only module that reads this shape; views call `getArtistsForLetter(l)` / `getArtist(id)` / `getSong(id)` / `getTab(id)`. The latter three return `{ artist|song|tab, ..., letter }` for back-link routing.
 
-## Cache-busting
+## Cache-busting + service worker
 
-`version.js` exports `APP_VERSION` (Unix epoch). `catalog.js` appends `?v=${APP_VERSION}` to its `catalog.json` and `enrichment.json` fetches so every commit produces a unique cache-bust token.
+`version.js` exports `APP_VERSION` (Unix epoch). Two consumers:
+- `catalog.js` appends `?v=${APP_VERSION}` to `catalog.json` / `enrichment.json` / `private-bundle.json` fetches.
+- `sw.js` uses `APP_VERSION` as the cache key (`nortabs-v${APP_VERSION}`) for the precached app shell. Old caches are deleted on activate.
 
 **Auto-bumped on commit** by `.githooks/pre-commit` (Python one-liner). Activate the hook once per clone:
 
@@ -59,9 +66,39 @@ git config core.hooksPath .githooks
 
 After that, every commit bumps `version.js` automatically. Don't edit manually — the hook will overwrite. Skip with `git commit --no-verify` for the rare commit that shouldn't change deployed cache state.
 
-## Crawler
+**Merge/rebase/cherry-pick conflicts on `version.js`**: trivially resolve by picking *either* side (`git checkout --ours version.js` or `--theirs version.js`). The pre-commit hook runs on the resulting commit (`rebase --continue` / `cherry-pick --continue` / merge commit) and overwrites whatever you chose with a fresh epoch anyway. Don't waste cycles deciding which side is "right" — both produce identical end state.
 
-`crawler/crawl.py` — zero-dep stdlib Python (urllib). Args: `--letters`, `--delay-ms` (default 100), `--user-agent`, `--checkpoint-dir` (default `crawler/data/`), `--out` (default `catalog.json`), `--merge-only`, `--force`. Per-letter checkpoint files in `crawler/data/<letter>.json` survive interruptions; the merge step assembles `catalog.json` from whatever checkpoints exist. Default delay 100 ms is "obviously polite"; full A-Z + 0-9 crawl is ~3 hours at 200 ms, ~9 MB gzipped catalog.
+**SW debugging gotcha**: when iterating locally on shell files (`*.js`, `style.css`) without committing, the service worker keeps serving the cached old version — `APP_VERSION` only bumps at commit time. PC dev tools usually bypass via "Disable cache" while DevTools is open; **iOS Safari has no such switch** and will serve stale code until either (a) you commit so APP_VERSION bumps, (b) you clear Safari's website data for the host, or (c) you manually `caches.delete()` from the JS console. If a code change "works on desktop but not on iOS," suspect SW cache first.
+
+## Crawler & enrichment
+
+`crawler/crawl.py` — zero-dep stdlib Python (urllib). Args: `--letters`, `--delay-ms` (default 100), `--user-agent`, `--checkpoint-dir` (default `crawler/data/`), `--out` (default `catalog.json`), `--merge-only`, `--force`, `--incremental`. Per-letter checkpoint files in `crawler/data/<letter>.json` survive interruptions; the merge step assembles `catalog.json` from whatever checkpoints exist. Default delay 100 ms is "obviously polite"; full A-Z + 0-9 crawl is ~3 hours at 200 ms, ~9 MB gzipped catalog. Runs nightly via `.github/workflows/crawl.yml` (incremental Mon-Sat, full Sun).
+
+Enrichment scripts (all in `crawler/`):
+- `enrich.py` — local LLM enrichment via the `claude` CLI; needs `pip install json5`.
+- `enrich-gpt.py` — OpenAI API variant (concurrent); needs `pip install openai` + `OPENAI_API_KEY`.
+- `merge-enrichment.py` — combines per-letter `enrichment/<letter>.json` files into the shipped `enrichment.json`.
+- `generate-wordcloud.py` — regenerates `home-wordcloud.svg`; needs `pip install wordcloud pillow numpy`.
+- `run-enrich.ps1` / `run-enrich-parallel.ps1` / `scheduled-enrich.ps1` — quota-aware drivers (Windows Task Scheduler runs the scheduled one at 06:00 Oslo).
+- `enrich-private.py` + `build-private-bundle.py` — private-tabs pipeline (see below).
+
+## Private-tabs bundle (UG imports)
+
+`private-bundle.json` is a separately-loaded artifact alongside `catalog.json`; it carries user-imported Ultimate Guitar tabs. Pipeline:
+
+1. `crawler/userscripts/nortabs-ug-exporter.user.js` — Tampermonkey script that scrapes a UG tab page into JSON.
+2. `crawler/private/ug-import.json` — accumulated raw exports (committed for transparency).
+3. `crawler/enrich-private.py` — LLM-enriches private tabs into `crawler/private/ug-enrichment.json` (STRICT_SUFFIX prompt + JSON salvage + `--retry-thin`).
+4. `crawler/build-private-bundle.py` — emits `private-bundle.json` for the shipped app.
+
+The web app pulls private-bundle.json optionally — absence is fine. UG tabs surface in the catalog as a hardcoded songbook (`ug-import-main`), reachable via `#/songbook/ug-import-main` and via the search index.
+
+## Docs and screenshots
+
+- `README.md` — outward-facing project intro (motivations + search journey).
+- `PLAN.md` — design log and backlog (canonical spec).
+- `BENCHMARKING.md` — cloud-LLM evaluation notes (currently parked for future private-tabs enrichment work).
+- `docs/screenshots/` — canonical location for README-referenced screenshots; `0X-*.png` are the production set.
 
 ## iOS chord-wrap: defensive shotgun in place (2026-05-17)
 
@@ -77,7 +114,7 @@ Don't remove any of these without re-testing on a physical iPhone:
 
 **Surfaced-but-parked:** `wrapPlain` hard-breaks lines that have no whitespace within `maxCols` (long URLs split mid-token: `Tumbleweed_C` / `onnection`). Better behavior: pass such lines through unchanged and let `overflow-x: auto` on `.tab-body` handle them with horizontal scroll. Low priority.
 
-**SW-cache double-bind during iteration:** because `APP_VERSION` only bumps at commit, every speculative shell-file change during local debugging needs a manual `version.js` bump to reach iOS. PC dev tools usually bypass this via "Disable cache" while DevTools is open; iOS Safari has no such switch and will serve stale cached code until either (a) you commit so `APP_VERSION` bumps, (b) you clear Safari's website data for the host, or (c) you manually `caches.delete()` from the JS console. The 2026-05-16/17 session bumped manually four times before landing the final state. If a code change "works on desktop but not on iOS," suspect SW cache first.
+**SW-cache double-bind during iteration:** because `APP_VERSION` only bumps at commit, every speculative shell-file change during local debugging needs a manual `version.js` bump to reach iOS (see "Cache-busting + service worker" above). The 2026-05-16/17 session bumped manually four times before landing the final state.
 
 ## Working artifacts outside the repo
 
