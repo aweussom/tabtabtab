@@ -8,8 +8,14 @@ export function render(state, root) {
     return;
   }
   const { artist, letter } = result;
+  // letter === null marks a private (UG-imported) artist that lives outside
+  // the letter-index browse — point its back-link at Sangbøker, which is the
+  // canonical surface for private entries.
+  const backLink = letter
+    ? `<a href="#/letter/${escapeHtml(letter)}">&larr; ${escapeHtml(letter.toUpperCase())}</a>`
+    : `<a href="#/songbooks">&larr; Sangbøker</a>`;
   root.innerHTML = `
-    <p><a href="#/letter/${escapeHtml(letter)}">&larr; ${escapeHtml(letter.toUpperCase())}</a></p>
+    <p>${backLink}</p>
     <h1>${escapeHtml(artist.name)}</h1>
     ${artist.songs.length === 0
       ? '<p>No songs.</p>'

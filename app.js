@@ -40,9 +40,9 @@ async function main() {
     return;
   }
   // Private bundle is optional — absence is fine, app continues with just catalog.
-  await loadPrivateBundle();
+  const privateBundle = await loadPrivateBundle();
   const enrichment = await loadEnrichment();
-  const stats = buildIndex(getCatalogData(), enrichment);
+  const stats = buildIndex(getCatalogData(), enrichment, privateBundle);
   console.info('[search] index built:', stats);
   mountSearchBar();
   subscribe(renderCurrent);

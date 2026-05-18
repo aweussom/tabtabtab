@@ -93,7 +93,7 @@ function addToIndex(index, token, id) {
   set.add(id);
 }
 
-export function buildIndex(catalog, enrichment) {
+export function buildIndex(catalog, enrichment, privateBundle = null) {
   _artistIndex = new Map();
   _songIndex = new Map();
   _bodyIndex = new Map();
@@ -131,6 +131,48 @@ export function buildIndex(catalog, enrichment) {
           }
           _tabById.set(tab.id, { tab, song, artist, letter });
         }
+      }
+    }
+  }
+
+  // Merge private bundle (UG-import + LLM enrichment) into the same indexes,
+  // so UG entries compete with nortabs.net entries in search results — not
+  // just available through Sangbøker. Enrichment is inline on each entry
+  // (built by build-private-bundle.py), shaped the same as enrichment.json.
+  // letter: null marks these refs as non-letter-browseable, matching catalog.js.
+  for (const artist of Object.values(privateBundle?.artists ?? {})) {
+    const aEnrich = artist.enrichment?.search_text ?? '';
+    const aTokens = expandWithAliases(tokenize(fold(`${artist.name} ${aEnrich}`)));
+    for (const t of aTokens) {
+      addToIndex(_artistIndex, t, artist.id);
+      allTokenSet.add(t);
+    }
+    const syntheticArtist = { id: artist.id, name: artist.name, songs: [] };
+    _artistById.set(artist.id, { artist: syntheticArtist, letter: null });
+
+    for (const sid of artist.song_ids ?? []) {
+      const song = privateBundle.songs?.[sid];
+      if (!song) continue;
+      const sEnrich = song.enrichment?.search_text ?? '';
+      const sTokens = expandWithAliases(tokenize(fold(`${artist.name} ${aEnrich} ${song.name} ${sEnrich}`)));
+      for (const t of sTokens) {
+        addToIndex(_songIndex, t, song.id);
+        allTokenSet.add(t);
+      }
+      const syntheticSong = { id: song.id, name: song.name, tabs: [] };
+      syntheticArtist.songs.push(syntheticSong);
+      _songById.set(song.id, { song: syntheticSong, artist: syntheticArtist, letter: null });
+
+      for (const tid of song.tab_ids ?? []) {
+        const tab = privateBundle.tabs?.[tid];
+        if (!tab) continue;
+        const bTokens = tokenize(fold(tab.body || ''));
+        for (const t of bTokens) {
+          addToIndex(_bodyIndex, t, tab.id);
+          allTokenSet.add(t);
+        }
+        syntheticSong.tabs.push(tab);
+        _tabById.set(tab.id, { tab, song: syntheticSong, artist: syntheticArtist, letter: null });
       }
     }
   }
