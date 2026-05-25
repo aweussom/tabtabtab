@@ -1,0 +1,49 @@
+{
+  "model": "deepseek-v4-pro:cloud",
+  "tab_key": "Jolene",
+  "tab_id": "dolly-parton__jolene-ver-2",
+  "artist": "Dolly Parton",
+  "song": "Jolene (ver 2)",
+  "latency_ms": 8429,
+  "tokens_in": 807,
+  "tokens_out": 568,
+  "error": null,
+  "raw_content": "{\n  \"search_text\": \"jolene dolly parton country klassiker bønn om å ikke ta mannen hennes kjærlighet sjalusi trist akustisk gitar emerald green eyes auburn hair please don't take my man begging heartbreak norsk oversettelse\",\n  \"language\": \"english\",\n  \"themes\": [\"love\", \"jealousy\", \"desperation\", \"longing\", \"heartbreak\"],\n  \"mood\": [\"melancholy\", \"pleading\", \"trist\", \"sårbar\"],\n  \"occasion\": [\"breakup\", \"heartache\"],\n  \"alt_titles\": {\"no\": \"Jolene\", \"en\": \"Jolene\"},\n  \"key_phrases\": [\n    \"please don't take my man\",\n    \"flaming locks of auburn hair\",\n    \"ivory skin and eyes of emerald green\",\n    \"your smile is like a breath of spring\",\n    \"your voice is soft like summer rain\"\n  ]\n}",
+  "parse_ok": true,
+  "parse_path": "strict",
+  "enrichment": {
+    "search_text": "jolene dolly parton country klassiker bønn om å ikke ta mannen hennes kjærlighet sjalusi trist akustisk gitar emerald green eyes auburn hair please don't take my man begging heartbreak norsk oversettelse",
+    "language": "english",
+    "themes": [
+      "love",
+      "jealousy",
+      "desperation",
+      "longing",
+      "heartbreak"
+    ],
+    "mood": [
+      "melancholy",
+      "pleading",
+      "trist",
+      "sårbar"
+    ],
+    "occasion": [
+      "breakup",
+      "heartache"
+    ],
+    "alt_titles": {
+      "no": "Jolene",
+      "en": "Jolene"
+    },
+    "key_phrases": [
+      "please don't take my man",
+      "flaming locks of auburn hair",
+      "ivory skin and eyes of emerald green",
+      "your smile is like a breath of spring",
+      "your voice is soft like summer rain"
+    ]
+  },
+  "key_phrases_hit": 5,
+  "key_phrases_total": 5,
+  "key_phrases_fraction": 1.0
+}

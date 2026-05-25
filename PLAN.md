@@ -190,6 +190,16 @@ A minimal Node 24 backend on Tommy's Azure VM that lets the browser-side UG-impo
 
 **Architecture principle (binding)**: bodies are transient; only metadata is persisted server-side. Server logs `(artist, song, model, cache_hit, ms_taken, token_count)` — never the body. Same legal posture as Phase 5+.
 
+**Body preprocessing before LLM** (binding, decided 2026-05-26 after enrich-bench v1): the `body` field sent to the LLM is NOT the raw UG export — it is preprocessed to keep only enrichment-relevant signal.
+
+- **Stripped**: chord-line notation (chord-only lines above lyric lines), residual `[ch]X[/ch]` / `[tab]...[/tab]` wrappers, UG `#PLEASE NOTE` legal preambles, email/USENET headers in old chord charts, tabber signatures (Set8-style), capo/tuning notes, performance tips. None of this carries theme/mood/lyric signal.
+- **Kept**: actual lyric text. `[Verse]` / `[Chorus]` / `[Bridge]` section markers are kept as light structural hints — debatable but small cost.
+- **Carried in the prompt prefix as separate fields, NOT inside body**: artist name, song name, composer/writer when known.
+
+Why: the truncated body (currently `body[:800]` in `enrich-private.py`, `body[:1200]` in bench) is the LLM's primary signal for `themes` / `mood` / `key_phrases`. Polluting it with chord notation, legal boilerplate, and tabber commentary wastes the context window AND nudges the LLM toward "this is a tab file" rather than "this is a song about X". Validated empirically by enrich-bench v1: DeepSeek-Pro returned 0 `key_phrases` on Passenger's *Let Her Go* because the truncated 1200-char body was mostly chord intro + tabber notes, not actual lyrics. After preprocessing, the same model has 1200 chars of *actual lyrics* to work with — higher signal density per token.
+
+Implementation: a shared `lyrics_only(body)` helper used by `proxy/enrich.js`, `crawler/enrich-private.py`, and `crawler/enrich-bench.py` before injecting into the prompt. Build the regex-based stripper from real UG samples (253 are available in `crawler/private/ug-import.json`). Not done yet — pinned here as a follow-on after the deploy plan.
+
 **Endpoint contract**:
 - `POST /enrich-tab` — body `{artist, song, body, chordnames?}` → returns `{enrichment, cache: 'hit' | 'miss', model_used}`.
 - Server hashes `(artist, normalized(song))` to derive the cache key, checks the JSON cache, returns cached enrichment or calls LLM and stores result. Per-tab not bulk; browser orchestrates parallelism (3-4 in-flight via `Promise.all`-batches).

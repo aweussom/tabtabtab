@@ -1,0 +1,40 @@
+{
+  "model": "qwen3.5:cloud",
+  "tab_key": "Let Her Go",
+  "tab_id": "passenger__let-her-go",
+  "artist": "Passenger",
+  "song": "Let Her Go",
+  "latency_ms": 44457,
+  "tokens_in": 769,
+  "tokens_out": 6529,
+  "error": null,
+  "raw_content": "{\n  \"search_text\": \"passenger let her go acoustic guitar tab chords norwegian english love loss regret sadness melancholy trist tap kjærlighet savn akustisk ballade wedding funeral breakup intro repeat from this point g fmaj7 g6 am progression folk pop indie rock singer songwriter lesson easy\",\n  \"language\": \"english\",\n  \"themes\": [\n    \"love\",\n    \"loss\",\n    \"regret\"\n  ],\n  \"mood\": [\n    \"melancholy\",\n    \"trist\",\n    \"acoustic\"\n  ],\n  \"occasion\": [\n    \"breakup\",\n    \"funeral\",\n    \"wedding\"\n  ],\n  \"alt_titles\": {\n    \"no\": \"La henne gå\",\n    \"en\": \"Let Her Go\"\n  }\n}",
+  "parse_ok": true,
+  "parse_path": "strict",
+  "enrichment": {
+    "search_text": "passenger let her go acoustic guitar tab chords norwegian english love loss regret sadness melancholy trist tap kjærlighet savn akustisk ballade wedding funeral breakup intro repeat from this point g fmaj7 g6 am progression folk pop indie rock singer songwriter lesson easy",
+    "language": "english",
+    "themes": [
+      "love",
+      "loss",
+      "regret"
+    ],
+    "mood": [
+      "melancholy",
+      "trist",
+      "acoustic"
+    ],
+    "occasion": [
+      "breakup",
+      "funeral",
+      "wedding"
+    ],
+    "alt_titles": {
+      "no": "La henne gå",
+      "en": "Let Her Go"
+    }
+  },
+  "key_phrases_hit": 0,
+  "key_phrases_total": 0,
+  "key_phrases_fraction": 1.0
+}

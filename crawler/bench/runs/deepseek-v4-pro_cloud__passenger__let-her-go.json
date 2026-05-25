@@ -1,0 +1,37 @@
+{
+  "model": "deepseek-v4-pro:cloud",
+  "tab_key": "Let Her Go",
+  "tab_id": "passenger__let-her-go",
+  "artist": "Passenger",
+  "song": "Let Her Go",
+  "latency_ms": 17029,
+  "tokens_in": 735,
+  "tokens_out": 1226,
+  "error": null,
+  "raw_content": "{\n  \"search_text\": \"melankolsk, hjertesorg, savn, letting go, kjærlighet, tap, refleksjon, trist, akustisk, ballade, breakup song, only know you love her when you let her go, savner solen når det snør, Passenger, Michael David Rosenberg, folk pop, populær, radiovennlig, gripende, emosjonell, håpløs romantikk\",\n  \"language\": \"english\",\n  \"themes\": [\"heartbreak\", \"loss\", \"love\", \"regret\"],\n  \"mood\": [\"melancholy\", \"reflective\", \"sad\", \"trist\"],\n  \"occasion\": [\"breakup\"],\n  \"key_phrases\": []\n}",
+  "parse_ok": true,
+  "parse_path": "strict",
+  "enrichment": {
+    "search_text": "melankolsk, hjertesorg, savn, letting go, kjærlighet, tap, refleksjon, trist, akustisk, ballade, breakup song, only know you love her when you let her go, savner solen når det snør, Passenger, Michael David Rosenberg, folk pop, populær, radiovennlig, gripende, emosjonell, håpløs romantikk",
+    "language": "english",
+    "themes": [
+      "heartbreak",
+      "loss",
+      "love",
+      "regret"
+    ],
+    "mood": [
+      "melancholy",
+      "reflective",
+      "sad",
+      "trist"
+    ],
+    "occasion": [
+      "breakup"
+    ],
+    "key_phrases": []
+  },
+  "key_phrases_hit": 0,
+  "key_phrases_total": 0,
+  "key_phrases_fraction": 1.0
+}

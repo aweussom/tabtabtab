@@ -1,0 +1,49 @@
+{
+  "model": "qwen3.5:cloud",
+  "tab_key": "Jolene",
+  "tab_id": "dolly-parton__jolene-ver-2",
+  "artist": "Dolly Parton",
+  "song": "Jolene (ver 2)",
+  "latency_ms": 36878,
+  "tokens_in": 865,
+  "tokens_out": 3263,
+  "error": null,
+  "raw_content": "{\n  \"search_text\": \"dolly parton jolene guitar tab chords am c g english country song om kjærlighet og sjalusi love and jealousy begging plea dont take my man trist sang melancholy acoustic guitar øvelse practice classic hit vintage musikk breakup heartbreak skillingsvise\",\n  \"language\": \"english\",\n  \"themes\": [\n    \"love\",\n    \"jealousy\",\n    \"heartbreak\",\n    \"pleading\"\n  ],\n  \"mood\": [\n    \"melancholy\",\n    \"desperate\",\n    \"trist\",\n    \"emotional\"\n  ],\n  \"occasion\": [\n    \"breakup\",\n    \"heartbreak\",\n    \"singing along\"\n  ],\n  \"alt_titles\": {\n    \"no\": \"Jolene\",\n    \"en\": \"Jolene\"\n  },\n  \"key_phrases\": [\n    \"Jolene, Jolene, Jolene, Jolene\",\n    \"please don't take my man\",\n    \"Your beauty is beyond compare\",\n    \"flaming locks of auburn hair\",\n    \"eyes of emerald green\"\n  ]\n}",
+  "parse_ok": true,
+  "parse_path": "strict",
+  "enrichment": {
+    "search_text": "dolly parton jolene guitar tab chords am c g english country song om kjærlighet og sjalusi love and jealousy begging plea dont take my man trist sang melancholy acoustic guitar øvelse practice classic hit vintage musikk breakup heartbreak skillingsvise",
+    "language": "english",
+    "themes": [
+      "love",
+      "jealousy",
+      "heartbreak",
+      "pleading"
+    ],
+    "mood": [
+      "melancholy",
+      "desperate",
+      "trist",
+      "emotional"
+    ],
+    "occasion": [
+      "breakup",
+      "heartbreak",
+      "singing along"
+    ],
+    "alt_titles": {
+      "no": "Jolene",
+      "en": "Jolene"
+    },
+    "key_phrases": [
+      "Jolene, Jolene, Jolene, Jolene",
+      "please don't take my man",
+      "Your beauty is beyond compare",
+      "flaming locks of auburn hair",
+      "eyes of emerald green"
+    ]
+  },
+  "key_phrases_hit": 5,
+  "key_phrases_total": 5,
+  "key_phrases_fraction": 1.0
+}

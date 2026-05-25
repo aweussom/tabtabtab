@@ -1,0 +1,51 @@
+{
+  "model": "deepseek-v4-flash:cloud",
+  "tab_key": "Lady In Black",
+  "tab_id": "uriah-heep__lady-in-black",
+  "artist": "Uriah Heep",
+  "song": "Lady In Black",
+  "latency_ms": 4620,
+  "tokens_in": 792,
+  "tokens_out": 635,
+  "error": null,
+  "raw_content": "{\n  \"search_text\": \"lady in black uriah heep classic rock sorgfull refleksjon krig fred mystisk kvinne hester fiender redemption war peace spirituality melancholy reflective somber trist ettertenksom funeral memorial she came to me one morning her long hair flowing in the midwinter wind in darkness i was walking to fight and kill their brothers i begged her give me horses\",\n  \"language\": \"english\",\n  \"themes\": [\"redemption\", \"war\", \"peace\", \"spirituality\", \"mystery\"],\n  \"mood\": [\"melancholic\", \"reflective\", \"somber\", \"trist\", \"ettertenksom\"],\n  \"occasion\": [\"funeral\", \"reflection\", \"memorial\"],\n  \"alt_titles\": {\"no\": \"Dame i svart\", \"en\": \"Lady In Black\"},\n  \"key_phrases\": [\"She came to me one morning\", \"Her long hair flowing in the midwinter wind\", \"In darkness I was walking\", \"To fight and kill their brothers\", \"I begged her give me horses\"]\n}",
+  "parse_ok": true,
+  "parse_path": "strict",
+  "enrichment": {
+    "search_text": "lady in black uriah heep classic rock sorgfull refleksjon krig fred mystisk kvinne hester fiender redemption war peace spirituality melancholy reflective somber trist ettertenksom funeral memorial she came to me one morning her long hair flowing in the midwinter wind in darkness i was walking to fight and kill their brothers i begged her give me horses",
+    "language": "english",
+    "themes": [
+      "redemption",
+      "war",
+      "peace",
+      "spirituality",
+      "mystery"
+    ],
+    "mood": [
+      "melancholic",
+      "reflective",
+      "somber",
+      "trist",
+      "ettertenksom"
+    ],
+    "occasion": [
+      "funeral",
+      "reflection",
+      "memorial"
+    ],
+    "alt_titles": {
+      "no": "Dame i svart",
+      "en": "Lady In Black"
+    },
+    "key_phrases": [
+      "She came to me one morning",
+      "Her long hair flowing in the midwinter wind",
+      "In darkness I was walking",
+      "To fight and kill their brothers",
+      "I begged her give me horses"
+    ]
+  },
+  "key_phrases_hit": 5,
+  "key_phrases_total": 5,
+  "key_phrases_fraction": 1.0
+}

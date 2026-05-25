@@ -1,0 +1,51 @@
+{
+  "model": "qwen3.5:cloud",
+  "tab_key": "Hallelujah",
+  "tab_id": "jeff-buckley__hallelujah-ver-2",
+  "artist": "Jeff Buckley",
+  "song": "Hallelujah (ver 2)",
+  "latency_ms": 30444,
+  "tokens_in": 882,
+  "tokens_out": 4210,
+  "error": null,
+  "raw_content": "{\n  \"search_text\": \"jeff buckley hallelujah guitar tab akkorder sang engelsk klassiker trist melankolsk spiritual faith love heartbreak bryllup funeral bryllupssang minnestund secret chord david lord music acoustic ballade cover version youtube official video studio original capo chord chart easy intermediate advanced learning spilleliste\",\n  \"language\": \"english\",\n  \"themes\": [\n    \"faith\",\n    \"love\",\n    \"music\",\n    \"spirituality\",\n    \"heartbreak\"\n  ],\n  \"mood\": [\n    \"melancholy\",\n    \"spiritual\",\n    \"emotional\",\n    \"trist\",\n    \"melankolsk\"\n  ],\n  \"occasion\": [\n    \"funeral\",\n    \"wedding\",\n    \"reflection\",\n    \"minnestund\"\n  ],\n  \"alt_titles\": {\n    \"no\": \"Halleluja\",\n    \"en\": \"Hallelujah\"\n  },\n  \"key_phrases\": [\n    \"I heard there was a secret chord\",\n    \"That David played and it pleased the Lord\",\n    \"The minor fall and the major lift\",\n    \"Hallelujah, hallelujah, hallelujah, hallelu-u-u-u-jah\"\n  ]\n}",
+  "parse_ok": true,
+  "parse_path": "strict",
+  "enrichment": {
+    "search_text": "jeff buckley hallelujah guitar tab akkorder sang engelsk klassiker trist melankolsk spiritual faith love heartbreak bryllup funeral bryllupssang minnestund secret chord david lord music acoustic ballade cover version youtube official video studio original capo chord chart easy intermediate advanced learning spilleliste",
+    "language": "english",
+    "themes": [
+      "faith",
+      "love",
+      "music",
+      "spirituality",
+      "heartbreak"
+    ],
+    "mood": [
+      "melancholy",
+      "spiritual",
+      "emotional",
+      "trist",
+      "melankolsk"
+    ],
+    "occasion": [
+      "funeral",
+      "wedding",
+      "reflection",
+      "minnestund"
+    ],
+    "alt_titles": {
+      "no": "Halleluja",
+      "en": "Hallelujah"
+    },
+    "key_phrases": [
+      "I heard there was a secret chord",
+      "That David played and it pleased the Lord",
+      "The minor fall and the major lift",
+      "Hallelujah, hallelujah, hallelujah, hallelu-u-u-u-jah"
+    ]
+  },
+  "key_phrases_hit": 4,
+  "key_phrases_total": 4,
+  "key_phrases_fraction": 1.0
+}

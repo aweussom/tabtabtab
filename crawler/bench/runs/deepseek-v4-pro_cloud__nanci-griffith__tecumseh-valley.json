@@ -1,0 +1,45 @@
+{
+  "model": "deepseek-v4-pro:cloud",
+  "tab_key": "Tecumseh Valley",
+  "tab_id": "nanci-griffith__tecumseh-valley",
+  "artist": "Nanci Griffith",
+  "song": "Tecumseh Valley",
+  "latency_ms": 12130,
+  "tokens_in": 766,
+  "tokens_out": 821,
+  "error": null,
+  "raw_content": "{\n  \"search_text\": \"nanci griffith tecumseh valley folk ballade gruvearbeider datter caroline spencer kull snø vinter frihet solskinn melankolsk trist historiefortelling akustisk gitar americana viser engelsk norsk\",\n  \"language\": \"english\",\n  \"themes\": [\"mining\", \"hardship\", \"nature\", \"freedom\", \"nostalgia\"],\n  \"mood\": [\"melancholy\", \"trist\", \"melankolsk\", \"reflective\"],\n  \"occasion\": [\"storytelling\", \"folk music listening\"],\n  \"alt_titles\": {},\n  \"key_phrases\": [\n    \"The name she gave was Caroline\",\n    \"Daughter of a miner\",\n    \"her ways were free and it seemed to me the sunshine walked beside her\",\n    \"the coal was low and soon the snow would turn the skies to winter\"\n  ]\n}",
+  "parse_ok": true,
+  "parse_path": "strict",
+  "enrichment": {
+    "search_text": "nanci griffith tecumseh valley folk ballade gruvearbeider datter caroline spencer kull snø vinter frihet solskinn melankolsk trist historiefortelling akustisk gitar americana viser engelsk norsk",
+    "language": "english",
+    "themes": [
+      "mining",
+      "hardship",
+      "nature",
+      "freedom",
+      "nostalgia"
+    ],
+    "mood": [
+      "melancholy",
+      "trist",
+      "melankolsk",
+      "reflective"
+    ],
+    "occasion": [
+      "storytelling",
+      "folk music listening"
+    ],
+    "alt_titles": {},
+    "key_phrases": [
+      "The name she gave was Caroline",
+      "Daughter of a miner",
+      "her ways were free and it seemed to me the sunshine walked beside her",
+      "the coal was low and soon the snow would turn the skies to winter"
+    ]
+  },
+  "key_phrases_hit": 3,
+  "key_phrases_total": 4,
+  "key_phrases_fraction": 0.75
+}

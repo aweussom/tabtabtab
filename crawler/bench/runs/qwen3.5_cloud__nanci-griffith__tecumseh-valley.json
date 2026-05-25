@@ -1,0 +1,51 @@
+{
+  "model": "qwen3.5:cloud",
+  "tab_key": "Tecumseh Valley",
+  "tab_id": "nanci-griffith__tecumseh-valley",
+  "artist": "Nanci Griffith",
+  "song": "Tecumseh Valley",
+  "latency_ms": 56764,
+  "tokens_in": 806,
+  "tokens_out": 4500,
+  "error": null,
+  "raw_content": "{\n  \"search_text\": \"nanci griffith tecumseh valley folk country acoustic guitar tab chords english song norwegian metadata caroline daughter miner freedom melancholy trist viser countrymusikk akustisk sang tekst lyrics mining hardship life story storytelling ballad session campfire singing music sheet tabulatur spilleliste konsert winter spencer\",\n  \"language\": \"english\",\n  \"themes\": [\n    \"folk\",\n    \"country\",\n    \"storytelling\",\n    \"mining\",\n    \"hardship\",\n    \"freedom\"\n  ],\n  \"mood\": [\n    \"melancholy\",\n    \"nostalgic\",\n    \"trist\",\n    \"ettertenksom\"\n  ],\n  \"occasion\": [\n    \"campfire\",\n    \"acoustic session\",\n    \"listening\"\n  ],\n  \"alt_titles\": {\n    \"no\": \"\",\n    \"en\": \"\"\n  },\n  \"key_phrases\": [\n    \"The name she gave was Caroline\",\n    \"Daughter of a miner\",\n    \"And her ways were free\",\n    \"The sunshine walked beside her\",\n    \"coal was low and soon the snow\"\n  ]\n}",
+  "parse_ok": true,
+  "parse_path": "strict",
+  "enrichment": {
+    "search_text": "nanci griffith tecumseh valley folk country acoustic guitar tab chords english song norwegian metadata caroline daughter miner freedom melancholy trist viser countrymusikk akustisk sang tekst lyrics mining hardship life story storytelling ballad session campfire singing music sheet tabulatur spilleliste konsert winter spencer",
+    "language": "english",
+    "themes": [
+      "folk",
+      "country",
+      "storytelling",
+      "mining",
+      "hardship",
+      "freedom"
+    ],
+    "mood": [
+      "melancholy",
+      "nostalgic",
+      "trist",
+      "ettertenksom"
+    ],
+    "occasion": [
+      "campfire",
+      "acoustic session",
+      "listening"
+    ],
+    "alt_titles": {
+      "no": "",
+      "en": ""
+    },
+    "key_phrases": [
+      "The name she gave was Caroline",
+      "Daughter of a miner",
+      "And her ways were free",
+      "The sunshine walked beside her",
+      "coal was low and soon the snow"
+    ]
+  },
+  "key_phrases_hit": 5,
+  "key_phrases_total": 5,
+  "key_phrases_fraction": 1.0
+}

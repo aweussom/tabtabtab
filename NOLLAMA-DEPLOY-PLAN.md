@@ -122,15 +122,18 @@ sudo mkdir -p /var/lib/nollama
 sudo chown $USER:$USER /var/lib/nollama
 ```
 
-**[ESCALATE]** the upstream LLM choice — three options, locked in here:
+Upstream LLM choice — four options. Default is locked in: **Ollama Cloud + `nemotron-3-super:cloud`** based on enrich-bench v1 (2026-05-25, see `crawler/bench/COMPARE.md`).
 
 | Option | `PROXY_API_BASE` | `PROXY_MODEL` | `PROXY_API_KEY` | Cost | Notes |
 |---|---|---|---|---|---|
-| Workstation Qwen3.6 via Tailscale | `http://<workstation-tailscale-ip>:11434/v1` | `qwen3.6:latest` | (empty) | $0 | Only works when workstation is on + Ollama running. Tailscale handles auth + encryption. |
-| Mimo V2 Pro | `https://api.mimo.xiaomi.com/v1` | `mimo-v2-pro` | `<mimo-key>` | $16/mo | Always up. Best Norwegian. |
-| Ollama Cloud | `https://ollama.com/v1` | `deepseek-v4-pro:cloud` | `<ollama-cloud-key>` | $0 (free tier) | Always up. Quality TBD. |
+| **Ollama Cloud + Nemotron** ← recommended | `https://ollama.com/v1` | `nemotron-3-super:cloud` | `<ollama-cloud-key>` | $20/mo flat (Tommy's existing sub, effectively unlimited for this workload) | Always up. Bench winner: 100% schema-compliance, 100% key_phrases hit-rate, 8.4 s mean latency. |
+| Ollama Cloud + DeepSeek-Pro (fallback) | `https://ollama.com/v1` | `deepseek-v4-pro:cloud` | `<ollama-cloud-key>` | same sub | 100% / 91% / 15.0 s — slower than Nemotron with more hallucinations. Use only if Nemotron has an outage. |
+| Workstation Qwen3.6 via Tailscale | `http://<workstation-tailscale-ip>:11434/v1` | `qwen3.6:latest` | (empty) | $0 | Functionally equivalent to qwen3.5:cloud per Tommy. Works only when workstation is on + Ollama running. Tailscale handles auth + encryption. Keep as last-ditch fallback. |
+| Mimo V2 Pro | `https://api.mimo.xiaomi.com/v1` | `mimo-v2-pro` | `<mimo-key>` | $16/mo dedicated | Untested in bench. Best candidate for Norwegian content — but UG is ~99.9% English, so not relevant for this path. |
 
-Recommendation: start with **workstation-via-Tailscale** since it's $0 and you've already validated it. Switch to Mimo if uptime becomes a real concern (e.g. you ship the URL to friends).
+Not recommended (bench losers): `deepseek-v4-flash:cloud` (20% hallucination rate — invents lyric phrases from training data when truncated body lacks them) and `qwen3.5:cloud` (5x token waste from `<think>` blocks, 43.7 s mean latency, same quality as Nemotron at 1/5 the speed).
+
+**Body preprocessing prerequisite** (PLAN.md Phase 2.5 "Body preprocessing before LLM"): before deploying to prod, implement the shared `lyrics_only(body)` helper. The bench measured raw-body input, which already gave Nemotron 100% key_phrases hit-rate; preprocessing should only *improve* this, especially for tabs like Passenger's *Let Her Go* where DeepSeek-Pro returned 0 phrases because the truncated body had no actual lyrics yet.
 
 Now create the systemd unit. `sudo nano /etc/systemd/system/nollama-proxy.service`:
 

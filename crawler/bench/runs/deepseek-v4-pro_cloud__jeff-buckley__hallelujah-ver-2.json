@@ -1,0 +1,49 @@
+{
+  "model": "deepseek-v4-pro:cloud",
+  "tab_key": "Hallelujah",
+  "tab_id": "jeff-buckley__hallelujah-ver-2",
+  "artist": "Jeff Buckley",
+  "song": "Hallelujah (ver 2)",
+  "latency_ms": 16987,
+  "tokens_in": 843,
+  "tokens_out": 1134,
+  "error": null,
+  "raw_content": "{\n  \"search_text\": \"hallelujah jeff buckley cover leonard cohen acoustic melancholy spiritual love heartbreak faith secret chord minor fall major lift baffled king halleluja sorgfull ettertenksom kjærlighet hjertesorg tro begravelse bryllup fingerpicking haunting vakker trist\",\n  \"language\": \"english\",\n  \"themes\": [\"love\", \"heartbreak\", \"faith\", \"spirituality\", \"music\"],\n  \"mood\": [\"melancholy\", \"trist\", \"ettertenksom\", \"haunting\", \"vakker\"],\n  \"occasion\": [\"funeral\", \"breakup\", \"wedding\"],\n  \"alt_titles\": {\"no\": \"Halleluja\", \"en\": \"Hallelujah\"},\n  \"key_phrases\": [\n    \"I heard there was a secret chord\",\n    \"the minor fall and the major lift\",\n    \"the baffled king composing hallelujah\"\n  ]\n}",
+  "parse_ok": true,
+  "parse_path": "strict",
+  "enrichment": {
+    "search_text": "hallelujah jeff buckley cover leonard cohen acoustic melancholy spiritual love heartbreak faith secret chord minor fall major lift baffled king halleluja sorgfull ettertenksom kjærlighet hjertesorg tro begravelse bryllup fingerpicking haunting vakker trist",
+    "language": "english",
+    "themes": [
+      "love",
+      "heartbreak",
+      "faith",
+      "spirituality",
+      "music"
+    ],
+    "mood": [
+      "melancholy",
+      "trist",
+      "ettertenksom",
+      "haunting",
+      "vakker"
+    ],
+    "occasion": [
+      "funeral",
+      "breakup",
+      "wedding"
+    ],
+    "alt_titles": {
+      "no": "Halleluja",
+      "en": "Hallelujah"
+    },
+    "key_phrases": [
+      "I heard there was a secret chord",
+      "the minor fall and the major lift",
+      "the baffled king composing hallelujah"
+    ]
+  },
+  "key_phrases_hit": 3,
+  "key_phrases_total": 3,
+  "key_phrases_fraction": 1.0
+}

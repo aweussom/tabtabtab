@@ -1,0 +1,46 @@
+{
+  "model": "nemotron-3-super:cloud",
+  "tab_key": "Lady In Black",
+  "tab_id": "uriah-heep__lady-in-black",
+  "artist": "Uriah Heep",
+  "song": "Lady In Black",
+  "latency_ms": 6181,
+  "tokens_in": 847,
+  "tokens_out": 1845,
+  "error": null,
+  "raw_content": "{\n  \"search_text\": \"lady in black svart dame mystery mysterium guidance veiledning krig war melancholy trist hopeful håpfull anthemic anslag funeral begravelse memorial minne she came to me one morning her long hair flowing ah ahah ahahah destruction lay around me\",\n  \"language\": \"english\",\n  \"themes\": [\"mystery\", \"guidance\", \"war\"],\n  \"mood\": [\"melancholy\", \"hopeful\", \"anthemic\"],\n  \"occasion\": [\"funeral\", \"memorial\", \"reflection\"],\n  \"alt_titles\": {\n    \"no\": \"Svart dame\",\n    \"en\": \"Lady In Black\"\n  },\n  \"key_phrases\": [\n    \"She came to me one morning, one lonely Sunday morning\",\n    \"Her long hair flowing in the midwinter wind\",\n    \"Ah... ahah.. ahahah... ahahah\",\n    \"And destruction lay around me from a fight I could not win\"\n  ]\n}",
+  "parse_ok": true,
+  "parse_path": "strict",
+  "enrichment": {
+    "search_text": "lady in black svart dame mystery mysterium guidance veiledning krig war melancholy trist hopeful håpfull anthemic anslag funeral begravelse memorial minne she came to me one morning her long hair flowing ah ahah ahahah destruction lay around me",
+    "language": "english",
+    "themes": [
+      "mystery",
+      "guidance",
+      "war"
+    ],
+    "mood": [
+      "melancholy",
+      "hopeful",
+      "anthemic"
+    ],
+    "occasion": [
+      "funeral",
+      "memorial",
+      "reflection"
+    ],
+    "alt_titles": {
+      "no": "Svart dame",
+      "en": "Lady In Black"
+    },
+    "key_phrases": [
+      "She came to me one morning, one lonely Sunday morning",
+      "Her long hair flowing in the midwinter wind",
+      "Ah... ahah.. ahahah... ahahah",
+      "And destruction lay around me from a fight I could not win"
+    ]
+  },
+  "key_phrases_hit": 4,
+  "key_phrases_total": 4,
+  "key_phrases_fraction": 1.0
+}

@@ -1,0 +1,45 @@
+{
+  "model": "nemotron-3-super:cloud",
+  "tab_key": "Jolene",
+  "tab_id": "dolly-parton__jolene-ver-2",
+  "artist": "Dolly Parton",
+  "song": "Jolene (ver 2)",
+  "latency_ms": 8864,
+  "tokens_in": 874,
+  "tokens_out": 1288,
+  "error": null,
+  "raw_content": "{\n  \"search_text\": \"jolene dolly parton love heartbreak pleading desperation melancholy begging beauty auburn hair emerald eyes spring smile summer rain norwegian english breakup song plea dont take my man obsessive longing guitar\",\n  \"language\": \"english\",\n  \"themes\": [\"love\", \"heartbreak\", \"obsession\"],\n  \"mood\": [\"melancholy\", \"pleading\", \"desperate\"],\n  \"occasion\": [\"breakup\"],\n  \"alt_titles\": {\"no\": \"Jolene\", \"en\": \"Jolene\"},\n  \"key_phrases\": [\n    \"Jolene, Jolene, Jolene, Jolene\",\n    \"I'm begging of you, please don't take my man\",\n    \"Please don't take him just because you can\",\n    \"Your beauty is beyond compare\",\n    \"Your smile is like a breath of spring\"\n  ]\n}",
+  "parse_ok": true,
+  "parse_path": "strict",
+  "enrichment": {
+    "search_text": "jolene dolly parton love heartbreak pleading desperation melancholy begging beauty auburn hair emerald eyes spring smile summer rain norwegian english breakup song plea dont take my man obsessive longing guitar",
+    "language": "english",
+    "themes": [
+      "love",
+      "heartbreak",
+      "obsession"
+    ],
+    "mood": [
+      "melancholy",
+      "pleading",
+      "desperate"
+    ],
+    "occasion": [
+      "breakup"
+    ],
+    "alt_titles": {
+      "no": "Jolene",
+      "en": "Jolene"
+    },
+    "key_phrases": [
+      "Jolene, Jolene, Jolene, Jolene",
+      "I'm begging of you, please don't take my man",
+      "Please don't take him just because you can",
+      "Your beauty is beyond compare",
+      "Your smile is like a breath of spring"
+    ]
+  },
+  "key_phrases_hit": 5,
+  "key_phrases_total": 5,
+  "key_phrases_fraction": 1.0
+}

@@ -1,0 +1,50 @@
+{
+  "model": "nemotron-3-super:cloud",
+  "tab_key": "Hallelujah",
+  "tab_id": "jeff-buckley__hallelujah-ver-2",
+  "artist": "Jeff Buckley",
+  "song": "Hallelujah (ver 2)",
+  "latency_ms": 6647,
+  "tokens_in": 906,
+  "tokens_out": 2337,
+  "error": null,
+  "raw_content": "{\n  \"search_text\": \"love heartbreak faith melancholy reflective funeral memorial hallelujah secret chord david played pleased lord minor fall major lift baffled king kjærlighet sorg tro melankoli refleksiv begravelse minne haleluja hemmelig akkord david spilte behagde herren mindre fall større løft forvirret konge\",\n  \"language\": \"mixed\",\n  \"themes\": [\"love\", \"heartbreak\", \"faith\", \"longing\"],\n  \"mood\": [\"melancholy\", \"reflective\", \"haunting\"],\n  \"occasion\": [\"funeral\", \"memorial\", \"worship\"],\n  \"alt_titles\": {\n    \"no\": \"Haleluja\",\n    \"en\": \"Hallelujah\"\n  },\n  \"key_phrases\": [\n    \"I heard there was a secret chord\",\n    \"That David played and it pleased the Lord\",\n    \"But you don't really care for music, do you?\",\n    \"Well it goes like this the fourth, the fifth\",\n    \"The minor fall and the major lift\",\n    \"The baffled king composing hallelujah\",\n    \"Hallelujah, hallelujah, hallelujah, hallelu-u-u-u-jah\"\n  ]\n}",
+  "parse_ok": true,
+  "parse_path": "strict",
+  "enrichment": {
+    "search_text": "love heartbreak faith melancholy reflective funeral memorial hallelujah secret chord david played pleased lord minor fall major lift baffled king kjærlighet sorg tro melankoli refleksiv begravelse minne haleluja hemmelig akkord david spilte behagde herren mindre fall større løft forvirret konge",
+    "language": "mixed",
+    "themes": [
+      "love",
+      "heartbreak",
+      "faith",
+      "longing"
+    ],
+    "mood": [
+      "melancholy",
+      "reflective",
+      "haunting"
+    ],
+    "occasion": [
+      "funeral",
+      "memorial",
+      "worship"
+    ],
+    "alt_titles": {
+      "no": "Haleluja",
+      "en": "Hallelujah"
+    },
+    "key_phrases": [
+      "I heard there was a secret chord",
+      "That David played and it pleased the Lord",
+      "But you don't really care for music, do you?",
+      "Well it goes like this the fourth, the fifth",
+      "The minor fall and the major lift",
+      "The baffled king composing hallelujah",
+      "Hallelujah, hallelujah, hallelujah, hallelu-u-u-u-jah"
+    ]
+  },
+  "key_phrases_hit": 7,
+  "key_phrases_total": 7,
+  "key_phrases_fraction": 1.0
+}

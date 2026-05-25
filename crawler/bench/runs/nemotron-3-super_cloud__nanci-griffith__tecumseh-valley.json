@@ -1,0 +1,44 @@
+{
+  "model": "nemotron-3-super:cloud",
+  "tab_key": "Tecumseh Valley",
+  "tab_id": "nanci-griffith__tecumseh-valley",
+  "artist": "Nanci Griffith",
+  "song": "Tecumseh Valley",
+  "latency_ms": 7399,
+  "tokens_in": 823,
+  "tokens_out": 1191,
+  "error": null,
+  "raw_content": "{\n  \"search_text\": \"Tecumseh Valley Nanci Griffith melancholy reflective nostalgic rural life longing daughter of a miner sunshine walked beside her name she gave was Caroline melankolsk stemningsfull reflektert nostalgi landliv lengsel folk ballad\",\n  \"language\": \"english\",\n  \"themes\": [\"nostalgia\", \"longing\", \"rural life\", \"melancholy\"],\n  \"mood\": [\"melancholy\", \"reflective\", \"wistful\"],\n  \"occasion\": [],\n  \"alt_titles\": {\n    \"no\": \"Tecumseh-dalen\",\n    \"en\": \"Tecumseh Valley\"\n  },\n  \"key_phrases\": [\n    \"The name she gave was Caroline\",\n    \"Daughter of a miner\",\n    \"And her ways were free and it seemed to me\",\n    \"The sunshine walked beside her\",\n    \"She came from Spencer across the hill\"\n  ]\n}",
+  "parse_ok": true,
+  "parse_path": "strict",
+  "enrichment": {
+    "search_text": "Tecumseh Valley Nanci Griffith melancholy reflective nostalgic rural life longing daughter of a miner sunshine walked beside her name she gave was Caroline melankolsk stemningsfull reflektert nostalgi landliv lengsel folk ballad",
+    "language": "english",
+    "themes": [
+      "nostalgia",
+      "longing",
+      "rural life",
+      "melancholy"
+    ],
+    "mood": [
+      "melancholy",
+      "reflective",
+      "wistful"
+    ],
+    "occasion": [],
+    "alt_titles": {
+      "no": "Tecumseh-dalen",
+      "en": "Tecumseh Valley"
+    },
+    "key_phrases": [
+      "The name she gave was Caroline",
+      "Daughter of a miner",
+      "And her ways were free and it seemed to me",
+      "The sunshine walked beside her",
+      "She came from Spencer across the hill"
+    ]
+  },
+  "key_phrases_hit": 5,
+  "key_phrases_total": 5,
+  "key_phrases_fraction": 1.0
+}

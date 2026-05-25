@@ -1,0 +1,47 @@
+{
+  "model": "nemotron-3-super:cloud",
+  "tab_key": "Let Her Go",
+  "tab_id": "passenger__let-her-go",
+  "artist": "Passenger",
+  "song": "Let Her Go",
+  "latency_ms": 12924,
+  "tokens_in": 825,
+  "tokens_out": 1729,
+  "error": null,
+  "raw_content": "{\n  \"language\": \"english\",\n  \"themes\": [\"love\", \"heartbreak\", \"reflection\", \"moving on\"],\n  \"mood\": [\"melancholy\", \"wistful\", \"reflective\", \"sad\"],\n  \"occasion\": [\"breakup\", \"farewell\", \"reflection\"],\n  \"alt_titles\": {\"no\": \"la henne gå\", \"en\": \"let her go\"},\n  \"key_phrases\": [\"Repeat from this point\", \"[tab][Intro]\", \"[Ch\"],\n  \"search_text\": \"love heartbreak letting go melancholy wistful reflective sad breakup farewell moving on regret reflection la henne gå let her go melancholy vemodig reflektiv trist heartbreak kjærlighet sorg farvel still hope\"\n}",
+  "parse_ok": true,
+  "parse_path": "strict",
+  "enrichment": {
+    "language": "english",
+    "themes": [
+      "love",
+      "heartbreak",
+      "reflection",
+      "moving on"
+    ],
+    "mood": [
+      "melancholy",
+      "wistful",
+      "reflective",
+      "sad"
+    ],
+    "occasion": [
+      "breakup",
+      "farewell",
+      "reflection"
+    ],
+    "alt_titles": {
+      "no": "la henne gå",
+      "en": "let her go"
+    },
+    "key_phrases": [
+      "Repeat from this point",
+      "[tab][Intro]",
+      "[Ch"
+    ],
+    "search_text": "love heartbreak letting go melancholy wistful reflective sad breakup farewell moving on regret reflection la henne gå let her go melancholy vemodig reflektiv trist heartbreak kjærlighet sorg farvel still hope"
+  },
+  "key_phrases_hit": 3,
+  "key_phrases_total": 3,
+  "key_phrases_fraction": 1.0
+}

@@ -1,0 +1,51 @@
+{
+  "model": "deepseek-v4-pro:cloud",
+  "tab_key": "Lady In Black",
+  "tab_id": "uriah-heep__lady-in-black",
+  "artist": "Uriah Heep",
+  "song": "Lady In Black",
+  "latency_ms": 20637,
+  "tokens_in": 792,
+  "tokens_out": 1427,
+  "error": null,
+  "raw_content": "{\n  \"search_text\": \"lady in black dame i svart uriah heep rock ballad mørk ensom søndag morgen midtvinter vind kamp ødeleggelse indre demoner håp veiledning mystisk kvinne trist melankolsk anthemic classic rock 70s engelsk sang ensomhet vinter sorg refleksjon åndelig fred\",\n  \"language\": \"english\",\n  \"themes\": [\"loneliness\", \"inner struggle\", \"hope\", \"guidance\", \"darkness\", \"peace\", \"spiritual\"],\n  \"mood\": [\"melancholy\", \"mysterious\", \"anthemic\", \"trist\"],\n  \"occasion\": [\"reflection\", \"remembrance\"],\n  \"alt_titles\": {\"no\": \"Dame i svart\", \"en\": \"Lady In Black\"},\n  \"key_phrases\": [\n    \"She came to me one morning, one lonely Sunday morning\",\n    \"Her long hair flowing in the midwinter wind\",\n    \"I know not how she found me for in darkness I was walking\",\n    \"destruction lay around me from a fight I could not win\",\n    \"the need within some men to fight and kill their brothers without thought of love or God\"\n  ]\n}",
+  "parse_ok": true,
+  "parse_path": "strict",
+  "enrichment": {
+    "search_text": "lady in black dame i svart uriah heep rock ballad mørk ensom søndag morgen midtvinter vind kamp ødeleggelse indre demoner håp veiledning mystisk kvinne trist melankolsk anthemic classic rock 70s engelsk sang ensomhet vinter sorg refleksjon åndelig fred",
+    "language": "english",
+    "themes": [
+      "loneliness",
+      "inner struggle",
+      "hope",
+      "guidance",
+      "darkness",
+      "peace",
+      "spiritual"
+    ],
+    "mood": [
+      "melancholy",
+      "mysterious",
+      "anthemic",
+      "trist"
+    ],
+    "occasion": [
+      "reflection",
+      "remembrance"
+    ],
+    "alt_titles": {
+      "no": "Dame i svart",
+      "en": "Lady In Black"
+    },
+    "key_phrases": [
+      "She came to me one morning, one lonely Sunday morning",
+      "Her long hair flowing in the midwinter wind",
+      "I know not how she found me for in darkness I was walking",
+      "destruction lay around me from a fight I could not win",
+      "the need within some men to fight and kill their brothers without thought of love or God"
+    ]
+  },
+  "key_phrases_hit": 4,
+  "key_phrases_total": 5,
+  "key_phrases_fraction": 0.8
+}

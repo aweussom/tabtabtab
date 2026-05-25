@@ -1,0 +1,51 @@
+{
+  "model": "qwen3.5:cloud",
+  "tab_key": "Lady In Black",
+  "tab_id": "uriah-heep__lady-in-black",
+  "artist": "Uriah Heep",
+  "song": "Lady In Black",
+  "latency_ms": 50199,
+  "tokens_in": 830,
+  "tokens_out": 5330,
+  "error": null,
+  "raw_content": "{\n  \"search_text\": \"uriah heep lady in black akustisk gitar tab klassisk rock 70 engelsk sang tekst om krig og fred spirituell veiledning mørk vinter vind destruction lay around me fight I could not win melancholsk stemning enkel am g for nybegynnere øvelseskvelder\",\n  \"language\": \"english\",\n  \"themes\": [\n    \"war\",\n    \"peace\",\n    \"spirituality\",\n    \"conflict\",\n    \"guidance\"\n  ],\n  \"mood\": [\n    \"melancholy\",\n    \"reflective\",\n    \"mystical\",\n    \"akustisk\",\n    \"rolig\"\n  ],\n  \"occasion\": [\n    \"reflection\",\n    \"evening\",\n    \"solo acoustic\"\n  ],\n  \"alt_titles\": {\n    \"no\": \"Damen i Svart\",\n    \"en\": \"Lady In Black\"\n  },\n  \"key_phrases\": [\n    \"She came to me one morning\",\n    \"one lonely Sunday morning\",\n    \"destruction lay around me\",\n    \"fight I could not win\",\n    \"fight and kill their brothers\"\n  ]\n}",
+  "parse_ok": true,
+  "parse_path": "strict",
+  "enrichment": {
+    "search_text": "uriah heep lady in black akustisk gitar tab klassisk rock 70 engelsk sang tekst om krig og fred spirituell veiledning mørk vinter vind destruction lay around me fight I could not win melancholsk stemning enkel am g for nybegynnere øvelseskvelder",
+    "language": "english",
+    "themes": [
+      "war",
+      "peace",
+      "spirituality",
+      "conflict",
+      "guidance"
+    ],
+    "mood": [
+      "melancholy",
+      "reflective",
+      "mystical",
+      "akustisk",
+      "rolig"
+    ],
+    "occasion": [
+      "reflection",
+      "evening",
+      "solo acoustic"
+    ],
+    "alt_titles": {
+      "no": "Damen i Svart",
+      "en": "Lady In Black"
+    },
+    "key_phrases": [
+      "She came to me one morning",
+      "one lonely Sunday morning",
+      "destruction lay around me",
+      "fight I could not win",
+      "fight and kill their brothers"
+    ]
+  },
+  "key_phrases_hit": 5,
+  "key_phrases_total": 5,
+  "key_phrases_fraction": 1.0
+}

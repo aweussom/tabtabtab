@@ -1,0 +1,48 @@
+{
+  "model": "deepseek-v4-flash:cloud",
+  "tab_key": "Let Her Go",
+  "tab_id": "passenger__let-her-go",
+  "artist": "Passenger",
+  "song": "Let Her Go",
+  "latency_ms": 12121,
+  "tokens_in": 735,
+  "tokens_out": 1067,
+  "error": null,
+  "raw_content": "{\n  \"search_text\": \"passenger let her go english song melancholy bittersweet love loss regret letting go breakup reflection trist melankolsk kjærlighet tap angrer å gi slipp\",\n  \"language\": \"english\",\n  \"themes\": [\"love\", \"loss\", \"regret\", \"letting go\", \"reflection\"],\n  \"mood\": [\"melancholy\", \"bittersweet\", \"trist\", \"melankolsk\"],\n  \"occasion\": [\"breakup\", \"reflection\", \"funeral\"],\n  \"alt_titles\": {\"no\": \"La henne gå\", \"en\": \"Let Her Go\"},\n  \"key_phrases\": [\"Only know you love her when you let her go\", \"Staring at the bottom of your glass\", \"And you let her go\"]\n}",
+  "parse_ok": true,
+  "parse_path": "strict",
+  "enrichment": {
+    "search_text": "passenger let her go english song melancholy bittersweet love loss regret letting go breakup reflection trist melankolsk kjærlighet tap angrer å gi slipp",
+    "language": "english",
+    "themes": [
+      "love",
+      "loss",
+      "regret",
+      "letting go",
+      "reflection"
+    ],
+    "mood": [
+      "melancholy",
+      "bittersweet",
+      "trist",
+      "melankolsk"
+    ],
+    "occasion": [
+      "breakup",
+      "reflection",
+      "funeral"
+    ],
+    "alt_titles": {
+      "no": "La henne gå",
+      "en": "Let Her Go"
+    },
+    "key_phrases": [
+      "Only know you love her when you let her go",
+      "Staring at the bottom of your glass",
+      "And you let her go"
+    ]
+  },
+  "key_phrases_hit": 0,
+  "key_phrases_total": 3,
+  "key_phrases_fraction": 0.0
+}

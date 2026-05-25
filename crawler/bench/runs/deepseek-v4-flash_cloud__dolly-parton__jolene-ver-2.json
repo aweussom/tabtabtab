@@ -1,0 +1,54 @@
+{
+  "model": "deepseek-v4-flash:cloud",
+  "tab_key": "Jolene",
+  "tab_id": "dolly-parton__jolene-ver-2",
+  "artist": "Dolly Parton",
+  "song": "Jolene (ver 2)",
+  "latency_ms": 9324,
+  "tokens_in": 807,
+  "tokens_out": 642,
+  "error": null,
+  "raw_content": "{\n  \"search_text\": \"jolene dolly parton guitar tab akkorder chords lyrics sang tekst english country heartbreak jealousy pleading desperation beauty love please don't take my man begging of you flaming locks auburn hair ivory skin emerald green smile breath of spring voice soft summer rain\",\n  \"language\": \"english\",\n  \"themes\": [\"love\", \"heartbreak\", \"jealousy\", \"pleading\", \"beauty\", \"desperation\"],\n  \"mood\": [\"melancholy\", \"desperate\", \"vulnerable\", \"pleading\"],\n  \"occasion\": [\"breakup\", \"heartache\", \"confession\"],\n  \"alt_titles\": {\"no\": \"Jolene\", \"en\": \"Jolene\"},\n  \"key_phrases\": [\"Jolene, Jolene, Jolene, Jolene\", \"I'm begging of you, please don't take my man\", \"Please don't take him just because you can\", \"Your beauty is beyond compare\", \"With flaming locks of auburn hair\", \"With ivory skin and eyes of emerald green\", \"Your smile is like a breath of spring\", \"Your voice is soft like summer rain\"]\n}",
+  "parse_ok": true,
+  "parse_path": "strict",
+  "enrichment": {
+    "search_text": "jolene dolly parton guitar tab akkorder chords lyrics sang tekst english country heartbreak jealousy pleading desperation beauty love please don't take my man begging of you flaming locks auburn hair ivory skin emerald green smile breath of spring voice soft summer rain",
+    "language": "english",
+    "themes": [
+      "love",
+      "heartbreak",
+      "jealousy",
+      "pleading",
+      "beauty",
+      "desperation"
+    ],
+    "mood": [
+      "melancholy",
+      "desperate",
+      "vulnerable",
+      "pleading"
+    ],
+    "occasion": [
+      "breakup",
+      "heartache",
+      "confession"
+    ],
+    "alt_titles": {
+      "no": "Jolene",
+      "en": "Jolene"
+    },
+    "key_phrases": [
+      "Jolene, Jolene, Jolene, Jolene",
+      "I'm begging of you, please don't take my man",
+      "Please don't take him just because you can",
+      "Your beauty is beyond compare",
+      "With flaming locks of auburn hair",
+      "With ivory skin and eyes of emerald green",
+      "Your smile is like a breath of spring",
+      "Your voice is soft like summer rain"
+    ]
+  },
+  "key_phrases_hit": 8,
+  "key_phrases_total": 8,
+  "key_phrases_fraction": 1.0
+}
