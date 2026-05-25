@@ -190,15 +190,72 @@ A minimal Node 24 backend on Tommy's Azure VM that lets the browser-side UG-impo
 
 **Architecture principle (binding)**: bodies are transient; only metadata is persisted server-side. Server logs `(artist, song, model, cache_hit, ms_taken, token_count)` — never the body. Same legal posture as Phase 5+.
 
-**Body preprocessing before LLM** (binding, decided 2026-05-26 after enrich-bench v1): the `body` field sent to the LLM is NOT the raw UG export — it is preprocessed to keep only enrichment-relevant signal.
+**Noise suppression — LLM tags, JS suppresses** (binding, decided 2026-05-26 after enrich-bench v1, architecture pivoted same day from regex-based to LLM-tagged):
 
-- **Stripped**: chord-line notation (chord-only lines above lyric lines), residual `[ch]X[/ch]` / `[tab]...[/tab]` wrappers, UG `#PLEASE NOTE` legal preambles, email/USENET headers in old chord charts, tabber signatures (Set8-style), capo/tuning notes, performance tips. None of this carries theme/mood/lyric signal.
-- **Kept**: actual lyric text. `[Verse]` / `[Chorus]` / `[Bridge]` section markers are kept as light structural hints — debatable but small cost.
-- **Carried in the prompt prefix as separate fields, NOT inside body**: artist name, song name, composer/writer when known.
+> Motivating quote: *"I want the tab, not the tab author's personal life story."*
 
-Why: the truncated body (currently `body[:800]` in `enrich-private.py`, `body[:1200]` in bench) is the LLM's primary signal for `themes` / `mood` / `key_phrases`. Polluting it with chord notation, legal boilerplate, and tabber commentary wastes the context window AND nudges the LLM toward "this is a tab file" rather than "this is a song about X". Validated empirically by enrich-bench v1: DeepSeek-Pro returned 0 `key_phrases` on Passenger's *Let Her Go* because the truncated 1200-char body was mostly chord intro + tabber notes, not actual lyrics. After preprocessing, the same model has 1200 chars of *actual lyrics* to work with — higher signal density per token.
+UG tab bodies frequently contain noise that isn't part of the song itself: UG `#PLEASE NOTE` legal preambles, USENET-era email headers (the Tecumseh Valley export in our sample data has a full 1993 header preserved verbatim through UG → Tampermonkey → JSON), tabber commentary, capo/tuning notes, tabber signatures (`Set8`-style), and other free-form prose. We want this hidden in the web UI and ignored by the LLM during enrichment.
 
-Implementation: a shared `lyrics_only(body)` helper used by `proxy/enrich.js`, `crawler/enrich-private.py`, and `crawler/enrich-bench.py` before injecting into the prompt. Build the regex-based stripper from real UG samples (253 are available in `crawler/private/ug-import.json`). Not done yet — pinned here as a follow-on after the deploy plan.
+Original sketch was a regex-based stripper shared by both surfaces. Pivoted because **the LLM is genuinely smarter than any regex we'd write**, and we're already calling it per tab during enrichment. So: let the LLM do the smart noise-detection work *once*, capture its judgement as metadata in the enrichment output, then let dumb JS apply that metadata at render time. Zero regex maintenance on either side.
+
+**Data shape — extend the enrichment output with one field**:
+
+```jsonc
+{
+  "search_text": "...",
+  "themes": [...],
+  // ... all existing fields ...
+  "key_phrases": [...],
+  "display_suppress": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+  //                  ^ 0-indexed line numbers in body.split("\n") to hide
+}
+```
+
+**Prompt instruction added to `SONG_PROMPT`** (in `enrich.py` / `proxy/enrich.js` system message):
+
+> Additionally, scan the body for lines that are *not part of the song itself* — UG legal preambles (`#PLEASE NOTE` blocks), USENET email headers, tabber commentary, capo/tuning notes, author signatures. Return their 0-indexed line numbers (in `body.split("\n")`) in a `display_suppress` array. Include only lines that should be hidden from a guitarist reading the tab. **Do NOT include** chord-only lines, `[tab]...[/tab]` fingering diagrams, or section markers like `[Verse]` / `[Chorus]` — those ARE part of the tab.
+
+**Web UI consumer — 5 lines in `views/tab.js`**:
+
+```js
+const suppress = new Set(enrichment?.display_suppress || []);
+const visible = body.split('\n').filter((_, i) => !suppress.has(i)).join('\n');
+```
+
+Missing `display_suppress` field (old enrichment record, non-UG tab) → show all lines. Backwards-compatible by construction. No migration step.
+
+**LLM consumer**: the LLM ALSO benefits from the same insight, but differently. Two complementary moves:
+
+1. **Drop the `body[:1200]` truncation cap** — Nemotron via Ollama Cloud is flat-rate, so token cost is no longer a constraint. Full body in the prompt = LLM sees the *actual lyrics* (which were getting truncated out under the old cap when blurb consumed the first ~400 chars). Validated empirically by enrich-bench v1: DeepSeek-Pro returned 0 `key_phrases` on Passenger's *Let Her Go* because the truncated 1200-char body was mostly chord intro + tabber notes, not actual lyrics.
+2. **Add a prompt instruction** asking the LLM to focus on lyric content when deriving `themes` / `mood` / `key_phrases`, ignoring the same noise categories listed for `display_suppress`. The LLM is doing two related jobs in one call now: (a) tag the noise, (b) enrich based on the non-noise.
+
+**Why this is the right shape**:
+
+- **LLM does the smart work once**, server-side at enrichment time. Cached in the enrichment record, served forever to all clients.
+- **JS does the dumb work many times**, client-side at render. One `Array.filter` per render. Cheap.
+- **No regex maintenance burden** on either side. Iterating on "what counts as blurb" = update the prompt and re-enrich. No client release needed.
+- **Legal posture unchanged** — `display_suppress` is metadata about the body, not the body itself. The cache contract (PLAN.md Phase 2.5 "Architecture principle") still holds.
+- **Single source of truth** — same LLM call produces both the enrichment and the suppression hints, so they can never drift.
+
+**Trade-offs / edge cases**:
+
+- **Line numbering is fragile**: server and client must agree on `\n`-split as canonical. The existing `private-bundle.json` shape preserves body verbatim, so this should be rock-solid out of the box — but worth a defensive guard (`String(body).split('\n')` on both sides, no CRLF normalization between).
+- **LLM hallucinates indices** (gives a number out of range) → JS `filter((_, i) => !suppress.has(i))` simply ignores indices that don't match any line. Cheap defense.
+- **LLM suppresses too aggressively** (hides real lyrics) → caught at bench / smoke-test time. If it becomes a real problem, prompt can be tightened or a per-tab override stored in localStorage.
+- **Sanity cap** worth considering: if LLM returns `display_suppress` covering >50% of the body, log a warning. Probably wrong.
+
+**Implementation shape** (pinned as follow-on after the deploy plan):
+
+- Update `enrich.py` `SONG_PROMPT` to add the `display_suppress` field + instruction. Same prompt is reused verbatim by `proxy/enrich.js` and `crawler/enrich-bench.py` via existing import paths.
+- Drop the `body[:800]` / `body[:1200]` truncation in `enrich-private.py` and `enrich-bench.py`. Send full body.
+- Update `views/tab.js` body-rendering to read `enrichment.display_suppress` and filter lines before passing to `wrapTabBody()`.
+- Re-run enrich-bench v2 to verify Nemotron correctly identifies blurb on Tecumseh Valley (golden test) and produces empty `display_suppress` on Jolene (no-blurb baseline). Re-evaluate if any model degrades on existing metrics due to the larger context.
+
+**Cache invalidation policy when the prompt changes**: when `SONG_PROMPT` evolves (e.g. when we add `display_suppress`), the clean move is to wipe `enrichment-cache.json` and re-enrich everything against Nemotron. ~8 s/tab × 253 tabs ≈ 30 min per full reset; flat-rate Ollama Cloud sub absorbs the cost. Backwards-compat handling of missing fields (e.g. `display_suppress`) stays as a *defensive fallback* in the JS render path (covers the brief window between prompt-update and re-enrich completion), but is not a hard constraint — we own the cache and can bulldoze it whenever it serves us.
+
+**Quality control via nightly Claude-Code CLI**: a sidecar QC pass cross-checks Nemotron's output by sampling N random cache entries each night, sending each `(body, enrichment)` pair to `claude -p` with a "rate quality, flag suspicious enrichment" prompt, and storing the results somewhere reviewable. Lifted from the catalog enrichment's cross-check pattern (commit `2ffe873`, "Cross-check across models"). Catches drift: prompt regressions, model-specific blind spots, the occasional Nemotron hallucination that the bench's 5-tab sample didn't surface. Not at PoC time — pinned so we don't reinvent it later.
+
+**Supersedes existing CLAUDE.md note**: the UG-import section says cosmetic noise is "hidden at render-time via regex filters in the view, not stripped at import — too varied to detect safely without losing real content." That guidance is replaced by LLM-tagged suppression. Update CLAUDE.md when this lands.
 
 **Endpoint contract**:
 - `POST /enrich-tab` — body `{artist, song, body, chordnames?}` → returns `{enrichment, cache: 'hit' | 'miss', model_used}`.
