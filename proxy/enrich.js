@@ -36,16 +36,29 @@ Required fields (all optional except search_text):
   "mood": ["melancholy", "joyful", "anthemic", ...],
   "occasion": ["wedding", "christmas", "funeral", "breakup", ...],
   "alt_titles": {"en": "alternate or shortened English title, if any"},
-  "key_phrases": ["3-5 memorable lyric phrases from the body, verbatim or near-verbatim"]
+  "key_phrases": ["3-5 memorable lyric phrases from the body, verbatim or near-verbatim"],
+  "display_suppress": [0, 1, 2]
 }
 
 Rules:
+- Focus on LYRIC content when deriving themes/mood/key_phrases. Ignore chord
+  notation, fingering diagrams, legal preambles, email headers, tabber notes.
 - key_phrases must come from the body text (verbatim or very close).
+- display_suppress: 0-indexed line numbers in body.split("\\n") that are NOT
+  part of the song itself — UG #PLEASE NOTE legal preambles, USENET-era
+  email headers (From:/To:/Subject:/Date:/Message-Id:), tabber commentary,
+  capo/tuning notes, author signatures, separator lines. Do NOT include
+  chord-only lines, [tab]...[/tab] fingering diagrams, or section markers
+  like [Intro]/[Verse]/[Chorus] — those ARE part of the tab. Empty array
+  is correct when the body has no noise to suppress.
 - No markdown fences. No commentary. Just the JSON object.`;
 
 function buildUserMessage({ artist, song, body }) {
-  const bodySnippet = (body || '').slice(0, 800);
-  return `Artist: ${artist}\nSong: ${song}\nFirst 800 chars of one tab body (for lyric/style context):\n---\n${bodySnippet}\n---`;
+  // Full body — no truncation. Ollama Cloud flat-rate sub makes token cost
+  // irrelevant, and the LLM needs actual lyrics (which were getting
+  // truncated out under the old 800-char cap when blurb consumed the
+  // first ~400 chars). See PLAN.md Phase 2.5 "Bench v2 update".
+  return `Artist: ${artist}\nSong: ${song}\nTab body (verbatim from the source; may contain UG legal preambles, USENET email headers, tabber commentary, capo/tuning notes, and tabber signatures alongside chord notation and actual lyrics):\n---\n${body || ''}\n---`;
 }
 
 /** Strip <think>...</think> / <reflection>...</reflection> blocks emitted
@@ -117,6 +130,7 @@ function stubEnrichment(artist, song) {
     occasion: [],
     alt_titles: {},
     key_phrases: [],
+    display_suppress: [],
     _stub: true,
   };
 }

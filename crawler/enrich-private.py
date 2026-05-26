@@ -278,7 +278,11 @@ def main():
     # Enrich songs
     for sid, (a, s) in todo_songs:
         print(f"[song] {a} — {s}")
-        body = body_by_song_id.get(sid, "")[:800]
+        # Full body — no truncation. Ollama Cloud flat-rate sub makes token
+        # cost irrelevant, and the LLM needs the actual lyrics (which were
+        # getting truncated out when blurb consumed the first 400-800 chars).
+        # See PLAN.md Phase 2.5 "Bench v2 update" for the empirical proof.
+        body = body_by_song_id.get(sid, "")
         result, _salvaged = enrich_one(
             label=f"{a} — {s}",
             prompt=SONG_PROMPT.format(artist=a, song=s, body=body),

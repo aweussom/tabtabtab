@@ -30,6 +30,22 @@ let _keyHandler = null;
 let _scrollListener = null;
 let _resizeHandler = null;
 
+/**
+ * Filter out lines tagged by the LLM as noise (UG legal preambles, USENET
+ * email headers, tabber commentary, etc.) before rendering the body.
+ *
+ * `suppress` is the enrichment's `display_suppress` array — 0-indexed line
+ * numbers in body.split("\n"). Missing/empty → return body untouched.
+ * Indices out of range are silently ignored (defensive: LLM hallucinations
+ * shouldn't break rendering).
+ */
+function applyDisplaySuppress(body, suppress) {
+  if (!Array.isArray(suppress) || suppress.length === 0) return body;
+  const skip = new Set(suppress.filter(n => Number.isInteger(n) && n >= 0));
+  if (skip.size === 0) return body;
+  return body.split('\n').filter((_, i) => !skip.has(i)).join('\n');
+}
+
 function renderHeart(tabId) {
   return isInFavorites(tabId) ? '♥' : '♡';
 }
@@ -121,7 +137,20 @@ export function renderTabUI(root, refs, backLink, opts = {}) {
          <div class="chord-diagrams" aria-label="Akkorddiagrammer"></div>
        </details>`
     : '';
-  const cleanedBody = cleanTabBody(tab.body || '');
+  // LLM-tagged noise suppression (per PLAN.md Phase 2.5): if the enrichment
+  // record has a `display_suppress` array of 0-indexed line numbers, hide
+  // those lines from the rendered body. Covers UG legal preambles, USENET
+  // email headers, tabber commentary, etc. — noise that lives in the body
+  // but isn't part of the song. Missing field → show all lines (defensive
+  // fallback, matches the architectural decision in PLAN.md "backwards
+  // compat is not a hard constraint").
+  // cleanTabBody is line-preserving (only strips inline HTML tags, never
+  // adds/removes newlines), so line indices the LLM computed from
+  // tab.body.split("\n") remain valid against cleanedBody.split("\n").
+  const cleanedBody = applyDisplaySuppress(
+    cleanTabBody(tab.body || ''),
+    song?.enrichment?.display_suppress,
+  );
 
   root.innerHTML = `
     <p><a href="${escapeHtml(backLink.href)}">&larr; ${escapeHtml(backLink.label)}</a></p>
