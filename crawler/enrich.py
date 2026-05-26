@@ -68,7 +68,9 @@ Output ONE JSON object only — no markdown fences, no commentary, no surroundin
 
 Artist: {artist}
 Song: {song}
-First 800 chars of one tab body (for lyric/style context):
+Tab body (verbatim from the source; may contain UG legal preambles, USENET-era
+email headers, tabber commentary, capo/tuning notes, and tabber signatures
+alongside chord notation and actual lyrics):
 ---
 {body}
 ---
@@ -81,13 +83,23 @@ Produce JSON with these fields (all optional except search_text):
   "mood": ["melancholy", "joyful", "anthemic", "trist", "lystig", ...],
   "occasion": ["wedding", "christmas", "funeral", "breakup", ...],
   "alt_titles": {{"no": "...", "en": "..."}},
-  "key_phrases": ["3-5 memorable lyric phrases from the body, verbatim or near-verbatim"]
+  "key_phrases": ["3-5 memorable lyric phrases from the body, verbatim or near-verbatim"],
+  "display_suppress": [0, 1, 2]
 }}
 
 Rules:
+- Focus on LYRIC content when deriving themes/mood/key_phrases. Ignore chord
+  notation, fingering diagrams, legal preambles, email headers, tabber notes.
 - For Norwegian songs: include English equivalents of mood/genre/themes in search_text.
 - For English songs: include Norwegian equivalents.
 - key_phrases must come from the body text (verbatim or very close).
+- display_suppress: 0-indexed line numbers in `body.split("\\n")` that are NOT
+  part of the song itself — UG `#PLEASE NOTE` legal preambles, USENET-era
+  email headers (From:/To:/Subject:/Date:/Message-Id:), tabber commentary
+  paragraphs, capo/tuning notes, author signatures, separator lines. Do NOT
+  include chord-only lines, [tab]...[/tab] fingering diagrams, or section
+  markers like [Intro]/[Verse]/[Chorus] — those ARE part of the tab. Empty
+  array is correct when the body has no noise to suppress.
 - No markdown fences. No commentary. Just the JSON object.
 """
 

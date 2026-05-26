@@ -4,51 +4,47 @@
   "tab_id": "dolly-parton__jolene-ver-2",
   "artist": "Dolly Parton",
   "song": "Jolene (ver 2)",
-  "latency_ms": 9324,
-  "tokens_in": 807,
-  "tokens_out": 642,
+  "latency_ms": 10541,
+  "tokens_in": 1762,
+  "tokens_out": 1428,
   "error": null,
-  "raw_content": "{\n  \"search_text\": \"jolene dolly parton guitar tab akkorder chords lyrics sang tekst english country heartbreak jealousy pleading desperation beauty love please don't take my man begging of you flaming locks auburn hair ivory skin emerald green smile breath of spring voice soft summer rain\",\n  \"language\": \"english\",\n  \"themes\": [\"love\", \"heartbreak\", \"jealousy\", \"pleading\", \"beauty\", \"desperation\"],\n  \"mood\": [\"melancholy\", \"desperate\", \"vulnerable\", \"pleading\"],\n  \"occasion\": [\"breakup\", \"heartache\", \"confession\"],\n  \"alt_titles\": {\"no\": \"Jolene\", \"en\": \"Jolene\"},\n  \"key_phrases\": [\"Jolene, Jolene, Jolene, Jolene\", \"I'm begging of you, please don't take my man\", \"Please don't take him just because you can\", \"Your beauty is beyond compare\", \"With flaming locks of auburn hair\", \"With ivory skin and eyes of emerald green\", \"Your smile is like a breath of spring\", \"Your voice is soft like summer rain\"]\n}",
+  "raw_content": "{\n  \"search_text\": \"jolene dolly parton kjærlighet sorg sjalusi bønn please don't take my man your beauty is beyond compare jeg ber deg ikke ta mannen min country classic guitar tab akustisk gitar sang tekst heartbreak desperation melancholy trist\",\n  \"language\": \"english\",\n  \"themes\": [\"love\", \"heartbreak\", \"jealousy\", \"desperation\", \"pleading\"],\n  \"mood\": [\"melancholy\", \"desperate\", \"sad\", \"emotional\"],\n  \"occasion\": [\"breakup\", \"relationship\"],\n  \"alt_titles\": {\"no\": \"\", \"en\": \"\"},\n  \"key_phrases\": [\"I'm begging of you, please don't take my man\", \"Please don't take him just because you can\", \"Your beauty is beyond compare\", \"He's the only one for me, Jolene\", \"And I cannot compete with you, Jolene\"],\n  \"display_suppress\": []\n}",
   "parse_ok": true,
   "parse_path": "strict",
   "enrichment": {
-    "search_text": "jolene dolly parton guitar tab akkorder chords lyrics sang tekst english country heartbreak jealousy pleading desperation beauty love please don't take my man begging of you flaming locks auburn hair ivory skin emerald green smile breath of spring voice soft summer rain",
+    "search_text": "jolene dolly parton kjærlighet sorg sjalusi bønn please don't take my man your beauty is beyond compare jeg ber deg ikke ta mannen min country classic guitar tab akustisk gitar sang tekst heartbreak desperation melancholy trist",
     "language": "english",
     "themes": [
       "love",
       "heartbreak",
       "jealousy",
-      "pleading",
-      "beauty",
-      "desperation"
+      "desperation",
+      "pleading"
     ],
     "mood": [
       "melancholy",
       "desperate",
-      "vulnerable",
-      "pleading"
+      "sad",
+      "emotional"
     ],
     "occasion": [
       "breakup",
-      "heartache",
-      "confession"
+      "relationship"
     ],
     "alt_titles": {
-      "no": "Jolene",
-      "en": "Jolene"
+      "no": "",
+      "en": ""
     },
     "key_phrases": [
-      "Jolene, Jolene, Jolene, Jolene",
       "I'm begging of you, please don't take my man",
       "Please don't take him just because you can",
       "Your beauty is beyond compare",
-      "With flaming locks of auburn hair",
-      "With ivory skin and eyes of emerald green",
-      "Your smile is like a breath of spring",
-      "Your voice is soft like summer rain"
-    ]
+      "He's the only one for me, Jolene",
+      "And I cannot compete with you, Jolene"
+    ],
+    "display_suppress": []
   },
-  "key_phrases_hit": 8,
-  "key_phrases_total": 8,
+  "key_phrases_hit": 5,
+  "key_phrases_total": 5,
   "key_phrases_fraction": 1.0
 }

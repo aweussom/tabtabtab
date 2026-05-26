@@ -4,45 +4,53 @@
   "tab_id": "passenger__let-her-go",
   "artist": "Passenger",
   "song": "Let Her Go",
-  "latency_ms": 12121,
-  "tokens_in": 735,
-  "tokens_out": 1067,
+  "latency_ms": 108384,
+  "tokens_in": 2645,
+  "tokens_out": 8268,
   "error": null,
-  "raw_content": "{\n  \"search_text\": \"passenger let her go english song melancholy bittersweet love loss regret letting go breakup reflection trist melankolsk kjærlighet tap angrer å gi slipp\",\n  \"language\": \"english\",\n  \"themes\": [\"love\", \"loss\", \"regret\", \"letting go\", \"reflection\"],\n  \"mood\": [\"melancholy\", \"bittersweet\", \"trist\", \"melankolsk\"],\n  \"occasion\": [\"breakup\", \"reflection\", \"funeral\"],\n  \"alt_titles\": {\"no\": \"La henne gå\", \"en\": \"Let Her Go\"},\n  \"key_phrases\": [\"Only know you love her when you let her go\", \"Staring at the bottom of your glass\", \"And you let her go\"]\n}",
+  "raw_content": "{\n  \"search_text\": \"let her go passenger acoustic folk pop love heartbreak loss regret melancholy bittersweet reflection breakup missing someone only need light burning low miss sun snow know love let go kjærlighet hjertesorg savn melankoli refleksjon brudd slippe taket\",\n  \"language\": \"english\",\n  \"themes\": [\"love\", \"heartbreak\", \"loss\", \"regret\", \"reflection\"],\n  \"mood\": [\"melancholy\", \"bittersweet\", \"reflective\"],\n  \"occasion\": [\"breakup\", \"alone time\", \"driving\"],\n  \"alt_titles\": {\"no\": \"\", \"en\": \"\"},\n  \"key_phrases\": [\"Only need the light when it's burning low\", \"Only miss the sun when it starts to snow\", \"Only know you love her when you let her go\", \"Staring at the bottom of your glass\", \"Everything you touch surely dies\"],\n  \"display_suppress\": [1, 141, 143, 144, 145]\n}",
   "parse_ok": true,
   "parse_path": "strict",
   "enrichment": {
-    "search_text": "passenger let her go english song melancholy bittersweet love loss regret letting go breakup reflection trist melankolsk kjærlighet tap angrer å gi slipp",
+    "search_text": "let her go passenger acoustic folk pop love heartbreak loss regret melancholy bittersweet reflection breakup missing someone only need light burning low miss sun snow know love let go kjærlighet hjertesorg savn melankoli refleksjon brudd slippe taket",
     "language": "english",
     "themes": [
       "love",
+      "heartbreak",
       "loss",
       "regret",
-      "letting go",
       "reflection"
     ],
     "mood": [
       "melancholy",
       "bittersweet",
-      "trist",
-      "melankolsk"
+      "reflective"
     ],
     "occasion": [
       "breakup",
-      "reflection",
-      "funeral"
+      "alone time",
+      "driving"
     ],
     "alt_titles": {
-      "no": "La henne gå",
-      "en": "Let Her Go"
+      "no": "",
+      "en": ""
     },
     "key_phrases": [
+      "Only need the light when it's burning low",
+      "Only miss the sun when it starts to snow",
       "Only know you love her when you let her go",
       "Staring at the bottom of your glass",
-      "And you let her go"
+      "Everything you touch surely dies"
+    ],
+    "display_suppress": [
+      1,
+      141,
+      143,
+      144,
+      145
     ]
   },
-  "key_phrases_hit": 0,
-  "key_phrases_total": 3,
-  "key_phrases_fraction": 0.0
+  "key_phrases_hit": 5,
+  "key_phrases_total": 5,
+  "key_phrases_fraction": 1.0
 }

@@ -219,7 +219,7 @@ def pick_test_tabs(import_path, keys):
                     "key": k,
                     "artist": t.get("artist", ""),
                     "song": song,
-                    "body": (t.get("body") or "")[:1200],  # match enrich-private.py truncation
+                    "body": t.get("body") or "",  # full body — Nemotron flat-rate makes token cost irrelevant
                     "id": f"{slugify(t.get('artist', ''))}__{slugify(song)}",
                 }
                 break

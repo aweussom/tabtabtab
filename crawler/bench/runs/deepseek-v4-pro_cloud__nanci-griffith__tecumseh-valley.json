@@ -4,42 +4,54 @@
   "tab_id": "nanci-griffith__tecumseh-valley",
   "artist": "Nanci Griffith",
   "song": "Tecumseh Valley",
-  "latency_ms": 12130,
-  "tokens_in": 766,
-  "tokens_out": 821,
+  "latency_ms": 47714,
+  "tokens_in": 1229,
+  "tokens_out": 3774,
   "error": null,
-  "raw_content": "{\n  \"search_text\": \"nanci griffith tecumseh valley folk ballade gruvearbeider datter caroline spencer kull snø vinter frihet solskinn melankolsk trist historiefortelling akustisk gitar americana viser engelsk norsk\",\n  \"language\": \"english\",\n  \"themes\": [\"mining\", \"hardship\", \"nature\", \"freedom\", \"nostalgia\"],\n  \"mood\": [\"melancholy\", \"trist\", \"melankolsk\", \"reflective\"],\n  \"occasion\": [\"storytelling\", \"folk music listening\"],\n  \"alt_titles\": {},\n  \"key_phrases\": [\n    \"The name she gave was Caroline\",\n    \"Daughter of a miner\",\n    \"her ways were free and it seemed to me the sunshine walked beside her\",\n    \"the coal was low and soon the snow would turn the skies to winter\"\n  ]\n}",
+  "raw_content": "{\n  \"search_text\": \"nanci griffith tecumseh valley caroline datter av en gruvearbeider miner poverty fattigdom hardship motgang death død trist melankolsk melancholy storytelling historiefortelling folk akustisk gitar vise the sunshine walked beside her fare thee well tecumseh valley she turned those hands to labor english engelsk\",\n  \"language\": \"english\",\n  \"themes\": [\"poverty\", \"hardship\", \"loss of innocence\", \"death\", \"despair\", \"survival\", \"small-town life\", \"mining\"],\n  \"mood\": [\"melancholy\", \"tragic\", \"somber\", \"trist\"],\n  \"occasion\": [],\n  \"alt_titles\": {},\n  \"key_phrases\": [\n    \"The name she gave was Caroline\",\n    \"Daughter of a miner\",\n    \"The sunshine walked beside her\",\n    \"Fare thee well, Tecumseh Valley\",\n    \"She turned those hands to labor\"\n  ],\n  \"display_suppress\": [0, 1, 2, 3, 4, 5, 6, 7, 8]\n}",
   "parse_ok": true,
   "parse_path": "strict",
   "enrichment": {
-    "search_text": "nanci griffith tecumseh valley folk ballade gruvearbeider datter caroline spencer kull snø vinter frihet solskinn melankolsk trist historiefortelling akustisk gitar americana viser engelsk norsk",
+    "search_text": "nanci griffith tecumseh valley caroline datter av en gruvearbeider miner poverty fattigdom hardship motgang death død trist melankolsk melancholy storytelling historiefortelling folk akustisk gitar vise the sunshine walked beside her fare thee well tecumseh valley she turned those hands to labor english engelsk",
     "language": "english",
     "themes": [
-      "mining",
+      "poverty",
       "hardship",
-      "nature",
-      "freedom",
-      "nostalgia"
+      "loss of innocence",
+      "death",
+      "despair",
+      "survival",
+      "small-town life",
+      "mining"
     ],
     "mood": [
       "melancholy",
-      "trist",
-      "melankolsk",
-      "reflective"
+      "tragic",
+      "somber",
+      "trist"
     ],
-    "occasion": [
-      "storytelling",
-      "folk music listening"
-    ],
+    "occasion": [],
     "alt_titles": {},
     "key_phrases": [
       "The name she gave was Caroline",
       "Daughter of a miner",
-      "her ways were free and it seemed to me the sunshine walked beside her",
-      "the coal was low and soon the snow would turn the skies to winter"
+      "The sunshine walked beside her",
+      "Fare thee well, Tecumseh Valley",
+      "She turned those hands to labor"
+    ],
+    "display_suppress": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
     ]
   },
-  "key_phrases_hit": 3,
-  "key_phrases_total": 4,
-  "key_phrases_fraction": 0.75
+  "key_phrases_hit": 5,
+  "key_phrases_total": 5,
+  "key_phrases_fraction": 1.0
 }

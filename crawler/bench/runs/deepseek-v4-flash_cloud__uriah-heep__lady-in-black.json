@@ -4,48 +4,42 @@
   "tab_id": "uriah-heep__lady-in-black",
   "artist": "Uriah Heep",
   "song": "Lady In Black",
-  "latency_ms": 4620,
-  "tokens_in": 792,
-  "tokens_out": 635,
+  "latency_ms": 8227,
+  "tokens_in": 2436,
+  "tokens_out": 854,
   "error": null,
-  "raw_content": "{\n  \"search_text\": \"lady in black uriah heep classic rock sorgfull refleksjon krig fred mystisk kvinne hester fiender redemption war peace spirituality melancholy reflective somber trist ettertenksom funeral memorial she came to me one morning her long hair flowing in the midwinter wind in darkness i was walking to fight and kill their brothers i begged her give me horses\",\n  \"language\": \"english\",\n  \"themes\": [\"redemption\", \"war\", \"peace\", \"spirituality\", \"mystery\"],\n  \"mood\": [\"melancholic\", \"reflective\", \"somber\", \"trist\", \"ettertenksom\"],\n  \"occasion\": [\"funeral\", \"reflection\", \"memorial\"],\n  \"alt_titles\": {\"no\": \"Dame i svart\", \"en\": \"Lady In Black\"},\n  \"key_phrases\": [\"She came to me one morning\", \"Her long hair flowing in the midwinter wind\", \"In darkness I was walking\", \"To fight and kill their brothers\", \"I begged her give me horses\"]\n}",
+  "raw_content": "{\n  \"search_text\": \"english song about a mysterious lady bringing peace and wisdom to a troubled man. themes of war, inner struggle, faith, guidance. mood melancholic yet hopeful. norwegian keywords: fred, håp, veiledning, krig, ensomhet, tro. key phrases: she came to me one morning, have faith and trust in peace, i feared to walk alone again\",\n  \"language\": \"english\",\n  \"themes\": [\"war\", \"peace\", \"faith\", \"guidance\", \"inner struggle\"],\n  \"mood\": [\"melancholic\", \"hopeful\", \"contemplative\"],\n  \"occasion\": [],\n  \"alt_titles\": {\"no\": \"\", \"en\": \"\"},\n  \"key_phrases\": [\"She came to me one morning\", \"Have faith and trust in peace\", \"I feared to walk alone again\", \"Take courage from her as your prize\"],\n  \"display_suppress\": []\n}",
   "parse_ok": true,
   "parse_path": "strict",
   "enrichment": {
-    "search_text": "lady in black uriah heep classic rock sorgfull refleksjon krig fred mystisk kvinne hester fiender redemption war peace spirituality melancholy reflective somber trist ettertenksom funeral memorial she came to me one morning her long hair flowing in the midwinter wind in darkness i was walking to fight and kill their brothers i begged her give me horses",
+    "search_text": "english song about a mysterious lady bringing peace and wisdom to a troubled man. themes of war, inner struggle, faith, guidance. mood melancholic yet hopeful. norwegian keywords: fred, håp, veiledning, krig, ensomhet, tro. key phrases: she came to me one morning, have faith and trust in peace, i feared to walk alone again",
     "language": "english",
     "themes": [
-      "redemption",
       "war",
       "peace",
-      "spirituality",
-      "mystery"
+      "faith",
+      "guidance",
+      "inner struggle"
     ],
     "mood": [
       "melancholic",
-      "reflective",
-      "somber",
-      "trist",
-      "ettertenksom"
+      "hopeful",
+      "contemplative"
     ],
-    "occasion": [
-      "funeral",
-      "reflection",
-      "memorial"
-    ],
+    "occasion": [],
     "alt_titles": {
-      "no": "Dame i svart",
-      "en": "Lady In Black"
+      "no": "",
+      "en": ""
     },
     "key_phrases": [
       "She came to me one morning",
-      "Her long hair flowing in the midwinter wind",
-      "In darkness I was walking",
-      "To fight and kill their brothers",
-      "I begged her give me horses"
-    ]
+      "Have faith and trust in peace",
+      "I feared to walk alone again",
+      "Take courage from her as your prize"
+    ],
+    "display_suppress": []
   },
-  "key_phrases_hit": 5,
-  "key_phrases_total": 5,
+  "key_phrases_hit": 4,
+  "key_phrases_total": 4,
   "key_phrases_fraction": 1.0
 }

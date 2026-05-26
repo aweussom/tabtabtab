@@ -4,32 +4,35 @@
   "tab_id": "dolly-parton__jolene-ver-2",
   "artist": "Dolly Parton",
   "song": "Jolene (ver 2)",
-  "latency_ms": 36878,
-  "tokens_in": 865,
-  "tokens_out": 3263,
+  "latency_ms": 101995,
+  "tokens_in": 1875,
+  "tokens_out": 7289,
   "error": null,
-  "raw_content": "{\n  \"search_text\": \"dolly parton jolene guitar tab chords am c g english country song om kjærlighet og sjalusi love and jealousy begging plea dont take my man trist sang melancholy acoustic guitar øvelse practice classic hit vintage musikk breakup heartbreak skillingsvise\",\n  \"language\": \"english\",\n  \"themes\": [\n    \"love\",\n    \"jealousy\",\n    \"heartbreak\",\n    \"pleading\"\n  ],\n  \"mood\": [\n    \"melancholy\",\n    \"desperate\",\n    \"trist\",\n    \"emotional\"\n  ],\n  \"occasion\": [\n    \"breakup\",\n    \"heartbreak\",\n    \"singing along\"\n  ],\n  \"alt_titles\": {\n    \"no\": \"Jolene\",\n    \"en\": \"Jolene\"\n  },\n  \"key_phrases\": [\n    \"Jolene, Jolene, Jolene, Jolene\",\n    \"please don't take my man\",\n    \"Your beauty is beyond compare\",\n    \"flaming locks of auburn hair\",\n    \"eyes of emerald green\"\n  ]\n}",
+  "raw_content": "{\n  \"search_text\": \"dolly parton jolene country classic english sang norsk oversettelse kjærlighet sjalusi heartbreak breakup pleading begging don't take my man melancholy triste følelser acoustic guitar chords kvinne mann relationship problemer jealousy insecurity emerald green auburn hair iconic 70s music legend\",\n  \"language\": \"english\",\n  \"themes\": [\n    \"love\",\n    \"jealousy\",\n    \"heartbreak\",\n    \"insecurity\",\n    \"pleading\"\n  ],\n  \"mood\": [\n    \"melancholy\",\n    \"desperate\",\n    \"sad\",\n    \"trist\",\n    \"engstelig\"\n  ],\n  \"occasion\": [\n    \"breakup\",\n    \"heartbreak\",\n    \"karaoke\",\n    \"country night\"\n  ],\n  \"alt_titles\": {\n    \"no\": \"Jolene\",\n    \"en\": \"Jolene\"\n  },\n  \"key_phrases\": [\n    \"Jolene, Jolene, Jolene, Jolene\",\n    \"please don't take my man\",\n    \"Your beauty is beyond compare\",\n    \"I'm begging of you\"\n  ],\n  \"display_suppress\": []\n}",
   "parse_ok": true,
   "parse_path": "strict",
   "enrichment": {
-    "search_text": "dolly parton jolene guitar tab chords am c g english country song om kjærlighet og sjalusi love and jealousy begging plea dont take my man trist sang melancholy acoustic guitar øvelse practice classic hit vintage musikk breakup heartbreak skillingsvise",
+    "search_text": "dolly parton jolene country classic english sang norsk oversettelse kjærlighet sjalusi heartbreak breakup pleading begging don't take my man melancholy triste følelser acoustic guitar chords kvinne mann relationship problemer jealousy insecurity emerald green auburn hair iconic 70s music legend",
     "language": "english",
     "themes": [
       "love",
       "jealousy",
       "heartbreak",
+      "insecurity",
       "pleading"
     ],
     "mood": [
       "melancholy",
       "desperate",
+      "sad",
       "trist",
-      "emotional"
+      "engstelig"
     ],
     "occasion": [
       "breakup",
       "heartbreak",
-      "singing along"
+      "karaoke",
+      "country night"
     ],
     "alt_titles": {
       "no": "Jolene",
@@ -39,11 +42,11 @@
       "Jolene, Jolene, Jolene, Jolene",
       "please don't take my man",
       "Your beauty is beyond compare",
-      "flaming locks of auburn hair",
-      "eyes of emerald green"
-    ]
+      "I'm begging of you"
+    ],
+    "display_suppress": []
   },
-  "key_phrases_hit": 5,
-  "key_phrases_total": 5,
+  "key_phrases_hit": 4,
+  "key_phrases_total": 4,
   "key_phrases_fraction": 1.0
 }

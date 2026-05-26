@@ -4,45 +4,55 @@
   "tab_id": "nanci-griffith__tecumseh-valley",
   "artist": "Nanci Griffith",
   "song": "Tecumseh Valley",
-  "latency_ms": 56764,
-  "tokens_in": 806,
-  "tokens_out": 4500,
+  "latency_ms": 129981,
+  "tokens_in": 1263,
+  "tokens_out": 10405,
   "error": null,
-  "raw_content": "{\n  \"search_text\": \"nanci griffith tecumseh valley folk country acoustic guitar tab chords english song norwegian metadata caroline daughter miner freedom melancholy trist viser countrymusikk akustisk sang tekst lyrics mining hardship life story storytelling ballad session campfire singing music sheet tabulatur spilleliste konsert winter spencer\",\n  \"language\": \"english\",\n  \"themes\": [\n    \"folk\",\n    \"country\",\n    \"storytelling\",\n    \"mining\",\n    \"hardship\",\n    \"freedom\"\n  ],\n  \"mood\": [\n    \"melancholy\",\n    \"nostalgic\",\n    \"trist\",\n    \"ettertenksom\"\n  ],\n  \"occasion\": [\n    \"campfire\",\n    \"acoustic session\",\n    \"listening\"\n  ],\n  \"alt_titles\": {\n    \"no\": \"\",\n    \"en\": \"\"\n  },\n  \"key_phrases\": [\n    \"The name she gave was Caroline\",\n    \"Daughter of a miner\",\n    \"And her ways were free\",\n    \"The sunshine walked beside her\",\n    \"coal was low and soon the snow\"\n  ]\n}",
+  "raw_content": "{\n  \"search_text\": \"nanci griffith tecumseh valley folk country ballad tragedy caroline miner prostitute gypsy sallys død trist historie fortelling amerikansk folk visa sorg livshistorie hard times labor winter snow farewell note died beneath the stairs farvel tecumseh valley kull gruve\",\n  \"language\": \"english\",\n  \"themes\": [\n    \"tragedy\",\n    \"prostitution\",\n    \"mining\",\n    \"hardship\",\n    \"death\",\n    \"labor\",\n    \"folk narrative\"\n  ],\n  \"mood\": [\n    \"melancholy\",\n    \"trist\",\n    \"somber\",\n    \"narrative\"\n  ],\n  \"occasion\": [\n    \"listening\",\n    \"storytelling\"\n  ],\n  \"alt_titles\": {\n    \"no\": \"Tecumseh Valley\",\n    \"en\": \"Tecumseh Valley\"\n  },\n  \"key_phrases\": [\n    \"The name she gave was Caroline\",\n    \"Daughter of a miner\",\n    \"Tendin' bar at Gypsy Sally's\",\n    \"Fare thee well, Tecumseh Valley\",\n    \"They found her down beneath the stairs\"\n  ],\n  \"display_suppress\": [\n    0,\n    1,\n    2,\n    3,\n    4,\n    5,\n    6,\n    7\n  ]\n}",
   "parse_ok": true,
   "parse_path": "strict",
   "enrichment": {
-    "search_text": "nanci griffith tecumseh valley folk country acoustic guitar tab chords english song norwegian metadata caroline daughter miner freedom melancholy trist viser countrymusikk akustisk sang tekst lyrics mining hardship life story storytelling ballad session campfire singing music sheet tabulatur spilleliste konsert winter spencer",
+    "search_text": "nanci griffith tecumseh valley folk country ballad tragedy caroline miner prostitute gypsy sallys død trist historie fortelling amerikansk folk visa sorg livshistorie hard times labor winter snow farewell note died beneath the stairs farvel tecumseh valley kull gruve",
     "language": "english",
     "themes": [
-      "folk",
-      "country",
-      "storytelling",
+      "tragedy",
+      "prostitution",
       "mining",
       "hardship",
-      "freedom"
+      "death",
+      "labor",
+      "folk narrative"
     ],
     "mood": [
       "melancholy",
-      "nostalgic",
       "trist",
-      "ettertenksom"
+      "somber",
+      "narrative"
     ],
     "occasion": [
-      "campfire",
-      "acoustic session",
-      "listening"
+      "listening",
+      "storytelling"
     ],
     "alt_titles": {
-      "no": "",
-      "en": ""
+      "no": "Tecumseh Valley",
+      "en": "Tecumseh Valley"
     },
     "key_phrases": [
       "The name she gave was Caroline",
       "Daughter of a miner",
-      "And her ways were free",
-      "The sunshine walked beside her",
-      "coal was low and soon the snow"
+      "Tendin' bar at Gypsy Sally's",
+      "Fare thee well, Tecumseh Valley",
+      "They found her down beneath the stairs"
+    ],
+    "display_suppress": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
     ]
   },
   "key_phrases_hit": 5,

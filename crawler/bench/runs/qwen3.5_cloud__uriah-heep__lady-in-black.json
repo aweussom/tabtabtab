@@ -4,34 +4,38 @@
   "tab_id": "uriah-heep__lady-in-black",
   "artist": "Uriah Heep",
   "song": "Lady In Black",
-  "latency_ms": 50199,
-  "tokens_in": 830,
-  "tokens_out": 5330,
+  "latency_ms": 62897,
+  "tokens_in": 2485,
+  "tokens_out": 5792,
   "error": null,
-  "raw_content": "{\n  \"search_text\": \"uriah heep lady in black akustisk gitar tab klassisk rock 70 engelsk sang tekst om krig og fred spirituell veiledning mørk vinter vind destruction lay around me fight I could not win melancholsk stemning enkel am g for nybegynnere øvelseskvelder\",\n  \"language\": \"english\",\n  \"themes\": [\n    \"war\",\n    \"peace\",\n    \"spirituality\",\n    \"conflict\",\n    \"guidance\"\n  ],\n  \"mood\": [\n    \"melancholy\",\n    \"reflective\",\n    \"mystical\",\n    \"akustisk\",\n    \"rolig\"\n  ],\n  \"occasion\": [\n    \"reflection\",\n    \"evening\",\n    \"solo acoustic\"\n  ],\n  \"alt_titles\": {\n    \"no\": \"Damen i Svart\",\n    \"en\": \"Lady In Black\"\n  },\n  \"key_phrases\": [\n    \"She came to me one morning\",\n    \"one lonely Sunday morning\",\n    \"destruction lay around me\",\n    \"fight I could not win\",\n    \"fight and kill their brothers\"\n  ]\n}",
+  "raw_content": "{\n  \"search_text\": \"uriah heep lady in black rock classic 70talls hard rock akkorder tabs norwegian english lyrics krig fred veiledning mystikk melancholsk anthemic sang guitar undervisning she came to me one morning midwinter wind destruction lay around me take courage prize windy day faith trust peace\",\n  \"language\": \"english\",\n  \"themes\": [\"war\", \"peace\", \"guidance\", \"mystery\", \"hope\", \"conflict\", \"spirituality\"],\n  \"mood\": [\"melancholy\", \"anthemic\", \"reflective\", \"mystical\", \"hopeful\", \"melankolsk\", \"reflekterende\"],\n  \"occasion\": [\"reflection\", \"memorial\", \"rock classic\"],\n  \"alt_titles\": {\"no\": \"Damen i Svart\", \"en\": \"Lady In Black\"},\n  \"key_phrases\": [\"She came to me one morning\", \"Her long hair flowing in the midwinter wind\", \"destruction lay around me from a fight I could not win\", \"Take courage from her as your prize\", \"I find new heart each time I think upon that windy day\"],\n  \"display_suppress\": []\n}",
   "parse_ok": true,
   "parse_path": "strict",
   "enrichment": {
-    "search_text": "uriah heep lady in black akustisk gitar tab klassisk rock 70 engelsk sang tekst om krig og fred spirituell veiledning mørk vinter vind destruction lay around me fight I could not win melancholsk stemning enkel am g for nybegynnere øvelseskvelder",
+    "search_text": "uriah heep lady in black rock classic 70talls hard rock akkorder tabs norwegian english lyrics krig fred veiledning mystikk melancholsk anthemic sang guitar undervisning she came to me one morning midwinter wind destruction lay around me take courage prize windy day faith trust peace",
     "language": "english",
     "themes": [
       "war",
       "peace",
-      "spirituality",
+      "guidance",
+      "mystery",
+      "hope",
       "conflict",
-      "guidance"
+      "spirituality"
     ],
     "mood": [
       "melancholy",
+      "anthemic",
       "reflective",
       "mystical",
-      "akustisk",
-      "rolig"
+      "hopeful",
+      "melankolsk",
+      "reflekterende"
     ],
     "occasion": [
       "reflection",
-      "evening",
-      "solo acoustic"
+      "memorial",
+      "rock classic"
     ],
     "alt_titles": {
       "no": "Damen i Svart",
@@ -39,11 +43,12 @@
     },
     "key_phrases": [
       "She came to me one morning",
-      "one lonely Sunday morning",
-      "destruction lay around me",
-      "fight I could not win",
-      "fight and kill their brothers"
-    ]
+      "Her long hair flowing in the midwinter wind",
+      "destruction lay around me from a fight I could not win",
+      "Take courage from her as your prize",
+      "I find new heart each time I think upon that windy day"
+    ],
+    "display_suppress": []
   },
   "key_phrases_hit": 5,
   "key_phrases_total": 5,

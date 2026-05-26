@@ -4,26 +4,30 @@
   "tab_id": "passenger__let-her-go",
   "artist": "Passenger",
   "song": "Let Her Go",
-  "latency_ms": 12924,
-  "tokens_in": 825,
-  "tokens_out": 1729,
+  "latency_ms": 93647,
+  "tokens_in": 2903,
+  "tokens_out": 9731,
   "error": null,
-  "raw_content": "{\n  \"language\": \"english\",\n  \"themes\": [\"love\", \"heartbreak\", \"reflection\", \"moving on\"],\n  \"mood\": [\"melancholy\", \"wistful\", \"reflective\", \"sad\"],\n  \"occasion\": [\"breakup\", \"farewell\", \"reflection\"],\n  \"alt_titles\": {\"no\": \"la henne gå\", \"en\": \"let her go\"},\n  \"key_phrases\": [\"Repeat from this point\", \"[tab][Intro]\", \"[Ch\"],\n  \"search_text\": \"love heartbreak letting go melancholy wistful reflective sad breakup farewell moving on regret reflection la henne gå let her go melancholy vemodig reflektiv trist heartbreak kjærlighet sorg farvel still hope\"\n}",
+  "raw_content": "{\n  \"search_text\": \"love heartbreak loss longing regret reflection kjærlighet hjertesorg tap savn anger refleksjon melankoli trist vemodig refleksiv håpfull brudd farvel let her go la henne gå miss the sun high when low hate the road bottom of your glass everything you touch and you let her go\",\n  \"language\": \"english\",\n  \"themes\": [\"love\",\"heartbreak\",\"loss\",\"longing\",\"regret\",\"reflection\"],\n  \"mood\": [\"melancholy\",\"sad\",\"wistful\",\"reflective\",\"hopeful\"],\n  \"occasion\": [\"breakup\",\"farewell\",\"reflection\"],\n  \"alt_titles\": {\"no\":\"La henne gå\",\"en\":\"Let Her Go\"},\n  \"key_phrases\": [\n    \"Only know you love her when you let her go\",\n    \"Only miss the sun when it starts to snow\",\n    \"Only know you've been high when you're feeling low\",\n    \"Only hate the road when you're missin' home\",\n    \"Staring at the bottom of your glass\"\n  ],\n  \"display_suppress\": [0,142,143,144,145,147]\n}",
   "parse_ok": true,
   "parse_path": "strict",
   "enrichment": {
+    "search_text": "love heartbreak loss longing regret reflection kjærlighet hjertesorg tap savn anger refleksjon melankoli trist vemodig refleksiv håpfull brudd farvel let her go la henne gå miss the sun high when low hate the road bottom of your glass everything you touch and you let her go",
     "language": "english",
     "themes": [
       "love",
       "heartbreak",
-      "reflection",
-      "moving on"
+      "loss",
+      "longing",
+      "regret",
+      "reflection"
     ],
     "mood": [
       "melancholy",
+      "sad",
       "wistful",
       "reflective",
-      "sad"
+      "hopeful"
     ],
     "occasion": [
       "breakup",
@@ -31,17 +35,26 @@
       "reflection"
     ],
     "alt_titles": {
-      "no": "la henne gå",
-      "en": "let her go"
+      "no": "La henne gå",
+      "en": "Let Her Go"
     },
     "key_phrases": [
-      "Repeat from this point",
-      "[tab][Intro]",
-      "[Ch"
+      "Only know you love her when you let her go",
+      "Only miss the sun when it starts to snow",
+      "Only know you've been high when you're feeling low",
+      "Only hate the road when you're missin' home",
+      "Staring at the bottom of your glass"
     ],
-    "search_text": "love heartbreak letting go melancholy wistful reflective sad breakup farewell moving on regret reflection la henne gå let her go melancholy vemodig reflektiv trist heartbreak kjærlighet sorg farvel still hope"
+    "display_suppress": [
+      0,
+      142,
+      143,
+      144,
+      145,
+      147
+    ]
   },
-  "key_phrases_hit": 3,
-  "key_phrases_total": 3,
+  "key_phrases_hit": 5,
+  "key_phrases_total": 5,
   "key_phrases_fraction": 1.0
 }

@@ -4,47 +4,54 @@
   "tab_id": "jeff-buckley__hallelujah-ver-2",
   "artist": "Jeff Buckley",
   "song": "Hallelujah (ver 2)",
-  "latency_ms": 6647,
-  "tokens_in": 906,
-  "tokens_out": 2337,
+  "latency_ms": 17794,
+  "tokens_in": 2768,
+  "tokens_out": 2743,
   "error": null,
-  "raw_content": "{\n  \"search_text\": \"love heartbreak faith melancholy reflective funeral memorial hallelujah secret chord david played pleased lord minor fall major lift baffled king kjærlighet sorg tro melankoli refleksiv begravelse minne haleluja hemmelig akkord david spilte behagde herren mindre fall større løft forvirret konge\",\n  \"language\": \"mixed\",\n  \"themes\": [\"love\", \"heartbreak\", \"faith\", \"longing\"],\n  \"mood\": [\"melancholy\", \"reflective\", \"haunting\"],\n  \"occasion\": [\"funeral\", \"memorial\", \"worship\"],\n  \"alt_titles\": {\n    \"no\": \"Haleluja\",\n    \"en\": \"Hallelujah\"\n  },\n  \"key_phrases\": [\n    \"I heard there was a secret chord\",\n    \"That David played and it pleased the Lord\",\n    \"But you don't really care for music, do you?\",\n    \"Well it goes like this the fourth, the fifth\",\n    \"The minor fall and the major lift\",\n    \"The baffled king composing hallelujah\",\n    \"Hallelujah, hallelujah, hallelujah, hallelu-u-u-u-jah\"\n  ]\n}",
+  "raw_content": "{\n  \"search_text\": \"love heartbreak faith melancholy trist håpefull memorial funeral bryllup hallelujah versjon 2 secret chord david pleased lord fourth fifth minor fall major lift baffled king hallelujah beauty moonlight kitchen chair broken hallelujah\",\n  \"language\": \"english\",\n  \"themes\": [\"love\", \"heartbreak\", \"faith\", \"longing\", \"redemption\"],\n  \"mood\": [\"melankolsk\", \"trist\", \"håpefull\", \"melancholy\", \"hopeful\"],\n  \"occasion\": [\"funeral\", \"memorial\", \"wedding\", \"reflection\"],\n  \"alt_titles\": {\"no\": \"Hallelujah (versjon 2)\", \"en\": \"Hallelujah (ver 2)\"},\n  \"key_phrases\": [\"I heard there was a secret chord\", \"That David played and it pleased the Lord\", \"Well it goes like this the fourth, the fifth\", \"The minor fall and the major lift\", \"The baffled king composing hallelujah\"],\n  \"display_suppress\": [0, 1, 2]\n}",
   "parse_ok": true,
   "parse_path": "strict",
   "enrichment": {
-    "search_text": "love heartbreak faith melancholy reflective funeral memorial hallelujah secret chord david played pleased lord minor fall major lift baffled king kjærlighet sorg tro melankoli refleksiv begravelse minne haleluja hemmelig akkord david spilte behagde herren mindre fall større løft forvirret konge",
-    "language": "mixed",
+    "search_text": "love heartbreak faith melancholy trist håpefull memorial funeral bryllup hallelujah versjon 2 secret chord david pleased lord fourth fifth minor fall major lift baffled king hallelujah beauty moonlight kitchen chair broken hallelujah",
+    "language": "english",
     "themes": [
       "love",
       "heartbreak",
       "faith",
-      "longing"
+      "longing",
+      "redemption"
     ],
     "mood": [
+      "melankolsk",
+      "trist",
+      "håpefull",
       "melancholy",
-      "reflective",
-      "haunting"
+      "hopeful"
     ],
     "occasion": [
       "funeral",
       "memorial",
-      "worship"
+      "wedding",
+      "reflection"
     ],
     "alt_titles": {
-      "no": "Haleluja",
-      "en": "Hallelujah"
+      "no": "Hallelujah (versjon 2)",
+      "en": "Hallelujah (ver 2)"
     },
     "key_phrases": [
       "I heard there was a secret chord",
       "That David played and it pleased the Lord",
-      "But you don't really care for music, do you?",
       "Well it goes like this the fourth, the fifth",
       "The minor fall and the major lift",
-      "The baffled king composing hallelujah",
-      "Hallelujah, hallelujah, hallelujah, hallelu-u-u-u-jah"
+      "The baffled king composing hallelujah"
+    ],
+    "display_suppress": [
+      0,
+      1,
+      2
     ]
   },
-  "key_phrases_hit": 7,
-  "key_phrases_total": 7,
+  "key_phrases_hit": 5,
+  "key_phrases_total": 5,
   "key_phrases_fraction": 1.0
 }

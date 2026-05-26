@@ -4,39 +4,55 @@
   "tab_id": "nanci-griffith__tecumseh-valley",
   "artist": "Nanci Griffith",
   "song": "Tecumseh Valley",
-  "latency_ms": 4079,
-  "tokens_in": 766,
-  "tokens_out": 546,
+  "latency_ms": 37948,
+  "tokens_in": 1229,
+  "tokens_out": 4253,
   "error": null,
-  "raw_content": "{\n  \"search_text\": \"nanci griffith tecumseh valley english folk song melancholy mining winter loss daughter free spirit sorrow gruve vinter sorg datter fri\",\n  \"language\": \"english\",\n  \"themes\": [\"loss\", \"childhood\", \"poverty\", \"nature\", \"memory\"],\n  \"mood\": [\"melancholy\", \"nostalgic\", \"wistful\"],\n  \"occasion\": [],\n  \"alt_titles\": {\"no\": \"\", \"en\": \"\"},\n  \"key_phrases\": [\"The name she gave was Caroline\", \"Daughter of a miner\", \"the sunshine walked beside her\", \"the coal was low and soon the snow\", \"She came from Spencer across the hill\"]\n}",
+  "raw_content": "{\n  \"search_text\": \"nanci griffith tecumseh valley folk country ballad tragedy poverty prostitution death melancholy sorrowful trist sorg død fattigdom ensomhet farvel caroline miner gypsy sally farewell hard times winter spring loss of father despair loneliness\",\n  \"language\": \"english\",\n  \"themes\": [\"tragedy\", \"poverty\", \"prostitution\", \"death\", \"loss\", \"family\", \"despair\"],\n  \"mood\": [\"melancholy\", \"sorrowful\", \"bleak\", \"somber\"],\n  \"occasion\": [\"funeral\"],\n  \"alt_titles\": {\"no\": \"Tecumseh-dalen\", \"en\": \"Tecumseh Valley\"},\n  \"key_phrases\": [\"The name she gave was Caroline\", \"Fare thee well, Tecumseh Valley\", \"She turned to whorin' out on the streets\", \"They found her down beneath the stairs\", \"The sunshine walked beside her\"],\n  \"display_suppress\": [0, 1, 2, 3, 4, 5, 6, 7, 8]\n}",
   "parse_ok": true,
   "parse_path": "strict",
   "enrichment": {
-    "search_text": "nanci griffith tecumseh valley english folk song melancholy mining winter loss daughter free spirit sorrow gruve vinter sorg datter fri",
+    "search_text": "nanci griffith tecumseh valley folk country ballad tragedy poverty prostitution death melancholy sorrowful trist sorg død fattigdom ensomhet farvel caroline miner gypsy sally farewell hard times winter spring loss of father despair loneliness",
     "language": "english",
     "themes": [
-      "loss",
-      "childhood",
+      "tragedy",
       "poverty",
-      "nature",
-      "memory"
+      "prostitution",
+      "death",
+      "loss",
+      "family",
+      "despair"
     ],
     "mood": [
       "melancholy",
-      "nostalgic",
-      "wistful"
+      "sorrowful",
+      "bleak",
+      "somber"
     ],
-    "occasion": [],
+    "occasion": [
+      "funeral"
+    ],
     "alt_titles": {
-      "no": "",
-      "en": ""
+      "no": "Tecumseh-dalen",
+      "en": "Tecumseh Valley"
     },
     "key_phrases": [
       "The name she gave was Caroline",
-      "Daughter of a miner",
-      "the sunshine walked beside her",
-      "the coal was low and soon the snow",
-      "She came from Spencer across the hill"
+      "Fare thee well, Tecumseh Valley",
+      "She turned to whorin' out on the streets",
+      "They found her down beneath the stairs",
+      "The sunshine walked beside her"
+    ],
+    "display_suppress": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
     ]
   },
   "key_phrases_hit": 5,

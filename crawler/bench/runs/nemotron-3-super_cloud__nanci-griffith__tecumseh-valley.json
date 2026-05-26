@@ -4,41 +4,57 @@
   "tab_id": "nanci-griffith__tecumseh-valley",
   "artist": "Nanci Griffith",
   "song": "Tecumseh Valley",
-  "latency_ms": 7399,
-  "tokens_in": 823,
-  "tokens_out": 1191,
+  "latency_ms": 70148,
+  "tokens_in": 1292,
+  "tokens_out": 7565,
   "error": null,
-  "raw_content": "{\n  \"search_text\": \"Tecumseh Valley Nanci Griffith melancholy reflective nostalgic rural life longing daughter of a miner sunshine walked beside her name she gave was Caroline melankolsk stemningsfull reflektert nostalgi landliv lengsel folk ballad\",\n  \"language\": \"english\",\n  \"themes\": [\"nostalgia\", \"longing\", \"rural life\", \"melancholy\"],\n  \"mood\": [\"melancholy\", \"reflective\", \"wistful\"],\n  \"occasion\": [],\n  \"alt_titles\": {\n    \"no\": \"Tecumseh-dalen\",\n    \"en\": \"Tecumseh Valley\"\n  },\n  \"key_phrases\": [\n    \"The name she gave was Caroline\",\n    \"Daughter of a miner\",\n    \"And her ways were free and it seemed to me\",\n    \"The sunshine walked beside her\",\n    \"She came from Spencer across the hill\"\n  ]\n}",
+  "raw_content": "{\n  \"search_text\": \"hardship poverty loss death melancholy trist somber funeral begravelse memorial minne tecumseh valley tecumseh dalen caroline saved home dreams denied fare thee well girl miner streets prostitution note winter spring gypsy sally\",\n  \"language\": \"english\",\n  \"themes\": [\"hardship\", \"poverty\", \"loss\", \"death\", \"melancholy\"],\n  \"mood\": [\"melancholy\", \"trist\", \"somber\"],\n  \"occasion\": [\"funeral\", \"begravelse\", \"memorial\", \"minne\"],\n  \"alt_titles\": {\n    \"no\": \"Tecumseh Dalen\",\n    \"en\": \"Tecumseh Valley\"\n  },\n  \"key_phrases\": [\n    \"The name she gave was Caroline\",\n    \"She saved enough to get back home\",\n    \"But her dreams were denied, her Pa had died\",\n    \"And in her hand when she died was a note that cried 'Fare thee well, Tecumseh Valley'\"\n  ],\n  \"display_suppress\": [0, 1, 2, 3, 4, 5, 6, 7, 8]\n}",
   "parse_ok": true,
   "parse_path": "strict",
   "enrichment": {
-    "search_text": "Tecumseh Valley Nanci Griffith melancholy reflective nostalgic rural life longing daughter of a miner sunshine walked beside her name she gave was Caroline melankolsk stemningsfull reflektert nostalgi landliv lengsel folk ballad",
+    "search_text": "hardship poverty loss death melancholy trist somber funeral begravelse memorial minne tecumseh valley tecumseh dalen caroline saved home dreams denied fare thee well girl miner streets prostitution note winter spring gypsy sally",
     "language": "english",
     "themes": [
-      "nostalgia",
-      "longing",
-      "rural life",
+      "hardship",
+      "poverty",
+      "loss",
+      "death",
       "melancholy"
     ],
     "mood": [
       "melancholy",
-      "reflective",
-      "wistful"
+      "trist",
+      "somber"
     ],
-    "occasion": [],
+    "occasion": [
+      "funeral",
+      "begravelse",
+      "memorial",
+      "minne"
+    ],
     "alt_titles": {
-      "no": "Tecumseh-dalen",
+      "no": "Tecumseh Dalen",
       "en": "Tecumseh Valley"
     },
     "key_phrases": [
       "The name she gave was Caroline",
-      "Daughter of a miner",
-      "And her ways were free and it seemed to me",
-      "The sunshine walked beside her",
-      "She came from Spencer across the hill"
+      "She saved enough to get back home",
+      "But her dreams were denied, her Pa had died",
+      "And in her hand when she died was a note that cried 'Fare thee well, Tecumseh Valley'"
+    ],
+    "display_suppress": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
     ]
   },
-  "key_phrases_hit": 5,
-  "key_phrases_total": 5,
+  "key_phrases_hit": 4,
+  "key_phrases_total": 4,
   "key_phrases_fraction": 1.0
 }

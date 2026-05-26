@@ -4,43 +4,48 @@
   "tab_id": "uriah-heep__lady-in-black",
   "artist": "Uriah Heep",
   "song": "Lady In Black",
-  "latency_ms": 6181,
-  "tokens_in": 847,
-  "tokens_out": 1845,
+  "latency_ms": 42082,
+  "tokens_in": 2600,
+  "tokens_out": 4606,
   "error": null,
-  "raw_content": "{\n  \"search_text\": \"lady in black svart dame mystery mysterium guidance veiledning krig war melancholy trist hopeful håpfull anthemic anslag funeral begravelse memorial minne she came to me one morning her long hair flowing ah ahah ahahah destruction lay around me\",\n  \"language\": \"english\",\n  \"themes\": [\"mystery\", \"guidance\", \"war\"],\n  \"mood\": [\"melancholy\", \"hopeful\", \"anthemic\"],\n  \"occasion\": [\"funeral\", \"memorial\", \"reflection\"],\n  \"alt_titles\": {\n    \"no\": \"Svart dame\",\n    \"en\": \"Lady In Black\"\n  },\n  \"key_phrases\": [\n    \"She came to me one morning, one lonely Sunday morning\",\n    \"Her long hair flowing in the midwinter wind\",\n    \"Ah... ahah.. ahahah... ahahah\",\n    \"And destruction lay around me from a fight I could not win\"\n  ]\n}",
+  "raw_content": "{\n  \"search_text\": \"lady in black uriah heep war peace melancholy dame she came to me one morning her long hair flowing in the midwinter wind i know not how she found me for in darkness i was walking and destruction lay around me from a fight i could not win ah ahah ahahah\",\n  \"language\": \"english\",\n  \"themes\": [\"war\", \"peace\", \"mother\", \"hope\", \"guidance\"],\n  \"mood\": [\"melancholy\", \"hopeful\", \"reflective\", \"anthemic\"],\n  \"occasion\": [\"funeral\", \"remembrance\", \"war memorial\"],\n  \"alt_titles\": {\"no\": \"Svart Dame\", \"en\": \"Lady In Black\"},\n  \"key_phrases\": [\n    \"She came to me one morning, one lonely Sunday morning\",\n    \"Her long hair flowing in the midwinter wind\",\n    \"I know not how she found me for in darkness I was walking\",\n    \"And destruction lay around me from a fight I could not win\",\n    \"Ah... ahah.. ahahah... ahahah\"\n  ],\n  \"display_suppress\": []\n}",
   "parse_ok": true,
   "parse_path": "strict",
   "enrichment": {
-    "search_text": "lady in black svart dame mystery mysterium guidance veiledning krig war melancholy trist hopeful håpfull anthemic anslag funeral begravelse memorial minne she came to me one morning her long hair flowing ah ahah ahahah destruction lay around me",
+    "search_text": "lady in black uriah heep war peace melancholy dame she came to me one morning her long hair flowing in the midwinter wind i know not how she found me for in darkness i was walking and destruction lay around me from a fight i could not win ah ahah ahahah",
     "language": "english",
     "themes": [
-      "mystery",
-      "guidance",
-      "war"
+      "war",
+      "peace",
+      "mother",
+      "hope",
+      "guidance"
     ],
     "mood": [
       "melancholy",
       "hopeful",
+      "reflective",
       "anthemic"
     ],
     "occasion": [
       "funeral",
-      "memorial",
-      "reflection"
+      "remembrance",
+      "war memorial"
     ],
     "alt_titles": {
-      "no": "Svart dame",
+      "no": "Svart Dame",
       "en": "Lady In Black"
     },
     "key_phrases": [
       "She came to me one morning, one lonely Sunday morning",
       "Her long hair flowing in the midwinter wind",
-      "Ah... ahah.. ahahah... ahahah",
-      "And destruction lay around me from a fight I could not win"
-    ]
+      "I know not how she found me for in darkness I was walking",
+      "And destruction lay around me from a fight I could not win",
+      "Ah... ahah.. ahahah... ahahah"
+    ],
+    "display_suppress": []
   },
-  "key_phrases_hit": 4,
-  "key_phrases_total": 4,
+  "key_phrases_hit": 5,
+  "key_phrases_total": 5,
   "key_phrases_fraction": 1.0
 }

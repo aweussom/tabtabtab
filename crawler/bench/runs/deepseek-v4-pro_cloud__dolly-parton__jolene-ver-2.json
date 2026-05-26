@@ -4,44 +4,43 @@
   "tab_id": "dolly-parton__jolene-ver-2",
   "artist": "Dolly Parton",
   "song": "Jolene (ver 2)",
-  "latency_ms": 8429,
-  "tokens_in": 807,
-  "tokens_out": 568,
+  "latency_ms": 48864,
+  "tokens_in": 1762,
+  "tokens_out": 2939,
   "error": null,
-  "raw_content": "{\n  \"search_text\": \"jolene dolly parton country klassiker bønn om å ikke ta mannen hennes kjærlighet sjalusi trist akustisk gitar emerald green eyes auburn hair please don't take my man begging heartbreak norsk oversettelse\",\n  \"language\": \"english\",\n  \"themes\": [\"love\", \"jealousy\", \"desperation\", \"longing\", \"heartbreak\"],\n  \"mood\": [\"melancholy\", \"pleading\", \"trist\", \"sårbar\"],\n  \"occasion\": [\"breakup\", \"heartache\"],\n  \"alt_titles\": {\"no\": \"Jolene\", \"en\": \"Jolene\"},\n  \"key_phrases\": [\n    \"please don't take my man\",\n    \"flaming locks of auburn hair\",\n    \"ivory skin and eyes of emerald green\",\n    \"your smile is like a breath of spring\",\n    \"your voice is soft like summer rain\"\n  ]\n}",
+  "raw_content": "{\n  \"search_text\": \"jolene dolly parton begging please don't take my man love triangle jealousy insecurity pleading melancholy trist melankolsk heartbreak breakup sårbar desperat norsk engelsk jolene jolene jolene jolene your beauty is beyond compare flaming locks of auburn hair he's the only one for me please don't take him just because you can\",\n  \"language\": \"english\",\n  \"themes\": [\"love\", \"jealousy\", \"pleading\", \"insecurity\", \"rivalry\"],\n  \"mood\": [\"melancholy\", \"desperate\", \"pleading\", \"trist\", \"melankolsk\"],\n  \"occasion\": [\"heartbreak\", \"relationship crisis\"],\n  \"alt_titles\": null,\n  \"key_phrases\": [\n    \"I'm begging of you, please don't take my man\",\n    \"Your beauty is beyond compare\",\n    \"With flaming locks of auburn hair\",\n    \"He's the only one for me, Jolene\",\n    \"Please don't take him just because you can\"\n  ],\n  \"display_suppress\": []\n}",
   "parse_ok": true,
   "parse_path": "strict",
   "enrichment": {
-    "search_text": "jolene dolly parton country klassiker bønn om å ikke ta mannen hennes kjærlighet sjalusi trist akustisk gitar emerald green eyes auburn hair please don't take my man begging heartbreak norsk oversettelse",
+    "search_text": "jolene dolly parton begging please don't take my man love triangle jealousy insecurity pleading melancholy trist melankolsk heartbreak breakup sårbar desperat norsk engelsk jolene jolene jolene jolene your beauty is beyond compare flaming locks of auburn hair he's the only one for me please don't take him just because you can",
     "language": "english",
     "themes": [
       "love",
       "jealousy",
-      "desperation",
-      "longing",
-      "heartbreak"
+      "pleading",
+      "insecurity",
+      "rivalry"
     ],
     "mood": [
       "melancholy",
+      "desperate",
       "pleading",
       "trist",
-      "sårbar"
+      "melankolsk"
     ],
     "occasion": [
-      "breakup",
-      "heartache"
+      "heartbreak",
+      "relationship crisis"
     ],
-    "alt_titles": {
-      "no": "Jolene",
-      "en": "Jolene"
-    },
+    "alt_titles": null,
     "key_phrases": [
-      "please don't take my man",
-      "flaming locks of auburn hair",
-      "ivory skin and eyes of emerald green",
-      "your smile is like a breath of spring",
-      "your voice is soft like summer rain"
-    ]
+      "I'm begging of you, please don't take my man",
+      "Your beauty is beyond compare",
+      "With flaming locks of auburn hair",
+      "He's the only one for me, Jolene",
+      "Please don't take him just because you can"
+    ],
+    "display_suppress": []
   },
   "key_phrases_hit": 5,
   "key_phrases_total": 5,

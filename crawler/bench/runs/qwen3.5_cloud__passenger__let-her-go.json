@@ -4,37 +4,59 @@
   "tab_id": "passenger__let-her-go",
   "artist": "Passenger",
   "song": "Let Her Go",
-  "latency_ms": 44457,
-  "tokens_in": 769,
-  "tokens_out": 6529,
+  "latency_ms": 262588,
+  "tokens_in": 2773,
+  "tokens_out": 10493,
   "error": null,
-  "raw_content": "{\n  \"search_text\": \"passenger let her go acoustic guitar tab chords norwegian english love loss regret sadness melancholy trist tap kjærlighet savn akustisk ballade wedding funeral breakup intro repeat from this point g fmaj7 g6 am progression folk pop indie rock singer songwriter lesson easy\",\n  \"language\": \"english\",\n  \"themes\": [\n    \"love\",\n    \"loss\",\n    \"regret\"\n  ],\n  \"mood\": [\n    \"melancholy\",\n    \"trist\",\n    \"acoustic\"\n  ],\n  \"occasion\": [\n    \"breakup\",\n    \"funeral\",\n    \"wedding\"\n  ],\n  \"alt_titles\": {\n    \"no\": \"La henne gå\",\n    \"en\": \"Let Her Go\"\n  }\n}",
+  "raw_content": "{\n  \"search_text\": \"passenger let her go guitar tab akkorder sang tekst melancholy heartbreak loss love sorrow trist kjærlighet sorg brudd acoustic folk pop ballad singing only know you love her when you let her go acoustic guitar chords lyrics norwegian english search metadata wedding funeral breakup song music\",\n  \"language\": \"english\",\n  \"themes\": [\n    \"love\",\n    \"heartbreak\",\n    \"loss\",\n    \"regret\",\n    \"relationships\"\n  ],\n  \"mood\": [\n    \"melancholy\",\n    \"sad\",\n    \"reflective\",\n    \"trist\",\n    \"melankolsk\"\n  ],\n  \"occasion\": [\n    \"breakup\",\n    \"funeral\",\n    \"wedding\",\n    \"memorial\"\n  ],\n  \"alt_titles\": {\n    \"no\": \"La Hun Gå\",\n    \"en\": \"Let Her Go\"\n  },\n  \"key_phrases\": [\n    \"Only know you love her when you let her go\",\n    \"Only miss the sun when it starts to snow\",\n    \"Only hate the road when you're missin' home\",\n    \"Dreams come slow and they go so fast\",\n    \"Staring at the bottom of your glass\"\n  ],\n  \"display_suppress\": [\n    0,\n    143,\n    144,\n    145,\n    146,\n    147,\n    148,\n    149\n  ]\n}",
   "parse_ok": true,
   "parse_path": "strict",
   "enrichment": {
-    "search_text": "passenger let her go acoustic guitar tab chords norwegian english love loss regret sadness melancholy trist tap kjærlighet savn akustisk ballade wedding funeral breakup intro repeat from this point g fmaj7 g6 am progression folk pop indie rock singer songwriter lesson easy",
+    "search_text": "passenger let her go guitar tab akkorder sang tekst melancholy heartbreak loss love sorrow trist kjærlighet sorg brudd acoustic folk pop ballad singing only know you love her when you let her go acoustic guitar chords lyrics norwegian english search metadata wedding funeral breakup song music",
     "language": "english",
     "themes": [
       "love",
+      "heartbreak",
       "loss",
-      "regret"
+      "regret",
+      "relationships"
     ],
     "mood": [
       "melancholy",
+      "sad",
+      "reflective",
       "trist",
-      "acoustic"
+      "melankolsk"
     ],
     "occasion": [
       "breakup",
       "funeral",
-      "wedding"
+      "wedding",
+      "memorial"
     ],
     "alt_titles": {
-      "no": "La henne gå",
+      "no": "La Hun Gå",
       "en": "Let Her Go"
-    }
+    },
+    "key_phrases": [
+      "Only know you love her when you let her go",
+      "Only miss the sun when it starts to snow",
+      "Only hate the road when you're missin' home",
+      "Dreams come slow and they go so fast",
+      "Staring at the bottom of your glass"
+    ],
+    "display_suppress": [
+      0,
+      143,
+      144,
+      145,
+      146,
+      147,
+      148,
+      149
+    ]
   },
-  "key_phrases_hit": 0,
-  "key_phrases_total": 0,
+  "key_phrases_hit": 5,
+  "key_phrases_total": 5,
   "key_phrases_fraction": 1.0
 }

@@ -4,48 +4,55 @@
   "tab_id": "jeff-buckley__hallelujah-ver-2",
   "artist": "Jeff Buckley",
   "song": "Hallelujah (ver 2)",
-  "latency_ms": 30444,
-  "tokens_in": 882,
-  "tokens_out": 4210,
+  "latency_ms": 187475,
+  "tokens_in": 2649,
+  "tokens_out": 7059,
   "error": null,
-  "raw_content": "{\n  \"search_text\": \"jeff buckley hallelujah guitar tab akkorder sang engelsk klassiker trist melankolsk spiritual faith love heartbreak bryllup funeral bryllupssang minnestund secret chord david lord music acoustic ballade cover version youtube official video studio original capo chord chart easy intermediate advanced learning spilleliste\",\n  \"language\": \"english\",\n  \"themes\": [\n    \"faith\",\n    \"love\",\n    \"music\",\n    \"spirituality\",\n    \"heartbreak\"\n  ],\n  \"mood\": [\n    \"melancholy\",\n    \"spiritual\",\n    \"emotional\",\n    \"trist\",\n    \"melankolsk\"\n  ],\n  \"occasion\": [\n    \"funeral\",\n    \"wedding\",\n    \"reflection\",\n    \"minnestund\"\n  ],\n  \"alt_titles\": {\n    \"no\": \"Halleluja\",\n    \"en\": \"Hallelujah\"\n  },\n  \"key_phrases\": [\n    \"I heard there was a secret chord\",\n    \"That David played and it pleased the Lord\",\n    \"The minor fall and the major lift\",\n    \"Hallelujah, hallelujah, hallelujah, hallelu-u-u-u-jah\"\n  ]\n}",
+  "raw_content": "{\n  \"search_text\": \"jeff buckley hallelujah cover leonard cohen acoustic guitar ballad melancholy sad beautiful love faith heartbreak religion spiritual wedding funeral kjærlighet sorg tro akustisk vakker bryllup begraves hemmelig akkord david herren secret chord david played pleased the lord baffled king composing hallelujah cold broken\",\n  \"language\": \"english\",\n  \"themes\": [\n    \"love\",\n    \"faith\",\n    \"heartbreak\",\n    \"religion\",\n    \"kjærlighet\",\n    \"tro\",\n    \"sorg\"\n  ],\n  \"mood\": [\n    \"melancholy\",\n    \"beautiful\",\n    \"sad\",\n    \"melankolsk\",\n    \"vakker\"\n  ],\n  \"occasion\": [\n    \"wedding\",\n    \"funeral\",\n    \"bryllup\",\n    \"begravelse\"\n  ],\n  \"alt_titles\": {\n    \"no\": \"Hallelujah (Jeff Buckley versjon)\",\n    \"en\": \"Hallelujah (Leonard Cohen cover)\"\n  },\n  \"key_phrases\": [\n    \"I heard there was a secret chord\",\n    \"The baffled king composing hallelujah\",\n    \"It's a cold and it's a broken hallelujah\",\n    \"Hallelujah, hallelujah, hallelujah, hallelu-u-u-u-jah ....\",\n    \"Baby, I've been here before\"\n  ],\n  \"display_suppress\": [\n    0,\n    1\n  ]\n}",
   "parse_ok": true,
   "parse_path": "strict",
   "enrichment": {
-    "search_text": "jeff buckley hallelujah guitar tab akkorder sang engelsk klassiker trist melankolsk spiritual faith love heartbreak bryllup funeral bryllupssang minnestund secret chord david lord music acoustic ballade cover version youtube official video studio original capo chord chart easy intermediate advanced learning spilleliste",
+    "search_text": "jeff buckley hallelujah cover leonard cohen acoustic guitar ballad melancholy sad beautiful love faith heartbreak religion spiritual wedding funeral kjærlighet sorg tro akustisk vakker bryllup begraves hemmelig akkord david herren secret chord david played pleased the lord baffled king composing hallelujah cold broken",
     "language": "english",
     "themes": [
-      "faith",
       "love",
-      "music",
-      "spirituality",
-      "heartbreak"
+      "faith",
+      "heartbreak",
+      "religion",
+      "kjærlighet",
+      "tro",
+      "sorg"
     ],
     "mood": [
       "melancholy",
-      "spiritual",
-      "emotional",
-      "trist",
-      "melankolsk"
+      "beautiful",
+      "sad",
+      "melankolsk",
+      "vakker"
     ],
     "occasion": [
-      "funeral",
       "wedding",
-      "reflection",
-      "minnestund"
+      "funeral",
+      "bryllup",
+      "begravelse"
     ],
     "alt_titles": {
-      "no": "Halleluja",
-      "en": "Hallelujah"
+      "no": "Hallelujah (Jeff Buckley versjon)",
+      "en": "Hallelujah (Leonard Cohen cover)"
     },
     "key_phrases": [
       "I heard there was a secret chord",
-      "That David played and it pleased the Lord",
-      "The minor fall and the major lift",
-      "Hallelujah, hallelujah, hallelujah, hallelu-u-u-u-jah"
+      "The baffled king composing hallelujah",
+      "It's a cold and it's a broken hallelujah",
+      "Hallelujah, hallelujah, hallelujah, hallelu-u-u-u-jah ....",
+      "Baby, I've been here before"
+    ],
+    "display_suppress": [
+      0,
+      1
     ]
   },
-  "key_phrases_hit": 4,
-  "key_phrases_total": 4,
+  "key_phrases_hit": 5,
+  "key_phrases_total": 5,
   "key_phrases_fraction": 1.0
 }

@@ -4,24 +4,24 @@
   "tab_id": "dolly-parton__jolene-ver-2",
   "artist": "Dolly Parton",
   "song": "Jolene (ver 2)",
-  "latency_ms": 8864,
-  "tokens_in": 874,
-  "tokens_out": 1288,
+  "latency_ms": 14454,
+  "tokens_in": 1906,
+  "tokens_out": 1837,
   "error": null,
-  "raw_content": "{\n  \"search_text\": \"jolene dolly parton love heartbreak pleading desperation melancholy begging beauty auburn hair emerald eyes spring smile summer rain norwegian english breakup song plea dont take my man obsessive longing guitar\",\n  \"language\": \"english\",\n  \"themes\": [\"love\", \"heartbreak\", \"obsession\"],\n  \"mood\": [\"melancholy\", \"pleading\", \"desperate\"],\n  \"occasion\": [\"breakup\"],\n  \"alt_titles\": {\"no\": \"Jolene\", \"en\": \"Jolene\"},\n  \"key_phrases\": [\n    \"Jolene, Jolene, Jolene, Jolene\",\n    \"I'm begging of you, please don't take my man\",\n    \"Please don't take him just because you can\",\n    \"Your beauty is beyond compare\",\n    \"Your smile is like a breath of spring\"\n  ]\n}",
+  "raw_content": "{\n  \"search_text\": \"love kjærlighet heartbreak hjertesorg jealousy sjalusi pleading begging melankoli melancholy desperate desperat breakup brudd Jolene Jolene Jolene Jolene I'm begging of you please don't take my man Please don't take him just because you can Your beauty is beyond compare With flaming locks of auburn hair\",\n  \"language\": \"english\",\n  \"themes\": [\"love\", \"heartbreak\", \"jealousy\", \"pleading\"],\n  \"mood\": [\"melancholy\", \"desperate\"],\n  \"occasion\": [\"breakup\"],\n  \"alt_titles\": {\n    \"no\": \"Jolene\",\n    \"en\": \"Jolene\"\n  },\n  \"key_phrases\": [\n    \"Jolene, Jolene, Jolene, Jolene\",\n    \"I'm begging of you, please don't take my man\",\n    \"Please don't take him just because you can\",\n    \"Your beauty is beyond compare\",\n    \"With flaming locks of auburn hair\"\n  ],\n  \"display_suppress\": []\n}",
   "parse_ok": true,
   "parse_path": "strict",
   "enrichment": {
-    "search_text": "jolene dolly parton love heartbreak pleading desperation melancholy begging beauty auburn hair emerald eyes spring smile summer rain norwegian english breakup song plea dont take my man obsessive longing guitar",
+    "search_text": "love kjærlighet heartbreak hjertesorg jealousy sjalusi pleading begging melankoli melancholy desperate desperat breakup brudd Jolene Jolene Jolene Jolene I'm begging of you please don't take my man Please don't take him just because you can Your beauty is beyond compare With flaming locks of auburn hair",
     "language": "english",
     "themes": [
       "love",
       "heartbreak",
-      "obsession"
+      "jealousy",
+      "pleading"
     ],
     "mood": [
       "melancholy",
-      "pleading",
       "desperate"
     ],
     "occasion": [
@@ -36,8 +36,9 @@
       "I'm begging of you, please don't take my man",
       "Please don't take him just because you can",
       "Your beauty is beyond compare",
-      "Your smile is like a breath of spring"
-    ]
+      "With flaming locks of auburn hair"
+    ],
+    "display_suppress": []
   },
   "key_phrases_hit": 5,
   "key_phrases_total": 5,

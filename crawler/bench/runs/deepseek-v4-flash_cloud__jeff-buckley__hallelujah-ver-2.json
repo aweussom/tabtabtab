@@ -4,50 +4,51 @@
   "tab_id": "jeff-buckley__hallelujah-ver-2",
   "artist": "Jeff Buckley",
   "song": "Hallelujah (ver 2)",
-  "latency_ms": 3404,
-  "tokens_in": 843,
-  "tokens_out": 462,
+  "latency_ms": 8889,
+  "tokens_in": 2551,
+  "tokens_out": 1713,
   "error": null,
-  "raw_content": "{\n  \"search_text\": \"jeff buckley hallelujah cover leonard cohen melancholy faith love heartbreak secret chord baffled king composing hallelujah wedding funeral breakup begravelse bryllup brudd trist vakker refleksjon\",\n  \"language\": \"english\",\n  \"themes\": [\"love\", \"faith\", \"heartbreak\", \"music\", \"spirituality\"],\n  \"mood\": [\"melancholy\", \"reflective\", \"somber\", \"beautiful\", \"trist\"],\n  \"occasion\": [\"funeral\", \"wedding\", \"breakup\", \"begravelse\", \"bryllup\", \"brudd\"],\n  \"alt_titles\": {\"no\": \"Hallelujah\", \"en\": \"Hallelujah\"},\n  \"key_phrases\": [\"I heard there was a secret chord\", \"the baffled king composing hallelujah\", \"Hallelujah, hallelujah\", \"your faith was strong\"]\n}",
+  "raw_content": "{\n  \"search_text\": \"hallelujah jeff buckley leonard cohen cover kjærlighet tro hjertesorg melankoli begravelse brudd refleksjon sorg vemodig åndelig the baffled king composing hallelujah cold and broken hallelujah love is not a victory march her beauty and the moonlight overthrew you\",\n  \"language\": \"english\",\n  \"themes\": [\"love\", \"heartbreak\", \"faith\", \"spirituality\", \"longing\", \"betrayal\"],\n  \"mood\": [\"melancholy\", \"reflective\", \"somber\", \"emotional\", \"trist\"],\n  \"occasion\": [\"funeral\", \"breakup\", \"reflection\"],\n  \"alt_titles\": {\"no\": \"Hallelujah\", \"en\": \"Hallelujah\"},\n  \"key_phrases\": [\"the baffled king composing hallelujah\", \"love is not a victory march\", \"it's a cold and it's a broken hallelujah\"],\n  \"display_suppress\": [0, 1]\n}",
   "parse_ok": true,
   "parse_path": "strict",
   "enrichment": {
-    "search_text": "jeff buckley hallelujah cover leonard cohen melancholy faith love heartbreak secret chord baffled king composing hallelujah wedding funeral breakup begravelse bryllup brudd trist vakker refleksjon",
+    "search_text": "hallelujah jeff buckley leonard cohen cover kjærlighet tro hjertesorg melankoli begravelse brudd refleksjon sorg vemodig åndelig the baffled king composing hallelujah cold and broken hallelujah love is not a victory march her beauty and the moonlight overthrew you",
     "language": "english",
     "themes": [
       "love",
-      "faith",
       "heartbreak",
-      "music",
-      "spirituality"
+      "faith",
+      "spirituality",
+      "longing",
+      "betrayal"
     ],
     "mood": [
       "melancholy",
       "reflective",
       "somber",
-      "beautiful",
+      "emotional",
       "trist"
     ],
     "occasion": [
       "funeral",
-      "wedding",
       "breakup",
-      "begravelse",
-      "bryllup",
-      "brudd"
+      "reflection"
     ],
     "alt_titles": {
       "no": "Hallelujah",
       "en": "Hallelujah"
     },
     "key_phrases": [
-      "I heard there was a secret chord",
       "the baffled king composing hallelujah",
-      "Hallelujah, hallelujah",
-      "your faith was strong"
+      "love is not a victory march",
+      "it's a cold and it's a broken hallelujah"
+    ],
+    "display_suppress": [
+      0,
+      1
     ]
   },
-  "key_phrases_hit": 4,
-  "key_phrases_total": 4,
+  "key_phrases_hit": 3,
+  "key_phrases_total": 3,
   "key_phrases_fraction": 1.0
 }

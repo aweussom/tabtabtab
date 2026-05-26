@@ -4,34 +4,54 @@
   "tab_id": "passenger__let-her-go",
   "artist": "Passenger",
   "song": "Let Her Go",
-  "latency_ms": 17029,
-  "tokens_in": 735,
-  "tokens_out": 1226,
+  "latency_ms": 116113,
+  "tokens_in": 2645,
+  "tokens_out": 6048,
   "error": null,
-  "raw_content": "{\n  \"search_text\": \"melankolsk, hjertesorg, savn, letting go, kjærlighet, tap, refleksjon, trist, akustisk, ballade, breakup song, only know you love her when you let her go, savner solen når det snør, Passenger, Michael David Rosenberg, folk pop, populær, radiovennlig, gripende, emosjonell, håpløs romantikk\",\n  \"language\": \"english\",\n  \"themes\": [\"heartbreak\", \"loss\", \"love\", \"regret\"],\n  \"mood\": [\"melancholy\", \"reflective\", \"sad\", \"trist\"],\n  \"occasion\": [\"breakup\"],\n  \"key_phrases\": []\n}",
+  "raw_content": "{\n  \"search_text\": \"let her go passenger slipp henne fri kjærlighetssorg tap anger savn melankolsk reflekterende breakup only know you love her when you let her go only miss the sun when it starts to snow staring at the bottom of your glass everything you touch surely dies english folk pop acoustic guitar ballade love loss regret heartbreak realization missing home\",\n  \"language\": \"english\",\n  \"themes\": [\"love\", \"loss\", \"regret\", \"heartbreak\", \"realization\"],\n  \"mood\": [\"melancholy\", \"reflective\", \"sad\", \"melankolsk\", \"trist\"],\n  \"occasion\": [\"breakup\", \"reflection\"],\n  \"alt_titles\": {\"no\": \"Slipp henne fri\"},\n  \"key_phrases\": [\n    \"Only know you love her when you let her go\",\n    \"Only miss the sun when it starts to snow\",\n    \"Staring at the bottom of your glass\",\n    \"Everything you touch surely dies\",\n    \"Only need the light when it's burning low\"\n  ],\n  \"display_suppress\": [142, 143, 144, 145, 146, 147]\n}",
   "parse_ok": true,
   "parse_path": "strict",
   "enrichment": {
-    "search_text": "melankolsk, hjertesorg, savn, letting go, kjærlighet, tap, refleksjon, trist, akustisk, ballade, breakup song, only know you love her when you let her go, savner solen når det snør, Passenger, Michael David Rosenberg, folk pop, populær, radiovennlig, gripende, emosjonell, håpløs romantikk",
+    "search_text": "let her go passenger slipp henne fri kjærlighetssorg tap anger savn melankolsk reflekterende breakup only know you love her when you let her go only miss the sun when it starts to snow staring at the bottom of your glass everything you touch surely dies english folk pop acoustic guitar ballade love loss regret heartbreak realization missing home",
     "language": "english",
     "themes": [
-      "heartbreak",
-      "loss",
       "love",
-      "regret"
+      "loss",
+      "regret",
+      "heartbreak",
+      "realization"
     ],
     "mood": [
       "melancholy",
       "reflective",
       "sad",
+      "melankolsk",
       "trist"
     ],
     "occasion": [
-      "breakup"
+      "breakup",
+      "reflection"
     ],
-    "key_phrases": []
+    "alt_titles": {
+      "no": "Slipp henne fri"
+    },
+    "key_phrases": [
+      "Only know you love her when you let her go",
+      "Only miss the sun when it starts to snow",
+      "Staring at the bottom of your glass",
+      "Everything you touch surely dies",
+      "Only need the light when it's burning low"
+    ],
+    "display_suppress": [
+      142,
+      143,
+      144,
+      145,
+      146,
+      147
+    ]
   },
-  "key_phrases_hit": 0,
-  "key_phrases_total": 0,
+  "key_phrases_hit": 5,
+  "key_phrases_total": 5,
   "key_phrases_fraction": 1.0
 }

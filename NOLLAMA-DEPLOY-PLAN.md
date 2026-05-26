@@ -122,16 +122,16 @@ sudo mkdir -p /var/lib/nollama
 sudo chown $USER:$USER /var/lib/nollama
 ```
 
-Upstream LLM choice — four options. Default is locked in: **Ollama Cloud + `nemotron-3-super:cloud`** based on enrich-bench v1 (2026-05-25, see `crawler/bench/COMPARE.md`).
+Upstream LLM choice — four options. Default is locked in: **Ollama Cloud + `deepseek-v4-flash:cloud`** based on enrich-bench v2 (2026-05-26, see `crawler/bench/COMPARE.md`). Bench v2 dropped the `body[:1200]` truncation cap that hurt v1, and that *single change* leapfrogged Flash from worst-in-v1 to best-in-v2 — see PLAN.md Phase 2.5 "Bench v2 update" for the model-vs-context reversal story.
 
 | Option | `PROXY_API_BASE` | `PROXY_MODEL` | `PROXY_API_KEY` | Cost | Notes |
 |---|---|---|---|---|---|
-| **Ollama Cloud + Nemotron** ← recommended | `https://ollama.com/v1` | `nemotron-3-super:cloud` | `<ollama-cloud-key>` | $20/mo flat (Tommy's existing sub, effectively unlimited for this workload) | Always up. Bench winner: 100% schema-compliance, 100% key_phrases hit-rate, 8.4 s mean latency. |
-| Ollama Cloud + DeepSeek-Pro (fallback) | `https://ollama.com/v1` | `deepseek-v4-pro:cloud` | `<ollama-cloud-key>` | same sub | 100% / 91% / 15.0 s — slower than Nemotron with more hallucinations. Use only if Nemotron has an outage. |
+| **Ollama Cloud + DeepSeek-Flash** ← recommended | `https://ollama.com/v1` | `deepseek-v4-flash:cloud` | `<ollama-cloud-key>` | $20/mo flat (Tommy's existing sub, effectively unlimited for this workload) | Always up. Bench v2 winner: 100% schema-compliance, 100% key_phrases hit-rate, 34.8 s mean latency (with full untruncated body), 100% accuracy on `display_suppress` gold-standard tests. Reasoning-variant; hidden internal reasoning tokens are billed (~3-4× visible output) but flat-rate sub absorbs it. Subjectively tighter theme accuracy than the other models — caught "prostitution" on Tecumseh Valley where Pro/Nemotron said "loss". |
+| Ollama Cloud + Nemotron (fallback) | `https://ollama.com/v1` | `nemotron-3-super:cloud` | `<ollama-cloud-key>` | same sub | 100% / 100% / 47.6 s — co-equal on the v2 quality gates but ~27% slower and 60% more verbose than Flash. Solid fallback when Flash has an outage. |
 | Workstation Qwen3.6 via Tailscale | `http://<workstation-tailscale-ip>:11434/v1` | `qwen3.6:latest` | (empty) | $0 | Functionally equivalent to qwen3.5:cloud per Tommy. Works only when workstation is on + Ollama running. Tailscale handles auth + encryption. Keep as last-ditch fallback. |
 | Mimo V2 Pro | `https://api.mimo.xiaomi.com/v1` | `mimo-v2-pro` | `<mimo-key>` | $16/mo dedicated | Untested in bench. Best candidate for Norwegian content — but UG is ~99.9% English, so not relevant for this path. |
 
-Not recommended (bench losers): `deepseek-v4-flash:cloud` (20% hallucination rate — invents lyric phrases from training data when truncated body lacks them) and `qwen3.5:cloud` (5x token waste from `<think>` blocks, 43.7 s mean latency, same quality as Nemotron at 1/5 the speed).
+Not recommended (bench v2 losers): `deepseek-v4-pro:cloud` (92% kp hit-rate — caught 3/5 phrases on Hallelujah where the others got 5/5) and `qwen3.5:cloud` (149 s mean latency = ~4× Flash, no quality edge to compensate).
 
 **Body preprocessing prerequisite** (PLAN.md Phase 2.5 "Body preprocessing before LLM"): before deploying to prod, implement the shared `lyrics_only(body)` helper. The bench measured raw-body input, which already gave Nemotron 100% key_phrases hit-rate; preprocessing should only *improve* this, especially for tabs like Passenger's *Let Her Go* where DeepSeek-Pro returned 0 phrases because the truncated body had no actual lyrics yet.
 

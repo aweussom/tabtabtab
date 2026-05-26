@@ -4,46 +4,51 @@
   "tab_id": "jeff-buckley__hallelujah-ver-2",
   "artist": "Jeff Buckley",
   "song": "Hallelujah (ver 2)",
-  "latency_ms": 16987,
-  "tokens_in": 843,
-  "tokens_out": 1134,
+  "latency_ms": 22396,
+  "tokens_in": 2551,
+  "tokens_out": 1252,
   "error": null,
-  "raw_content": "{\n  \"search_text\": \"hallelujah jeff buckley cover leonard cohen acoustic melancholy spiritual love heartbreak faith secret chord minor fall major lift baffled king halleluja sorgfull ettertenksom kjærlighet hjertesorg tro begravelse bryllup fingerpicking haunting vakker trist\",\n  \"language\": \"english\",\n  \"themes\": [\"love\", \"heartbreak\", \"faith\", \"spirituality\", \"music\"],\n  \"mood\": [\"melancholy\", \"trist\", \"ettertenksom\", \"haunting\", \"vakker\"],\n  \"occasion\": [\"funeral\", \"breakup\", \"wedding\"],\n  \"alt_titles\": {\"no\": \"Halleluja\", \"en\": \"Hallelujah\"},\n  \"key_phrases\": [\n    \"I heard there was a secret chord\",\n    \"the minor fall and the major lift\",\n    \"the baffled king composing hallelujah\"\n  ]\n}",
+  "raw_content": "{\n  \"search_text\": \"hallelujah jeff buckley cover leonard cohen kjærlighet tro spiritualitet hjertesorg melankoli refleksjon anthemic broken cold and broken hallelujah minor fall major lift baffled king love is not a victory march\",\n  \"language\": \"english\",\n  \"themes\": [\"love\", \"faith\", \"heartbreak\", \"spirituality\", \"betrayal\"],\n  \"mood\": [\"melancholy\", \"reflective\", \"anthemic\", \"somber\", \"spiritual\"],\n  \"occasion\": [\"breakup\", \"funeral\", \"reflection\"],\n  \"alt_titles\": {\"en\": \"Hallelujah (ver 2)\"},\n  \"key_phrases\": [\n    \"the fourth, the fifth, the minor fall and the major lift\",\n    \"the baffled king composing hallelujah\",\n    \"love is not a victory march, it's a cold and it's a broken hallelujah\",\n    \"she broke your throne and she cut your hair\",\n    \"how to shoot somebody who outdrew you\"\n  ],\n  \"display_suppress\": [0, 1]\n}",
   "parse_ok": true,
   "parse_path": "strict",
   "enrichment": {
-    "search_text": "hallelujah jeff buckley cover leonard cohen acoustic melancholy spiritual love heartbreak faith secret chord minor fall major lift baffled king halleluja sorgfull ettertenksom kjærlighet hjertesorg tro begravelse bryllup fingerpicking haunting vakker trist",
+    "search_text": "hallelujah jeff buckley cover leonard cohen kjærlighet tro spiritualitet hjertesorg melankoli refleksjon anthemic broken cold and broken hallelujah minor fall major lift baffled king love is not a victory march",
     "language": "english",
     "themes": [
       "love",
-      "heartbreak",
       "faith",
+      "heartbreak",
       "spirituality",
-      "music"
+      "betrayal"
     ],
     "mood": [
       "melancholy",
-      "trist",
-      "ettertenksom",
-      "haunting",
-      "vakker"
+      "reflective",
+      "anthemic",
+      "somber",
+      "spiritual"
     ],
     "occasion": [
-      "funeral",
       "breakup",
-      "wedding"
+      "funeral",
+      "reflection"
     ],
     "alt_titles": {
-      "no": "Halleluja",
-      "en": "Hallelujah"
+      "en": "Hallelujah (ver 2)"
     },
     "key_phrases": [
-      "I heard there was a secret chord",
-      "the minor fall and the major lift",
-      "the baffled king composing hallelujah"
+      "the fourth, the fifth, the minor fall and the major lift",
+      "the baffled king composing hallelujah",
+      "love is not a victory march, it's a cold and it's a broken hallelujah",
+      "she broke your throne and she cut your hair",
+      "how to shoot somebody who outdrew you"
+    ],
+    "display_suppress": [
+      0,
+      1
     ]
   },
   "key_phrases_hit": 3,
-  "key_phrases_total": 3,
-  "key_phrases_fraction": 1.0
+  "key_phrases_total": 5,
+  "key_phrases_fraction": 0.6
 }
