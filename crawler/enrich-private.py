@@ -35,6 +35,66 @@ from enrich import (
     call_llm, extract_json, reconfigure_streams,
 )
 
+# Optional — only needed for --ollama mode. Importing lazily would be
+# cleaner but this script is small and the failure message is clearer
+# when we report it up-front.
+try:
+    import requests as _requests
+except ImportError:
+    _requests = None
+
+# Ollama-mode defaults. The default model is the bench v2 winner — see
+# PLAN.md Phase 2.5 "Bench v2 update" and NOLLAMA-DEPLOY-PLAN.md Phase 3
+# for the rationale (100% schema-compliance, 100% kp hit-rate, fastest
+# of the top-quality tier). Override with --ollama-model when iterating.
+DEFAULT_OLLAMA_BASE = "http://localhost:11434/v1"
+DEFAULT_OLLAMA_MODEL = "deepseek-v4-flash:cloud"
+OLLAMA_SYSTEM_MSG = (
+    "You enrich a guitar-tab catalog with search metadata for a web app. "
+    "Output ONE JSON object only — no markdown fences, no commentary, no "
+    "surrounding text."
+)
+# Strip reasoning-model think blocks defensively. Mirrors the same regex
+# used in proxy/enrich.js and crawler/enrich-bench.py — see
+# reference_python_llm_patterns memory.
+_THINK_RE = re.compile(r"(?:<think>)?[\s\S]*?</think>\s*", re.IGNORECASE)
+_REFLECT_RE = re.compile(r"<reflection>[\s\S]*?</reflection>\s*", re.IGNORECASE)
+
+
+def call_ollama(model, user_msg, base_url=DEFAULT_OLLAMA_BASE,
+                temperature=0.7, timeout=600):
+    """OpenAI-compat /chat/completions against local Ollama daemon (which
+    transparently routes :cloud-suffixed models to Ollama Cloud).
+    Returns the response content string, with think-tag stripping.
+    Raises on HTTP error or empty content."""
+    if _requests is None:
+        raise RuntimeError(
+            "--ollama mode requires the `requests` package "
+            "(pip install requests)"
+        )
+    url = f"{base_url.rstrip('/')}/chat/completions"
+    payload = {
+        "model": model,
+        "messages": [
+            {"role": "system", "content": OLLAMA_SYSTEM_MSG},
+            {"role": "user", "content": user_msg},
+        ],
+        "stream": False,
+        "temperature": temperature,
+    }
+    resp = _requests.post(url, json=payload, timeout=timeout)
+    if resp.status_code != 200:
+        raise RuntimeError(
+            f"Ollama HTTP {resp.status_code}: {resp.text[:200]}"
+        )
+    data = resp.json()
+    content = (data.get("choices") or [{}])[0].get("message", {}).get("content", "")
+    if not content:
+        raise RuntimeError("Empty content in LLM response")
+    content = _THINK_RE.sub("", content)
+    content = _REFLECT_RE.sub("", content)
+    return content.strip()
+
 # Appended to every prompt — the catalog enricher's prompts are kept
 # unchanged. The catalog has tuned its prompt against thousands of entries
 # already; private imports need extra brevity discipline because Claude
@@ -163,9 +223,24 @@ def parse_args():
     p = argparse.ArgumentParser()
     p.add_argument("--input", default="crawler/private/ug-import.json")
     p.add_argument("--output", default="crawler/private/ug-enrichment.json")
+    # CLI mode (default — shells out to `claude -p` or similar)
     p.add_argument("--cli", default=DEFAULT_CLI,
-                   help="LLM CLI invocation (default: 'claude -p --model sonnet')")
-    p.add_argument("--model-tag", default=DEFAULT_MODEL_TAG)
+                   help="LLM CLI invocation (default: 'claude -p --model sonnet'). "
+                        "Ignored when --ollama is set.")
+    p.add_argument("--model-tag", default=DEFAULT_MODEL_TAG,
+                   help="Tag written to the output file's `model` field in CLI mode. "
+                        "Ollama mode uses --ollama-model verbatim.")
+    # Ollama HTTP mode (--ollama → bypass CLI shell-out, call Ollama API directly)
+    p.add_argument("--ollama", action="store_true",
+                   help="Call Ollama HTTP API directly (OpenAI-compat) instead of "
+                        "shelling out to a CLI. Use this for batch runs against "
+                        f"Ollama Cloud (default model: {DEFAULT_OLLAMA_MODEL}).")
+    p.add_argument("--ollama-base", default=DEFAULT_OLLAMA_BASE,
+                   help=f"Ollama OpenAI-compat base URL (default: {DEFAULT_OLLAMA_BASE})")
+    p.add_argument("--ollama-model", default=DEFAULT_OLLAMA_MODEL,
+                   help=f"Model name passed to Ollama (default: {DEFAULT_OLLAMA_MODEL}). "
+                        "Use `:cloud`-suffixed names to route through Ollama Cloud.")
+    # Run control
     p.add_argument("--force", action="store_true",
                    help="Re-enrich entries that already have output")
     p.add_argument("--retry-thin", action="store_true",
@@ -180,9 +255,24 @@ def parse_args():
 def main():
     reconfigure_streams()
     args = parse_args()
-    cli_cmd = args.cli.split()
     in_path = Path(args.input)
     out_path = Path(args.output)
+
+    # Build the LLM caller closure once, based on flags. Single source of
+    # truth — enrich_one calls call_fn(prompt) without caring whether the
+    # backend is a CLI subprocess or an HTTP request.
+    if args.ollama:
+        def call_fn(prompt_text):
+            return call_ollama(args.ollama_model, prompt_text,
+                               base_url=args.ollama_base)
+        model_tag = args.ollama_model
+        print(f"Mode: Ollama HTTP ({args.ollama_model} via {args.ollama_base})")
+    else:
+        cli_cmd = args.cli.split()
+        def call_fn(prompt_text):
+            return call_llm(cli_cmd, prompt_text)
+        model_tag = args.model_tag
+        print(f"Mode: CLI subprocess ({args.cli})")
 
     if not in_path.exists():
         print(f"ABORT: input file not found: {in_path}", file=sys.stderr)
@@ -250,7 +340,7 @@ def main():
         """Call LLM, try strict parse, then salvage truncated output, else fallback."""
         resp = None
         try:
-            resp = call_llm(cli_cmd, prompt + STRICT_SUFFIX)
+            resp = call_fn(prompt + STRICT_SUFFIX)
             return extract_json(resp), False
         except Exception as strict_err:
             salvaged = salvage_truncated_json(resp)
@@ -270,7 +360,7 @@ def main():
         )
         state["artists"][aid] = result
         done += 1
-        save_state(out_path, state, args.model_tag)
+        save_state(out_path, state, model_tag)
         if args.limit and done >= args.limit:
             print(f"Reached --limit {args.limit}. Stopping.")
             return 0
@@ -290,7 +380,7 @@ def main():
         )
         state["songs"][sid] = result
         done += 1
-        save_state(out_path, state, args.model_tag)
+        save_state(out_path, state, model_tag)
         if args.limit and done >= args.limit:
             print(f"Reached --limit {args.limit}. Stopping.")
             return 0
