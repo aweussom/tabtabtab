@@ -69,6 +69,11 @@ const SYSTEM = `You enrich a guitar-tab catalog with search metadata for a music
 "key_phrases" (array of 3-5 verbatim memorable lyric lines from the body).
 Focus on lyric content; ignore chord notation and any header/tabber noise.`;
 
+// Appended to the user turn — same brevity discipline as the Python pipeline's
+// STRICT_SUFFIX. Small on-device models drift verbose / trail prose; this
+// nudges them toward one clean object.
+const STRICT = `\n\nOutput MUST be exactly ONE valid JSON object that starts with { and ends with }. No prose before or after. Keep each array to 3-5 short items.`;
+
 // ---- on-device model ----
 let baseSession = null;
 async function ensureBase() {
@@ -91,19 +96,83 @@ async function ensureBase() {
   return baseSession;
 }
 
+// ---- lenient JSON recovery (ports archive/proxy/enrich.js + enrich-private.py) ----
+function stripReasoning(t) {
+  return (t || '')
+    .replace(/(?:<think>)?[\s\S]*?<\/think>\s*/gi, '')
+    .replace(/<reflection>[\s\S]*?<\/reflection>\s*/gi, '')
+    .trim();
+}
+function stripFences(t) {
+  return t.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '').trim();
+}
+// First balanced top-level {...}, string-aware so braces inside strings don't
+// shift the depth count. Handles "valid object + trailing prose".
+function firstBalancedJsonBlock(text) {
+  let depth = 0, start = -1, inStr = false, escape = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (escape) { escape = false; continue; }
+    if (ch === '\\' && inStr) { escape = true; continue; }
+    if (ch === '"') { inStr = !inStr; continue; }
+    if (inStr) continue;
+    if (ch === '{') { if (depth === 0) start = i; depth++; }
+    else if (ch === '}') { depth--; if (depth === 0 && start >= 0) return text.slice(start, i + 1); }
+  }
+  return null;
+}
+// Best-effort recovery for output truncated mid-string/array/object: walk once
+// tracking string + brace/bracket depth, append the missing closers, drop a
+// dangling trailing comma. Handles "Expected ',' or ']' after array element".
+function salvageTruncatedJson(text) {
+  const start = text.indexOf('{');
+  if (start < 0) return null;
+  text = text.slice(start);
+  let depth = 0, brackets = 0, inStr = false, escape = false;
+  for (const ch of text) {
+    if (escape) { escape = false; continue; }
+    if (inStr) { if (ch === '\\') escape = true; else if (ch === '"') inStr = false; continue; }
+    if (ch === '"') inStr = true;
+    else if (ch === '{') depth++;
+    else if (ch === '}') depth--;
+    else if (ch === '[') brackets++;
+    else if (ch === ']') brackets--;
+  }
+  let s = text;
+  if (inStr) s += '"';
+  while (brackets-- > 0) s += ']';
+  while (depth-- > 0) s += '}';
+  s = s.replace(/,\s*([}\]])/g, '$1');   // dangling comma before a closer
+  try { return JSON.parse(s); } catch { return null; }
+}
+function parseEnrichment(raw) {
+  const t = stripFences(stripReasoning(raw));
+  const block = firstBalancedJsonBlock(t) ?? t;
+  try { return JSON.parse(block); } catch {}
+  const salvaged = salvageTruncatedJson(t);
+  if (salvaged) return salvaged;
+  throw new Error('unparseable: ' + raw.slice(0, 70).replace(/\n/g, ' '));
+}
+
 async function enrichOne(tab) {
   const base = await ensureBase();
-  // Clone per tab so each prompt gets a fresh context — accumulating 250 tab
-  // bodies in one session would blow Gemini Nano's input quota.
-  const session = await base.clone();
-  try {
-    const user = `Artist: ${tab.artist}\nSong: ${tab.song}\nBody:\n---\n${tab.body || ''}\n---`;
-    const raw = await session.prompt(user);
-    const cleaned = raw.replace(/^```(?:json)?/i, '').replace(/```\s*$/, '').trim();
-    return JSON.parse(cleaned);
-  } finally {
-    session.destroy?.();
+  const user = `Artist: ${tab.artist}\nSong: ${tab.song}\nBody:\n---\n${tab.body || ''}\n---${STRICT}`;
+  let lastErr;
+  // Two attempts: Nano is nondeterministic, so a re-roll often parses where the
+  // first didn't. Each attempt clones the base session for fresh context —
+  // accumulating 250 tab bodies in one session would blow Nano's input quota.
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    const session = await base.clone();
+    try {
+      const raw = await session.prompt(user);
+      return parseEnrichment(raw);
+    } catch (err) {
+      lastErr = err;
+    } finally {
+      session.destroy?.();
+    }
   }
+  throw lastErr;
 }
 
 // ---- corpus (persisted) ----
