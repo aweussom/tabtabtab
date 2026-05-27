@@ -119,12 +119,22 @@ def strip_fences(text):
 
 
 def call_ollama(model, system_msg, user_msg, temperature=TEMPERATURE,
-                timeout=TIMEOUT_S):
-    """OpenAI-compat /chat/completions against local Ollama. Returns dict:
+                timeout=TIMEOUT_S, base_url=None, api_key=None, extra_body=None):
+    """OpenAI-compat /chat/completions. Returns dict:
         {content, raw, latency_ms, tokens_in, tokens_out, error}
     On final failure (after retries), `content` is None and `error` is set.
+
+    `base_url` defaults to local Ollama; pass e.g. https://api.xiaomimimo.com/v1
+    for a hosted provider. `api_key` adds an Authorization: Bearer header
+    (local Ollama needs none; Mimo / Ollama Cloud require one). `extra_body`
+    is a dict merged into the request payload — e.g.
+    {"thinking": {"type": "disabled"}} to turn off MiMo's reasoning mode.
     """
-    url = f"{OLLAMA_BASE}/chat/completions"
+    base = (base_url or OLLAMA_BASE).rstrip("/")
+    url = f"{base}/chat/completions"
+    headers = {"Content-Type": "application/json"}
+    if api_key:
+        headers["Authorization"] = f"Bearer {api_key}"
     payload = {
         "model": model,
         "messages": [
@@ -134,11 +144,13 @@ def call_ollama(model, system_msg, user_msg, temperature=TEMPERATURE,
         "stream": False,
         "temperature": temperature,
     }
+    if extra_body:
+        payload.update(extra_body)
     last_err = None
     t0 = time.time()
     for attempt in range(1, RETRY_ATTEMPTS + 1):
         try:
-            resp = requests.post(url, json=payload, timeout=timeout)
+            resp = requests.post(url, json=payload, headers=headers, timeout=timeout)
             if resp.status_code != 200:
                 raise RuntimeError(f"HTTP {resp.status_code}: {resp.text[:200]}")
             data = resp.json()
@@ -230,13 +242,14 @@ def pick_test_tabs(import_path, keys):
     return [picks[k] for k in keys if k in picks]
 
 
-def run_one(model, tab):
+def run_one(model, tab, base_url=None, api_key=None, extra_body=None):
     """Run a single (model, tab) pair. Returns the full per-run dict."""
     user_msg = SONG_PROMPT.format(
         artist=tab["artist"], song=tab["song"], body=tab["body"]
     ) + STRICT_SUFFIX
 
-    llm = call_ollama(model, SYSTEM_MSG, user_msg)
+    llm = call_ollama(model, SYSTEM_MSG, user_msg, base_url=base_url,
+                      api_key=api_key, extra_body=extra_body)
     parsed = None
     parse_ok = False
     parse_path = None  # "strict" | "salvaged" | "failed"
@@ -388,6 +401,17 @@ def parse_args():
     p.add_argument("--input", default="crawler/private/ug-import.json")
     p.add_argument("--out-dir", default="crawler/bench")
     p.add_argument("--models", nargs="*", default=DEFAULT_MODELS)
+    p.add_argument("--base", default=OLLAMA_BASE,
+                   help=f"OpenAI-compat base URL (default: {OLLAMA_BASE}). "
+                        "Use https://api.mimo.xiaomi.com/v1 for Mimo, "
+                        "https://ollama.com/v1 for Ollama Cloud direct, etc.")
+    p.add_argument("--api-key-env", default=None,
+                   help="Name of an env var holding the Bearer API key. "
+                        "Omit for local Ollama (no auth). E.g. MIMO_API_KEY.")
+    p.add_argument("--extra-body", default=None,
+                   help="JSON string merged into the request payload. "
+                        "E.g. '{\"thinking\": {\"type\": \"disabled\"}}' to "
+                        "turn off MiMo's reasoning mode.")
     p.add_argument("--force", action="store_true",
                    help="Re-run runs even if a cached file exists")
     p.add_argument("--compare-only", action="store_true",
@@ -401,6 +425,22 @@ def main():
     out_dir = Path(args.out_dir)
     runs_dir = out_dir / "runs"
     runs_dir.mkdir(parents=True, exist_ok=True)
+
+    # Resolve the API key from the named env var, if any. Never logged.
+    import os
+    api_key = os.environ.get(args.api_key_env) if args.api_key_env else None
+    if args.api_key_env and not api_key:
+        print(f"ABORT: --api-key-env {args.api_key_env} is set but the env "
+              f"var is empty/unset.", file=sys.stderr)
+        return 1
+
+    extra_body = None
+    if args.extra_body:
+        try:
+            extra_body = json.loads(args.extra_body)
+        except json.JSONDecodeError as e:
+            print(f"ABORT: --extra-body is not valid JSON: {e}", file=sys.stderr)
+            return 1
 
     tabs = pick_test_tabs(args.input, TEST_TAB_KEYS)
     if not tabs:
@@ -420,7 +460,8 @@ def main():
 
     total = len(args.models) * len(tabs)
     done = 0
-    print(f"Running {total} (model × tab) combinations against {OLLAMA_BASE}")
+    auth_note = f" (auth via ${args.api_key_env})" if args.api_key_env else ""
+    print(f"Running {total} (model × tab) combinations against {args.base}{auth_note}")
     for model in args.models:
         for tab in tabs:
             done += 1
@@ -430,7 +471,8 @@ def main():
                 print(f"[{done:2}/{total}] cached: {model} × {tab['key']}")
                 continue
             print(f"[{done:2}/{total}] {model} × {tab['key']} ...", flush=True)
-            result = run_one(model, tab)
+            result = run_one(model, tab, base_url=args.base, api_key=api_key,
+                             extra_body=extra_body)
             run_path.write_text(
                 json.dumps(result, indent=2, ensure_ascii=False),
                 encoding="utf-8"

@@ -26,6 +26,24 @@ The rest of this document — candidate-model survey, gold-standard dataset cons
 
 Until one of those triggers, do not invest in benchmark harness work. The rest of the doc stays as parked design notes.
 
+## TODO: MiMo-V2.5 bench — blocked on token-plan key (2026-05-27)
+
+Xiaomi cut MiMo-V2.5 pricing hard (up to 99% off) and the Standard token plan is $16/mo for 11 B credits (~9000 full re-enrichments of our 253-tab library/month — effectively unlimited). Cost + official-API + ToS-clean profile makes it a serious nollama.no production candidate, possibly displacing DeepSeek-Flash. **But it's untested in our bench.**
+
+Attempted 2026-05-27, blocked on auth:
+- `enrich-bench.py` now supports arbitrary OpenAI-compat endpoints: `--base`, `--api-key-env`, `--extra-body` (JSON merged into payload — for `{"thinking":{"type":"disabled"}}` + `{"response_format":{"type":"json_object"}}`). Harness side is done.
+- `api.xiaomimimo.com/v1` + the platform API key → **HTTP 402 "Insufficient account balance"** (key valid, pay-as-you-go balance empty).
+- `token-plan-ams.xiaomimimo.com/v1` + the same key → **HTTP 401 "Invalid API Key"**.
+- Conclusion: the token plan uses a **separate key** (the coding-tool key that works with Claude Code / OpenCode / KiloCode), distinct from the platform API key. Need to grab it from the Token Plan section of the dashboard and set it (`[Environment]::SetEnvironmentVariable("MIMO_TOKEN_KEY", ..., "User")`).
+
+To resume: set `MIMO_TOKEN_KEY`, then
+```
+python crawler/enrich-bench.py --base https://token-plan-ams.xiaomimimo.com/v1 \
+  --api-key-env MIMO_TOKEN_KEY --models mimo-v2.5-pro \
+  --extra-body '{"thinking":{"type":"disabled"},"response_format":{"type":"json_object"}}' --force
+```
+If that 401s too, next suspect is `api-key:` header vs `Authorization: Bearer` — add an auth-header-style flag and retry. `response_format: json_object` is worth keeping regardless — structured-output mode makes parsing bulletproof (eliminates fence-stripping + most salvage logic). It belongs in the production proxy + enrich-private.py once a working provider is confirmed.
+
 ## Why benchmark at all
 
 The current catalog uses Claude Sonnet and GPT-4-class models. These are expensive (~$50-150 per full catalog enrichment) and Tommy's personal subscriptions absorb the cost. For *user-import* enrichment, scaling per-user-bookmarks-at-Tommy's-cost doesn't work — costs grow linearly with user count.
