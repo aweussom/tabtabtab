@@ -116,6 +116,22 @@ Don't remove any of these without re-testing on a physical iPhone:
 
 **SW-cache double-bind during iteration:** because `APP_VERSION` only bumps at commit, every speculative shell-file change during local debugging needs a manual `version.js` bump to reach iOS (see "Cache-busting + service worker" above). The 2026-05-16/17 session bumped manually four times before landing the final state.
 
+## iOS chord-wrap: defensive shotgun in place (2026-05-17)
+
+The chord-wrap pipeline carries five overlapping defenses against iOS Safari's stale-layout-after-rotation behavior. They were landed together as a shotgun fix on 2026-05-16/17 after a debugging session confirmed they make the wrap correct on a real iPhone. We did not bisect to find the minimum-necessary subset — the iOS user count for this app is effectively zero, so the overkill is acceptable. If anyone ever wants to minimize, the PLAN.md "Narrow down exactly what is needed for iOS" entry has the bisection plan.
+
+Don't remove any of these without re-testing on a physical iPhone:
+
+1. `chord-wrap.js` `measureMaxCols` reads `preEl.parentElement.clientWidth` instead of `preEl.clientWidth`. The pre shrinks to its post-wrap content (flex auto-basis in portrait, `width: max-content` in bleed mode), so reading its own clientWidth creates a feedback loop — a wider viewport never gets a bigger budget. **Fundamental: PC needs it too.**
+2. `chord-wrap.js` `measureMaxCols` copies font *longhands* (`fontFamily`, `fontSize`, `fontWeight`, `fontStyle`, `letterSpacing`) to the temp measurement span instead of the `cs.font` shorthand, because WebKit returns `""` for the shorthand when any longhand isn't explicit, which would silently fall through to body's proportional font and skew `charW`.
+3. `views/tab.js` `wireChordWrap` schedules `apply()` *four times* per viewport event: immediate, double-RAF, 250 ms, 600 ms. iOS fires `resize` mid-rotation-animation before viewport / media-query / font metrics have settled; spreading retries across this window means at least one measurement lands after Safari catches up. Each `apply()` re-reads fresh dimensions, so duplicates are idempotent and cheap.
+4. `views/tab.js` `wireChordWrap` listens to `orientationchange` and `visualViewport.resize` in addition to `window.resize`. Both are more reliable than plain `resize` on iOS for rotation, and `visualViewport` additionally covers browser-chrome show/hide.
+5. `views/tab.js` `wireTextSize` defers `applyWrap()` to the next `requestAnimationFrame` after writing `--tab-text-scale`, so `getComputedStyle`'s font metrics have reflowed before `charW` is measured. Without this, A−/zoom-out is asymmetric on iOS — wrap doesn't widen when the budget grows.
+
+**Surfaced-but-parked:** `wrapPlain` hard-breaks lines that have no whitespace within `maxCols` (long URLs split mid-token: `Tumbleweed_C` / `onnection`). Better behavior: pass such lines through unchanged and let `overflow-x: auto` on `.tab-body` handle them with horizontal scroll. Low priority.
+
+**SW-cache double-bind during iteration:** because `APP_VERSION` only bumps at commit, every speculative shell-file change during local debugging needs a manual `version.js` bump to reach iOS. PC dev tools usually bypass this via "Disable cache" while DevTools is open; iOS Safari has no such switch and will serve stale cached code until either (a) you commit so `APP_VERSION` bumps, (b) you clear Safari's website data for the host, or (c) you manually `caches.delete()` from the JS console. The 2026-05-16/17 session bumped manually four times before landing the final state. If a code change "works on desktop but not on iOS," suspect SW cache first.
+
 ## Working artifacts outside the repo
 
 - `C:\Users\wossn\catalog_a.json` and `nortabs_crawl_test.py` — early unpaginated samples; superseded by `crawler/crawl.py`. Keep for historical reference only.
