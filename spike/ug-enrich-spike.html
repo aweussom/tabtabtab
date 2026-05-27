@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>tabtabtab — on-device UG enrichment spike</title>
+<style>
+  :root { color-scheme: light dark; }
+  body { font: 15px/1.5 system-ui, sans-serif; max-width: 920px; margin: 2rem auto; padding: 0 1rem; }
+  h1 { font-size: 1.3rem; } h2 { font-size: 1.05rem; margin-top: 1.6rem; }
+  .muted { opacity: .7; }
+  .card { border: 1px solid #8884; border-radius: 8px; padding: .8rem 1rem; margin: .8rem 0; }
+  button { font: inherit; padding: .4rem .8rem; border-radius: 6px; border: 1px solid #8886; cursor: pointer; }
+  button:disabled { opacity: .5; cursor: default; }
+  input[type=number] { width: 5rem; font: inherit; padding: .2rem .4rem; }
+  #drop { border: 2px dashed #8886; border-radius: 8px; padding: 1.4rem; text-align: center; }
+  #drop.over { border-color: #4a9; background: #4a92; }
+  #status { white-space: pre-wrap; font-family: ui-monospace, monospace; font-size: 13px; }
+  table { border-collapse: collapse; width: 100%; font-size: 13px; }
+  th, td { text-align: left; padding: .3rem .5rem; border-bottom: 1px solid #8883; vertical-align: top; }
+  .tag { display: inline-block; background: #8882; border-radius: 4px; padding: 0 .4rem; margin: 0 .2rem .2rem 0; font-size: 12px; }
+  .fail { color: #c44; }
+  #search { width: 100%; font: inherit; padding: .5rem; box-sizing: border-box; }
+  .hit-meta { font-size: 12px; opacity: .75; }
+</style>
+</head>
+<body>
+<h1>tabtabtab — on-device UG enrichment spike</h1>
+<p class="muted">
+  Standalone proof of the loop: drop an Ultimate Guitar export → enrich each tab
+  <strong>on-device</strong> with Chrome's Gemini Nano → search the result by vibe.
+  No server, no key, nothing uploaded. Assumes Chrome with the Prompt API available.
+</p>
+
+<div class="card">
+  <div id="drop">
+    Drop a <code>nortabs-ug-import-*.json</code> here, or
+    <input type="file" id="file" accept="application/json,.json">
+    <div class="muted" style="margin-top:.5rem">
+      …or <button id="sample">load bundled sample</button>
+      (<code>/crawler/private/ug-import.json</code>)
+    </div>
+  </div>
+  <p>
+    Enrich first <input type="number" id="limit" value="10" min="1" max="999"> tabs
+    <button id="enrich" disabled>Enrich on-device</button>
+    <span id="loaded" class="muted"></span>
+  </p>
+  <div id="status">checking Prompt API…</div>
+</div>
+
+<h2>Enriched corpus <span id="count" class="muted"></span></h2>
+<input id="search" placeholder="search by vibe — e.g. heartbreak, roadtrip, faith, melancholy…" disabled>
+<div id="results"></div>
+
+<script type="module">
+const $ = s => document.querySelector(s);
+const statusEl = $('#status');
+const setStatus = t => { statusEl.textContent = t; };
+const log = t => { statusEl.textContent += '\n' + t; };
+
+// ---- enrichment prompt (mirrors the validated console tests; semantic layer only) ----
+const SYSTEM = `You enrich a guitar-tab catalog with search metadata for a music search engine. Output ONE JSON object only — no markdown fences, no commentary. Fields:
+"search_text" (flat lowercase keyword string blending themes/mood/occasion/key phrases, 30-60 words),
+"language" (string),
+"themes" (array of strings),
+"mood" (array of strings),
+"occasion" (array of strings like wedding/funeral/breakup; [] if none),
+"key_phrases" (array of 3-5 verbatim memorable lyric lines from the body).
+Focus on lyric content; ignore chord notation and any header/tabber noise.`;
+
+// ---- on-device model ----
+let baseSession = null;
+async function ensureBase() {
+  if (typeof LanguageModel === 'undefined')
+    throw new Error('No LanguageModel API. Need Chrome + chrome://flags/#prompt-api-for-gemini-nano.');
+  const avail = await LanguageModel.availability();
+  if (avail === 'unavailable')
+    throw new Error('Gemini Nano unavailable. Enable #optimization-guide-on-device-model=BypassPerfRequirement and download the component via chrome://components.');
+  if (!baseSession) {
+    baseSession = await LanguageModel.create({
+      expectedInputs:  [{ type: 'text', languages: ['en'] }],
+      expectedOutputs: [{ type: 'text', languages: ['en'] }],
+      initialPrompts:  [{ role: 'system', content: SYSTEM }],
+      monitor(m) {
+        m.addEventListener('downloadprogress', e =>
+          setStatus(`Downloading Gemini Nano: ${Math.round(e.loaded * 100)}%`));
+      },
+    });
+  }
+  return baseSession;
+}
+
+async function enrichOne(tab) {
+  const base = await ensureBase();
+  // Clone per tab so each prompt gets a fresh context — accumulating 250 tab
+  // bodies in one session would blow Gemini Nano's input quota.
+  const session = await base.clone();
+  try {
+    const user = `Artist: ${tab.artist}\nSong: ${tab.song}\nBody:\n---\n${tab.body || ''}\n---`;
+    const raw = await session.prompt(user);
+    const cleaned = raw.replace(/^```(?:json)?/i, '').replace(/```\s*$/, '').trim();
+    return JSON.parse(cleaned);
+  } finally {
+    session.destroy?.();
+  }
+}
+
+// ---- corpus (persisted) ----
+const STORE_KEY = 'tabtabtab:spike:corpus:v1';
+let corpus = [];
+try { corpus = JSON.parse(localStorage.getItem(STORE_KEY) || '[]'); } catch {}
+
+function saveCorpus() { localStorage.setItem(STORE_KEY, JSON.stringify(corpus)); }
+
+// ---- fold + tiny vibe search over enriched search_text ----
+function fold(s) {
+  return (s || '').toLowerCase()
+    .replace(/ø/g, 'o').replace(/æ/g, 'a').replace(/å/g, 'a')
+    .normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .replace(/[^\w\s]/g, ' ').replace(/\s+/g, ' ').trim();
+}
+function searchCorpus(q) {
+  const toks = fold(q).split(' ').filter(Boolean);
+  if (!toks.length) return [];
+  return corpus.map(e => {
+    const hay = fold(`${e.artist} ${e.song} ${e.enrichment?.search_text || ''} ${(e.enrichment?.themes||[]).join(' ')} ${(e.enrichment?.mood||[]).join(' ')} ${(e.enrichment?.occasion||[]).join(' ')}`);
+    const score = toks.reduce((n, t) => n + (hay.includes(t) ? 1 : 0), 0);
+    return { e, score };
+  }).filter(x => x.score > 0).sort((a, b) => b.score - a.score).slice(0, 30);
+}
+
+// ---- rendering ----
+function renderCount() {
+  $('#count').textContent = corpus.length ? `(${corpus.length} tabs)` : '(empty)';
+  $('#search').disabled = corpus.length === 0;
+}
+function tagList(arr) { return (arr || []).map(t => `<span class="tag">${t}</span>`).join(''); }
+
+function renderResults(list) {
+  const rows = list.map(({ e }) => `
+    <tr>
+      <td><strong>${e.artist}</strong><br>${e.song}<div class="hit-meta">${e.enrichment?.language || ''}</div></td>
+      <td>${tagList(e.enrichment?.themes)}${tagList(e.enrichment?.mood)}<br>${tagList(e.enrichment?.occasion)}</td>
+      <td class="hit-meta">${(e.enrichment?.key_phrases || []).map(p => `“${p}”`).join('<br>')}</td>
+    </tr>`).join('');
+  $('#results').innerHTML = list.length
+    ? `<table><thead><tr><th>Tab</th><th>themes / mood / occasion</th><th>key phrases</th></tr></thead><tbody>${rows}</tbody></table>`
+    : '<p class="muted">no matches</p>';
+}
+
+// ---- load + enrich flow ----
+let loadedTabs = [];
+function onLoaded(data) {
+  loadedTabs = (data.tabs || []).filter(t => t.artist && t.song);
+  $('#loaded').textContent = `${loadedTabs.length} tabs loaded`;
+  $('#enrich').disabled = loadedTabs.length === 0;
+}
+
+async function runEnrich() {
+  const n = Math.min(parseInt($('#limit').value, 10) || 10, loadedTabs.length);
+  $('#enrich').disabled = true;
+  setStatus(`enriching ${n} tabs on-device…`);
+  let ok = 0, fail = 0;
+  const t0 = performance.now();
+  for (let i = 0; i < n; i++) {
+    const tab = loadedTabs[i];
+    log(`[${i + 1}/${n}] ${tab.artist} — ${tab.song} …`);
+    try {
+      const enrichment = await enrichOne(tab);
+      const id = `ug:${tab.artist}:${tab.song}`.toLowerCase();
+      const existing = corpus.findIndex(e => e.id === id);
+      const entry = { id, artist: tab.artist, song: tab.song, body: tab.body, enrichment };
+      if (existing >= 0) corpus[existing] = entry; else corpus.push(entry);
+      ok++;
+    } catch (err) {
+      fail++;
+      log(`    ✗ ${err.message}`);
+    }
+  }
+  saveCorpus();
+  const secs = ((performance.now() - t0) / 1000).toFixed(1);
+  log(`\ndone: ${ok} ok, ${fail} failed in ${secs}s → saved to corpus (localStorage)`);
+  renderCount();
+  renderResults(corpus.slice(-n).reverse().map(e => ({ e })));
+}
+
+// ---- wiring ----
+async function init() {
+  renderCount();
+  try {
+    const avail = await (async () => {
+      if (typeof LanguageModel === 'undefined') return 'no-api';
+      return await LanguageModel.availability();
+    })();
+    if (avail === 'no-api') setStatus('⚠ No LanguageModel API — open in Chrome with the Prompt API flag enabled.');
+    else if (avail === 'unavailable') setStatus('⚠ Gemini Nano unavailable — enable the flags + download the component (chrome://components).');
+    else setStatus(`Prompt API ready (availability: ${avail}). Load a UG export to begin.`);
+  } catch (e) { setStatus('⚠ ' + e.message); }
+}
+
+$('#file').addEventListener('change', async e => {
+  const f = e.target.files[0]; if (!f) return;
+  try { onLoaded(JSON.parse(await f.text())); }
+  catch (err) { setStatus('✗ bad JSON: ' + err.message); }
+});
+$('#sample').addEventListener('click', async () => {
+  try {
+    const r = await fetch('/crawler/private/ug-import.json');
+    if (!r.ok) throw new Error('HTTP ' + r.status + ' (serve from repo root via http.server)');
+    onLoaded(await r.json());
+    setStatus('loaded bundled sample. Set a limit and hit Enrich.');
+  } catch (err) { setStatus('✗ ' + err.message); }
+});
+const drop = $('#drop');
+['dragover', 'dragenter'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('over'); }));
+['dragleave', 'drop'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('over'); }));
+drop.addEventListener('drop', async e => {
+  const f = e.dataTransfer.files[0]; if (!f) return;
+  try { onLoaded(JSON.parse(await f.text())); }
+  catch (err) { setStatus('✗ bad JSON: ' + err.message); }
+});
+$('#enrich').addEventListener('click', runEnrich);
+$('#search').addEventListener('input', e => renderResults(searchCorpus(e.target.value)));
+
+init();
+</script>
+</body>
+</html>
