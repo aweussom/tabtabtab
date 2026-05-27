@@ -53,6 +53,12 @@
 <input id="search" placeholder="search by vibe — e.g. heartbreak, roadtrip, faith, melancholy…" disabled>
 <div id="results"></div>
 
+<!-- JSON5 (vendored, ~31 KB UMD → global JSON5) as the lenient parser for
+     LLM output. Strict superset of JSON, so swapping JSON.parse→JSON5.parse
+     only adds tolerance (single quotes, unquoted keys, trailing commas,
+     comments). Structural recovery (balanced-block + salvage) still handles
+     truncation / trailing-prose, which JSON5 alone can't. -->
+<script src="/vendor/json5.min.js"></script>
 <script type="module">
 const $ = s => document.querySelector(s);
 const statusEl = $('#status');
@@ -143,12 +149,12 @@ function salvageTruncatedJson(text) {
   while (brackets-- > 0) s += ']';
   while (depth-- > 0) s += '}';
   s = s.replace(/,\s*([}\]])/g, '$1');   // dangling comma before a closer
-  try { return JSON.parse(s); } catch { return null; }
+  try { return JSON5.parse(s); } catch { return null; }
 }
 function parseEnrichment(raw) {
   const t = stripFences(stripReasoning(raw));
   const block = firstBalancedJsonBlock(t) ?? t;
-  try { return JSON.parse(block); } catch {}
+  try { return JSON5.parse(block); } catch {}
   const salvaged = salvageTruncatedJson(t);
   if (salvaged) return salvaged;
   throw new Error('unparseable: ' + raw.slice(0, 70).replace(/\n/g, ' '));
