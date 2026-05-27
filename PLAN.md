@@ -182,7 +182,24 @@ Concept: a **songbook** is a named, ordered collection of tabs. "Favorites" is j
 - **Search weighting**: tabs in any of the user's local songbooks get a large score boost. Effectively: "if I've bookmarked Bjørn Eidsvåg, his name should win over a less-known same-letter artist."
 - Future (Phase 4+ maybe): if we later add a backend for discovery/listing other people's public songbooks, the URL-hash share continues to work for private collections.
 
-### Phase 2.5 — Thin LLM proxy for UG-import enrichment (pinned 2026-05-17)
+### Phase 2.5 — SUPERSEDED 2026-05-27: UG enrichment moves on-device (Chrome-only)
+
+**BINDING DECISION (2026-05-27): UG-import enrichment runs ON-DEVICE in the browser via Chrome's built-in Prompt API (Gemini Nano). It is Google-Chrome-only, going forward.** The thin cloud proxy below was the *pre-Chrome-AI* plan; it is no longer the primary path for UG enrichment.
+
+**What changed**: Chrome shipped the built-in Prompt API (`LanguageModel` global, Gemini Nano on-device) in stable (Chrome 148 verified on Tommy's machine 2026-05-27). This is NOT a network call — it's an on-device model — so the entire premise that justified the proxy ("the browser can't call cloud LLMs, CORS blocks it, the proxy is not optional") is void for Chrome users. Validated end-to-end:
+
+- `LanguageModel.availability()` → `available` after one-time provisioning (flags `#prompt-api-for-gemini-nano` + `#optimization-guide-on-device-model=BypassPerfRequirement`, then download the "Optimization Guide On Device Model" component via `chrome://components`).
+- Tested on 2 English UG tabs (Tecumseh Valley, Let Her Go). **Semantic-layer quality matches the cloud models** (DeepSeek-Flash et al.): `search_text` / `themes` / `mood` / `key_phrases` were accurate and `key_phrases` came back verbatim-identical to the cloud baseline. ~9-10 s per song on an RTX 5090.
+- Create with `expectedInputs`/`expectedOutputs: [{type:'text', languages:['en']}]` (the `outputLanguage` key is not recognized; the language warning fires without the `expected*` form).
+- **`display_suppress` is dropped** (it was only aesthetic anyway). Gemini Nano over-suppressed line ranges (counting line indices is beyond a ~3-4B on-device model — it returned `[0..19]` on Tecumseh, eating the title + first verse). If we ever revisit it, prepend line numbers to the body so the model *reads* indices instead of *counting* them — that trick would help the cloud models too (they hallucinated out-of-range indices).
+
+**Why Chrome-only is acceptable**: it matches the project's "browser is a complete computer" ethos — zero backend, zero cost, zero CORS, zero API key, works offline. Non-Chrome users still get full *literal* search over their UG imports (artist/title/lyric/chord text); they just don't get the LLM semantic layer in-browser. That asymmetry is the same kind already accepted in the UG-import backlog ("Search asymmetry without enrichment"). A cloud fallback for non-Chrome users is possible later but is explicitly NOT being built now — Chrome-only is the committed scope.
+
+**Ripple effects** (downstream of this decision, to reconcile): the cloud-proxy work (`proxy/`, `NOLLAMA-DEPLOY-PLAN.md`, the DeepSeek-Flash/MiMo benchmarking) was building the now-superseded path. It is not deleted — it informed the decision and may return as the non-Chrome fallback — but it is no longer on the critical path. `nollama.no` no longer needs to host a UG-enrichment proxy. The public-catalog enrichment pipeline (`crawler/enrich.py`, Claude/OpenAI nightly) is unaffected — that's a separate concern.
+
+---
+
+**[Historical — the pre-Chrome-AI proxy plan, retained for context]**
 
 A minimal Node 24 backend on Tommy's Azure VM that lets the browser-side UG-import flow do real LLM-enrichment without ever shipping API keys to the client. This is the *thin* form of the Phase 5+ architecture — single endpoint, no auth, no persistence beyond a shared metadata cache. Magic-link auth + per-user rate limits get added later if/when traffic demands.
 
