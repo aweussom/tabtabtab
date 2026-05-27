@@ -20,7 +20,7 @@ A polite-to-the-API constraint sits underneath both: explicit blessing from the 
 
 | Decision | Choice | Why |
 |---|---|---|
-| Hosting | GitHub Pages (static) | Free, fast CDN, no infra to maintain. |
+| Hosting | ~~GitHub Pages (static)~~ → **superseded 2026-05-27**: repo went private (Pages off on free plan), product moves to `tabtabtab.no` served as static files from Tommy's Azure VM. Still static, still no app-backend — just a different static host. See Phase 2.5 "SUPERSEDED" + the on-device decision. | Free, fast CDN was the original draw; private-repo + own-domain won out. |
 | Stack | **Vanilla JS + HTML + CSS, no build step** | App has ~6 views and tiny state. Frameworks are overhead, not leverage. Open `index.html` → it works. |
 | State | Single `state.js` module | Centralized, predictable. Re-render current view on state change. |
 | Routing | `window.location.hash` + one `hashchange` listener | Shareable URLs, works under Pages' SPA limitations. |
@@ -196,6 +196,21 @@ Concept: a **songbook** is a named, ordered collection of tabs. "Favorites" is j
 **Why Chrome-only is acceptable**: it matches the project's "browser is a complete computer" ethos — zero backend, zero cost, zero CORS, zero API key, works offline. Non-Chrome users still get full *literal* search over their UG imports (artist/title/lyric/chord text); they just don't get the LLM semantic layer in-browser. That asymmetry is the same kind already accepted in the UG-import backlog ("Search asymmetry without enrichment"). A cloud fallback for non-Chrome users is possible later but is explicitly NOT being built now — Chrome-only is the committed scope.
 
 **Ripple effects** (downstream of this decision, to reconcile): the cloud-proxy work (`proxy/`, `NOLLAMA-DEPLOY-PLAN.md`, the DeepSeek-Flash/MiMo benchmarking) was building the now-superseded path. It is not deleted — it informed the decision and may return as the non-Chrome fallback — but it is no longer on the critical path. `nollama.no` no longer needs to host a UG-enrichment proxy. The public-catalog enrichment pipeline (`crawler/enrich.py`, Claude/OpenAI nightly) is unaffected — that's a separate concern.
+
+**Next near-term piece — cross-device sync via Google Drive `appDataFolder`** (elevated to near-term 2026-05-27): now that enrichment runs on-device, a user's imported + enriched UG library lives in their browser's localStorage/IndexedDB — which is *per-device*. The moment in-browser enrichment works (it does), the obvious next want is "take my tabs with me" across laptop / phone / desktop.
+
+The clean, still-serverless answer: **Google sign-in (OAuth) + store the user's private-tabs + enrichment JSON in Google Drive's hidden `appDataFolder`.**
+
+- `appDataFolder` is Drive's special per-app hidden folder (OAuth scope `drive.appdata`) — invisible in the user's normal Drive UI, and each app can only see its own. Minimal scope, easy for a user to trust, and Google's verification for it is lighter than full-Drive access.
+- The copyrighted UG content lives in the **user's own Google Drive**, never our infrastructure — exactly the "NorTabs never stores user-content bodies" legal posture. We host nothing but the static app shell; Google handles auth + storage + cross-device sync.
+- Result: a fully serverless, per-user-private, cross-device-synced UG library — **static app + on-device AI (enrichment) + the user's own Drive (sync). No backend of ours anywhere in the loop.**
+
+This was sketched in "Phase 5+ — Long-term vision" (Google Drive as the auth + storage layer) as a *far-future* item — but only because back then enrichment needed a server, so Drive-sync was bundled into the big-backend story. On-device enrichment removes that server dependency, so the Drive-sync piece **detaches from Phase 5+ and becomes the near-term priority**: it's the last thing standing between "works on one device" and "works everywhere, privately, with zero infra of ours."
+
+Scope notes for when it's built:
+- Auth: Google Identity Services (GIS) token flow in-browser; request only `drive.appdata`. A pure-client app may not need any server-side token exchange (TBD when built).
+- Storage shape: the `nortabs:private-tabs:v1` + `nortabs:private-enrichment:v1` payloads serialize to one (or a few) JSON files in `appDataFolder`. Read on login, write on change (debounced). Conflict handling: last-write-wins is likely fine for single-user-multi-device; revisit if it bites.
+- Offline-first stays intact: localStorage/IndexedDB remains the working copy, Drive is the sync backstop. Anonymous/offline use never touches Google.
 
 ---
 
