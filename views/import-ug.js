@@ -31,8 +31,8 @@ export function render(state, root) {
         <input type="file" id="ug-file" accept="application/json,.json">
       </div>
       <p>
-        Berik først <input type="number" id="ug-limit" value="10" min="1" max="999" style="width:5rem"> tabs
-        <button id="ug-enrich" disabled>Berik on-device</button>
+        Indekser først <input type="number" id="ug-limit" value="10" min="1" max="999" style="width:5rem"> tabs
+        <button id="ug-enrich" disabled>Indekser on-device</button>
         <span id="ug-loaded" class="muted"></span>
       </p>
     </div>
@@ -54,14 +54,14 @@ async function wireAvailability(root) {
     return;
   }
   if (avail === 'downloadable' || avail === 'downloading') {
-    el.innerHTML = `<strong>⏳ Modell ${avail}</strong> — klikk "Berik on-device" så starter (eller fortsetter) nedlasting av Gemini Nano (~2-4 GB), med progress under. Alternativ manuelt: <code>chrome://components</code> &rarr; "Optimization Guide On Device Model" &rarr; "Check for update".`;
+    el.innerHTML = `<strong>⏳ Modell ${avail}</strong> — klikk "Indekser on-device" så starter (eller fortsetter) nedlasting av Gemini Nano (~2-4 GB), med progress under. Alternativ manuelt: <code>chrome://components</code> &rarr; "Optimization Guide On Device Model" &rarr; "Check for update".`;
     // Keep the button enabled — LanguageModel.create() will trigger / resume
     // the download with the monitor wired below, so the user can do it all
     // inside the app.
     return;
   }
   if (avail === 'no-api') {
-    el.innerHTML = `<strong>⚠ Ingen Prompt API</strong> — denne nettleseren har ikke Chrome's on-device AI. Bruk Google Chrome (eller en annen Chromium-basert nettleser når de støtter det) for å berike importerte tabs.`;
+    el.innerHTML = `<strong>⚠ Ingen Prompt API</strong> — denne nettleseren har ikke Chrome's on-device AI. Bruk Google Chrome (eller en annen Chromium-basert nettleser når de støtter det) for å indeksere importerte tabs.`;
     root.querySelector('#ug-enrich').disabled = true;
     return;
   }
@@ -162,7 +162,7 @@ function renderQueueText(state) {
   }
   if (state.running) {
     const finished = state.done + state.failed;
-    let s = `Beriker ${finished}/${state.total} — ${state.done} OK, ${state.failed} feilet`;
+    let s = `Indekserer ${finished}/${state.total} — ${state.done} OK, ${state.failed} feilet`;
     if (state.current) s += `\nNå: ${state.current.artist} — ${state.current.song}`;
     s += '\n\nDu kan navigere bort — det kjører i bakgrunnen. Indeksen oppdateres når batchen er ferdig.';
     return s;

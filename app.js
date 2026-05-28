@@ -84,7 +84,7 @@ async function main() {
   // provisioned, when offline, or when the Prompt API isn't available.
   // Failures are silent — the user gets a clearer error in #/import/ug
   // if and when they actually try to enrich. Doing this here means the
-  // first "Berik on-device" click is instant for users who'd otherwise
+  // first "Indekser on-device" click is instant for users who'd otherwise
   // sit through a multi-minute download.
   prefetchModel();
 }
@@ -111,7 +111,7 @@ function wireEnrichPill() {
         pill.textContent = `↓ Gemini Nano ${gb} GB…`;
       } else {
         const finished = state.done + state.failed;
-        pill.textContent = `⚙ Beriker ${finished}/${state.total}…`;
+        pill.textContent = `⚙ Indekserer ${finished}/${state.total}…`;
       }
     } else {
       pill.hidden = true;
