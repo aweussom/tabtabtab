@@ -6,6 +6,9 @@ crawler/data/
 crawler/enrich_data/
 crawler/*.log
 
+# Per-run UG export samples (derivative of ug-export-*.json)
+ug/ug-export-sample-*.json
+
 # Enrichment per-letter lock files (per-process state, not data)
 enrichment/*.lock
 
