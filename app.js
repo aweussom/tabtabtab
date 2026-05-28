@@ -2,6 +2,7 @@ import { loadCatalog, loadEnrichment, loadPrivateBundle, loadLocalImports, getLo
 import { setState, subscribe } from './state.js';
 import { startRouter } from './router.js';
 import { buildIndex } from './search.js';
+import { subscribe as subscribeEnrich } from './enrich-queue.js';
 import { mount as mountSearchBar } from './views/search-bar.js';
 import { render as renderLetterIndex } from './views/letter-index.js';
 import { render as renderArtist } from './views/artist.js';
@@ -10,7 +11,7 @@ import { render as renderTab, teardownTabBindings } from './views/tab.js';
 import { render as renderSongbooks } from './views/songbooks.js';
 import { render as renderSongbook } from './views/songbook.js';
 import { render as renderShare } from './views/share.js';
-import { render as renderImportUG } from './views/import-ug.js';
+import { render as renderImportUG, teardownImportUg } from './views/import-ug.js';
 
 const VIEWS = {
   home: renderLetterIndex,
@@ -26,6 +27,7 @@ const VIEWS = {
 
 function renderCurrent(state) {
   teardownTabBindings();
+  teardownImportUg();
   const root = document.getElementById('app');
   const view = VIEWS[state.route.name] ?? renderLetterIndex;
   view(state, root);
@@ -74,8 +76,39 @@ async function main() {
   _enrichment = await loadEnrichment();
   rebuildIndex();
   mountSearchBar();
+  wireEnrichPill();
   subscribe(renderCurrent);
   startRouter(route => setState({ route }));
+}
+
+// Background-enrichment status pill: shown bottom-right whenever the
+// enrich-queue has a running batch, no matter which view the user is on.
+// Click routes back to #/import/ug for the full progress card. Once the
+// batch completes, rebuild the search index so the new imports are
+// queryable, and hide the pill.
+function wireEnrichPill() {
+  const pill = document.getElementById('enrich-pill');
+  if (!pill) return;
+  let wasRunning = false;
+  subscribeEnrich(state => {
+    if (state.running) {
+      wasRunning = true;
+      pill.hidden = false;
+      if (state.modelDownload) {
+        const gb = (state.modelDownload.loaded / (1024 ** 3)).toFixed(2);
+        pill.textContent = `↓ Gemini Nano ${gb} GB…`;
+      } else {
+        const finished = state.done + state.failed;
+        pill.textContent = `⚙ Beriker ${finished}/${state.total}…`;
+      }
+    } else {
+      pill.hidden = true;
+      if (wasRunning) {
+        wasRunning = false;
+        rebuildIndex();
+      }
+    }
+  });
 }
 
 main();

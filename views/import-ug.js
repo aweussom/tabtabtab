@@ -1,7 +1,5 @@
-import { escapeHtml } from '../util.js';
-import { getAvailability, enrichOne, prepareModel } from '../enrich-ondevice.js';
-import { addLocalImport } from '../catalog.js';
-import { rebuildIndex } from '../app.js';
+import { getAvailability } from '../enrich-ondevice.js';
+import { enqueue, subscribe as subscribeEnrich, getLastSummary, getFailures, isRunning } from '../enrich-queue.js';
 
 /**
  * #/import/ug — drop a Tampermonkey-exported Ultimate Guitar bookmarks JSON,
@@ -72,6 +70,7 @@ async function wireAvailability(root) {
 }
 
 let _loadedTabs = [];
+let _unsubscribe = null;
 
 function wireImport(root) {
   const fileInput = root.querySelector('#ug-file');
@@ -82,14 +81,17 @@ function wireImport(root) {
   const statusEl = root.querySelector('#ug-status');
   const dropZone = root.querySelector('.ug-drop-zone');
 
-  const setStatus = t => { statusEl.textContent = t; };
-  const log = t => { statusEl.textContent += '\n' + t; };
-
   function onLoaded(data) {
     _loadedTabs = (data.tabs || []).filter(t => t.artist && t.song);
-    loadedEl.textContent = `${_loadedTabs.length} tabs lastet`;
-    enrichBtn.disabled = _loadedTabs.length === 0;
+    refreshLoadedDisplay();
   }
+  function refreshLoadedDisplay() {
+    if (_loadedTabs.length) loadedEl.textContent = `${_loadedTabs.length} tabs lastet`;
+    enrichBtn.disabled = _loadedTabs.length === 0 || isRunning();
+  }
+  // Restore visible state if the user navigated away + back during a load
+  // (or after one). _loadedTabs persists module-level for exactly this case.
+  refreshLoadedDisplay();
 
   fileInput.addEventListener('change', async e => {
     const f = e.target.files[0]; if (!f) return;
@@ -108,54 +110,62 @@ function wireImport(root) {
     catch (err) { loadedEl.textContent = '✗ feil JSON: ' + err.message; }
   });
 
-  enrichBtn.addEventListener('click', async () => {
+  enrichBtn.addEventListener('click', () => {
     const n = Math.min(parseInt(limitEl.value, 10) || 10, _loadedTabs.length);
-    enrichBtn.disabled = true;
+    if (n === 0) return;
     progressCard.hidden = false;
-
-    // Prime the on-device model up front so a first-time Gemini Nano
-    // download (2-4 GB) shows live progress instead of the app appearing
-    // frozen during the first enrichOne call. No-op once the model is
-    // provisioned.
-    setStatus('Klargjør on-device-modellen…');
-    try {
-      await prepareModel({
-        onDownloadProgress({ loaded, total }) {
-          const gb = (loaded / (1024 ** 3)).toFixed(2);
-          if (total) {
-            const totalGb = (total / (1024 ** 3)).toFixed(2);
-            const pct = Math.round(100 * loaded / total);
-            setStatus(`Laster ned Gemini Nano: ${gb} / ${totalGb} GB (${pct}%)`);
-          } else {
-            setStatus(`Laster ned Gemini Nano: ${gb} GB`);
-          }
-        },
-      });
-    } catch (err) {
-      setStatus(`Kunne ikke klargjøre modellen: ${err.message}`);
-      enrichBtn.disabled = false;
-      return;
-    }
-
-    setStatus(`Beriker ${n} tabs on-device…`);
-    const t0 = performance.now();
-    let ok = 0, fail = 0;
-    for (let i = 0; i < n; i++) {
-      const tab = _loadedTabs[i];
-      log(`[${i + 1}/${n}] ${tab.artist} — ${tab.song} …`);
-      try {
-        const enrichment = await enrichOne(tab);
-        addLocalImport(tab, enrichment);
-        ok++;
-      } catch (err) {
-        fail++;
-        log(`    ✗ ${err.message}`);
-      }
-    }
-    rebuildIndex();
-    const secs = ((performance.now() - t0) / 1000).toFixed(1);
-    log(`\nFerdig: ${ok} OK, ${fail} feilet på ${secs}s — lagret lokalt og indeksen er oppdatert.`);
-    log(`Søk på tema/stemning/tekstlinjer i søkefeltet øverst — importerte tabs ligger nå i samme indeks som katalogen.`);
-    enrichBtn.disabled = false;
+    // Fire-and-forget — the queue does the actual work, and our subscriber
+    // below (renderQueueState) reflects progress into the status pre. The
+    // batch keeps running if the user navigates away; the status pill in
+    // the header takes over the surfacing job there.
+    enqueue(_loadedTabs.slice(0, n)).catch(err => {
+      statusEl.textContent = `Kunne ikke starte: ${err.message}`;
+    });
   });
+
+  // Single subscription per view-render; previous one (from a prior visit
+  // to this view) is unhooked to avoid leaking subscribers across mounts.
+  if (_unsubscribe) _unsubscribe();
+  _unsubscribe = subscribeEnrich(state => {
+    if (!statusEl.isConnected) return;
+    enrichBtn.disabled = state.running || _loadedTabs.length === 0;
+    if (state.running || state.modelDownload || getLastSummary()) {
+      progressCard.hidden = false;
+    }
+    statusEl.textContent = renderQueueText(state);
+  });
+}
+
+function renderQueueText(state) {
+  if (state.error) return `Feil: ${state.error}`;
+  if (state.modelDownload) {
+    const gb = (state.modelDownload.loaded / (1024 ** 3)).toFixed(2);
+    if (state.modelDownload.total) {
+      const totalGb = (state.modelDownload.total / (1024 ** 3)).toFixed(2);
+      const pct = Math.round(100 * state.modelDownload.loaded / state.modelDownload.total);
+      return `Laster ned Gemini Nano: ${gb} / ${totalGb} GB (${pct}%)`;
+    }
+    return `Laster ned Gemini Nano: ${gb} GB`;
+  }
+  if (state.running) {
+    const finished = state.done + state.failed;
+    let s = `Beriker ${finished}/${state.total} — ${state.done} OK, ${state.failed} feilet`;
+    if (state.current) s += `\nNå: ${state.current.artist} — ${state.current.song}`;
+    s += '\n\nDu kan navigere bort — det kjører i bakgrunnen. Indeksen oppdateres når batchen er ferdig.';
+    return s;
+  }
+  // Idle. Show last-completed summary if we have one this session.
+  const last = getLastSummary();
+  if (!last) return '';
+  const failures = getFailures();
+  let s = `Ferdig: ${last.ok} OK, ${last.fail} feilet på ${last.secs}s — lagret lokalt, søkeindeksen er oppdatert.`;
+  if (failures.length) {
+    s += '\n\nFeil:\n' + failures.map(f => `  ✗ ${f.tab.artist} — ${f.tab.song}: ${f.error}`).join('\n');
+  }
+  s += `\n\nSøk på tema/stemning/tekstlinjer i søkefeltet øverst — importerte tabs ligger nå i samme indeks som katalogen.`;
+  return s;
+}
+
+export function teardownImportUg() {
+  if (_unsubscribe) { _unsubscribe(); _unsubscribe = null; }
 }

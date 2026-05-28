@@ -130,6 +130,25 @@ a:hover { text-decoration: underline; }
 ul { padding-left: 1.25rem; }
 li { margin: 0.25rem 0; }
 
+/* Background-enrichment status pill. Fixed bottom-right when enqueued work
+   is running; click takes the user back to #/import/ug for full detail. */
+#enrich-pill {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  background: var(--link);
+  color: #fff;
+  text-decoration: none;
+  border-radius: 999px;
+  padding: 0.45rem 0.9rem;
+  font-size: 0.85em;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.18);
+  z-index: 100;
+  white-space: nowrap;
+}
+#enrich-pill:hover { filter: brightness(1.1); text-decoration: none; }
+#enrich-pill[hidden] { display: none; }
+
 /* UG-import marker: little red "U" right after the entry text (superscript
    feel), nodding to Ultimate Guitar's logo. Inline placement keeps it
    adjacent to the artist/song name regardless of row width. */
