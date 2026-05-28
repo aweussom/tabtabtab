@@ -98,6 +98,7 @@ function runSearch(query, results) {
   const r = search(q, { favoriteTabIds: favoriteTabIds() });
   results.hidden = false;
   const liveSearchHref = `https://nortabs.net/search/?q=${encodeURIComponent(q)}`;
+  const ugSearchHref = `https://www.ultimate-guitar.com/search.php?search_type=title&value=${encodeURIComponent(q)}`;
 
   if (r.total === 0 && !r.suggest) {
     setFrame('suggest', null);
@@ -107,17 +108,22 @@ function runSearch(query, results) {
     setFrame(
       'empty',
       `<p>Ingen treff for &laquo;${escapeHtml(q)}&raquo;. ` +
-      `<a href="${liveSearchHref}" target="_blank" rel="noopener">Søk live på nortabs.net &rarr;</a></p>`
+      `<a href="${liveSearchHref}" target="_blank" rel="noopener">Søk live på nortabs.net &rarr;</a> ` +
+      `eller <a href="${ugSearchHref}" target="_blank" rel="noopener">søk på Ultimate Guitar &rarr;</a></p>`
     );
     return;
   }
 
   // Always-visible fallthrough at the bottom: subtle nudge that the user can
-  // search nortabs.net live, in case they want broader coverage or fresher
-  // entries than our catalog snapshot.
+  // search either nortabs.net or Ultimate Guitar live — broader coverage,
+  // fresher entries, English-dominant UG for non-Norwegian queries. Same
+  // pattern (new tab, no embedding, no CORS).
   setFrame(
     'empty',
-    `<p class="fallthrough-link"><a href="${liveSearchHref}" target="_blank" rel="noopener">Søk også live på nortabs.net &rarr;</a></p>`
+    `<p class="fallthrough-link">` +
+    `<a href="${liveSearchHref}" target="_blank" rel="noopener">Søk også live på nortabs.net &rarr;</a> ` +
+    `&middot; <a href="${ugSearchHref}" target="_blank" rel="noopener">søk på Ultimate Guitar &rarr;</a>` +
+    `</p>`
   );
 
   setFrame(
