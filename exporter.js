@@ -252,13 +252,13 @@ export function buildExportHTML({ name, tabs, exportedAt }) {
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>${escapeHtml(name)} — NorTabs sangbok</title>
+<title>${escapeHtml(name)} — TabTabTab sangbok</title>
 <style>${EXPORT_CSS}</style>
 </head>
 <body id="top">
 <header>
   <h1>${escapeHtml(name)}</h1>
-  <p class="meta">Eksportert fra NorTabs · ${date} · ${tabs.length} ${tabs.length === 1 ? 'tab' : 'tabs'}</p>
+  <p class="meta">Eksportert fra TabTabTab · ${date} · ${tabs.length} ${tabs.length === 1 ? 'tab' : 'tabs'}</p>
 </header>
 <nav class="toc">
   <h2>Innhold</h2>

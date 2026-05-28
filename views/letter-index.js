@@ -11,7 +11,7 @@ export function render(state, root) {
     root.innerHTML = `
       <div class="home-wordcloud" aria-hidden="true"></div>
       <div class="home-content">
-        <h1>NorTabs</h1>
+        <h1>TabTabTab</h1>
         <nav class="letter-grid">
           ${LETTERS.map(l => {
             const has = getArtistsForLetter(l) !== null;
