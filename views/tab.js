@@ -51,7 +51,9 @@ function renderHeart(tabId) {
 }
 
 function renderPicker(tabId) {
-  const all = getSongbooks();
+  // Skip synthetic songbooks (UG-import-main) — they auto-include their
+  // tabs, so a checkbox would be misleading (can't be unchecked).
+  const all = getSongbooks().filter(sb => !sb._synthetic);
   const containingList = getSongbooksContaining(tabId);
   const containing = new Set(containingList.map(s => s.id));
   const summary = containingList.length === 0

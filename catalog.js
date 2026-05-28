@@ -115,6 +115,16 @@ export function getLocalImports() {
 }
 
 /**
+ * Return all UG-imported tab IDs in insertion order. Used by storage.js to
+ * synthesize the always-present "Mine UG-importer" songbook — no matter how
+ * many import rounds, every UG tab is reachable via that songbook surface.
+ */
+export function getLocalImportTabIds() {
+  if (!_localImports?.tabs) return [];
+  return Object.keys(_localImports.tabs);
+}
+
+/**
  * Append a single enriched UG-imported tab to local imports. Updates the
  * in-memory bundle, persists to localStorage, and re-registers entries in
  * the catalog lookup maps (idempotent — safe). The caller is responsible

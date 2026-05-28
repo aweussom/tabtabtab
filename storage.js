@@ -1,4 +1,6 @@
-import { getPrivateSongbook } from './catalog.js';
+import { getLocalImportTabIds } from './catalog.js';
+
+const UG_SYNTHETIC_ID = 'ug-import-main';
 
 const KEY = 'nortabs:songbooks:v1';
 const PB_KEY = 'nortabs:playback:v1';
@@ -124,19 +126,22 @@ function read() {
   } catch {
     parsed = defaultData();
   }
-  // Inject the bundled private-tabs songbook (currently UG imports) on first
-  // load after a private-bundle.json is shipped. Once written to localStorage,
-  // the user owns it — they can rename, reorder, or delete it like any other
-  // songbook. We won't re-inject after deletion.
-  const bundledSb = getPrivateSongbook?.();
-  if (bundledSb && !parsed.songbooks.find(s => s.id === bundledSb.id)) {
-    parsed.songbooks.push({
-      id: bundledSb.id,
-      name: bundledSb.name,
+  // Always-present "Mine UG-importer" songbook — synthesized from current
+  // local imports on every read. Never persisted: it can't fall out of sync,
+  // can't be deleted, and re-appears the moment the user imports their first
+  // UG tab. Any stale entry in localStorage (from the old shipped-bundle era)
+  // is overwritten. Marked `_synthetic` so views know to disable editing
+  // controls and to skip it from favorites/picker surfaces where appropriate.
+  const ugTabIds = getLocalImportTabIds?.() ?? [];
+  parsed.songbooks = parsed.songbooks.filter(s => s.id !== UG_SYNTHETIC_ID);
+  if (ugTabIds.length) {
+    parsed.songbooks.splice(1, 0, {
+      id: UG_SYNTHETIC_ID,
+      name: 'Mine UG-importer',
       created_at: now(),
-      tab_ids: [...(bundledSb.tab_ids ?? [])],
+      tab_ids: ugTabIds,
+      _synthetic: true,
     });
-    try { write(parsed); } catch {}
   }
   return parsed;
 }
@@ -229,7 +234,10 @@ export function moveTabInSongbook(songbookId, tabId, direction) {
 }
 
 export function getSongbooksContaining(tabId) {
-  return read().songbooks.filter(s => s.tab_ids.includes(tabId));
+  // Skip synthetic songbooks — the UG songbook auto-includes every UG tab,
+  // so reporting "this tab is in Mine UG-importer" is noise (always true).
+  // Tab picker + heart-state only care about user-curated memberships.
+  return read().songbooks.filter(s => !s._synthetic && s.tab_ids.includes(tabId));
 }
 
 export function importSharedSongbook(name, tabIds) {

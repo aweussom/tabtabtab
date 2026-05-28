@@ -59,8 +59,13 @@ export function mount() {
 }
 
 function favoriteTabIds() {
+  // Synthetic songbooks (UG-import-main) aren't user-curated favorites — UG
+  // tabs already have a dedicated relevance boost in search.js. Including
+  // them here would double-boost every UG tab as if the user had explicitly
+  // bookmarked it. Skip.
   const ids = new Set();
   for (const sb of getSongbooks()) {
+    if (sb._synthetic) continue;
     for (const tid of sb.tab_ids) ids.add(tid);
   }
   return ids;

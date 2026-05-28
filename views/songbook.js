@@ -25,30 +25,38 @@ export function render(state, root) {
 
   const sbParam = `?sb=${encodeURIComponent(sb.id)}`;
   const total = sb.tab_ids.length;
+  // Synthetic songbooks (UG-import-main) auto-track their tabs from the
+  // local-imports store — manual remove/reorder is meaningless because the
+  // next read regenerates them. Render rows without those controls.
+  const isSynthetic = !!sb._synthetic;
   const tabRows = sb.tab_ids.map((tid, idx) => {
-    const reorderBtns = `
-      <button data-action="up" data-tab="${tid}" ${idx === 0 ? 'disabled' : ''} title="Flytt opp">↑</button>
-      <button data-action="down" data-tab="${tid}" ${idx === total - 1 ? 'disabled' : ''} title="Flytt ned">↓</button>
+    const reorderBtns = isSynthetic ? '' : `
+      <span class="reorder">
+        <button data-action="up" data-tab="${tid}" ${idx === 0 ? 'disabled' : ''} title="Flytt opp">↑</button>
+        <button data-action="down" data-tab="${tid}" ${idx === total - 1 ? 'disabled' : ''} title="Flytt ned">↓</button>
+      </span>
     `;
+    const removeBtn = isSynthetic ? '' : `<button data-action="remove" data-tab="${tid}">Fjern</button>`;
     const r = getTab(tid);
     if (!r) {
       return `<li class="missing">
-        <span class="reorder">${reorderBtns}</span>
+        ${reorderBtns}
         <span class="muted">Tab #${tid} (ikke i lokal katalog)</span>
-        <button data-action="remove" data-tab="${tid}">Fjern</button>
+        ${removeBtn}
       </li>`;
     }
     const { tab, song, artist } = r;
-    return `<li>
-      <span class="reorder">${reorderBtns}</span>
+    const ugCls = artist._source === 'ug' || song._source === 'ug' ? ' class="ug-import"' : '';
+    return `<li${ugCls}>
+      ${reorderBtns}
       <a href="#/tab/${tab.id}${sbParam}">${escapeHtml(artist.name)} &mdash; ${escapeHtml(song.name)}</a>
-      <button data-action="remove" data-tab="${tab.id}">Fjern</button>
+      ${removeBtn}
     </li>`;
   }).join('');
 
   const isFav = sb.id === 'fav';
-  const canDelete = !isFav;
-  const canRename = !isFav;
+  const canDelete = !isFav && !isSynthetic;
+  const canRename = !isFav && !isSynthetic;
 
   root.innerHTML = `
     <p><a href="#/songbooks">&larr; Sangbøker</a></p>
