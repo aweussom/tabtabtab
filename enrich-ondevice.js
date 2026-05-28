@@ -93,7 +93,7 @@ export function resetSession() {
   _baseSession = null;
 }
 
-async function ensureBase() {
+async function ensureBase(opts = {}) {
   if (typeof LanguageModel === 'undefined')
     throw new Error('No LanguageModel API. Chrome with the Prompt API flag is required.');
   const avail = await LanguageModel.availability();
@@ -104,9 +104,29 @@ async function ensureBase() {
       expectedInputs:  [{ type: 'text', languages: ['en'] }],
       expectedOutputs: [{ type: 'text', languages: ['en'] }],
       initialPrompts:  [{ role: 'system', content: SYSTEM }],
+      // The monitor only fires while the model is downloading — for a user
+      // who already has Gemini Nano provisioned, this is a no-op. For first-
+      // time users (or anyone Chrome is re-downloading the model for) it
+      // gives the UI a hook to surface the 2-4 GB transfer instead of
+      // appearing frozen for several minutes.
+      monitor(m) {
+        m.addEventListener('downloadprogress', (e) => {
+          opts.onDownloadProgress?.({ loaded: e.loaded, total: e.total });
+        });
+      },
     });
   }
   return _baseSession;
+}
+
+/**
+ * Prime the on-device session. Triggers a Gemini Nano download if the model
+ * isn't yet provisioned (Chrome handles that under the hood); opts.onDownloadProgress
+ * gets {loaded, total} events while that runs. Subsequent calls (or calls
+ * after the model is already available) resolve immediately.
+ */
+export async function prepareModel(opts = {}) {
+  return ensureBase(opts);
 }
 
 /**
@@ -116,8 +136,8 @@ async function ensureBase() {
  * Gemini Nano's input quota. Retries once on parse failure (Nano is
  * nondeterministic; a re-roll usually succeeds when the first parse fails).
  */
-export async function enrichOne(tab) {
-  const base = await ensureBase();
+export async function enrichOne(tab, opts = {}) {
+  const base = await ensureBase(opts);
   const user = `Artist: ${tab.artist}\nSong: ${tab.song}\nBody:\n---\n${tab.body || ''}\n---${STRICT}`;
   let lastErr;
   for (let attempt = 1; attempt <= 2; attempt++) {

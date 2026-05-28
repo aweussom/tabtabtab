@@ -1,5 +1,5 @@
 import { escapeHtml } from '../util.js';
-import { getAvailability, enrichOne } from '../enrich-ondevice.js';
+import { getAvailability, enrichOne, prepareModel } from '../enrich-ondevice.js';
 import { addLocalImport } from '../catalog.js';
 import { rebuildIndex } from '../app.js';
 
@@ -56,8 +56,10 @@ async function wireAvailability(root) {
     return;
   }
   if (avail === 'downloadable' || avail === 'downloading') {
-    el.innerHTML = `<strong>⏳ Modell ${avail}</strong> — gå til <code>chrome://components</code>, finn "Optimization Guide On Device Model" og trykk "Check for update". Tilbake hit når den er ferdig nedlastet.`;
-    root.querySelector('#ug-enrich').disabled = true;
+    el.innerHTML = `<strong>⏳ Modell ${avail}</strong> — klikk "Berik on-device" så starter (eller fortsetter) nedlasting av Gemini Nano (~2-4 GB), med progress under. Alternativ manuelt: <code>chrome://components</code> &rarr; "Optimization Guide On Device Model" &rarr; "Check for update".`;
+    // Keep the button enabled — LanguageModel.create() will trigger / resume
+    // the download with the monitor wired below, so the user can do it all
+    // inside the app.
     return;
   }
   if (avail === 'no-api') {
@@ -110,6 +112,31 @@ function wireImport(root) {
     const n = Math.min(parseInt(limitEl.value, 10) || 10, _loadedTabs.length);
     enrichBtn.disabled = true;
     progressCard.hidden = false;
+
+    // Prime the on-device model up front so a first-time Gemini Nano
+    // download (2-4 GB) shows live progress instead of the app appearing
+    // frozen during the first enrichOne call. No-op once the model is
+    // provisioned.
+    setStatus('Klargjør on-device-modellen…');
+    try {
+      await prepareModel({
+        onDownloadProgress({ loaded, total }) {
+          const gb = (loaded / (1024 ** 3)).toFixed(2);
+          if (total) {
+            const totalGb = (total / (1024 ** 3)).toFixed(2);
+            const pct = Math.round(100 * loaded / total);
+            setStatus(`Laster ned Gemini Nano: ${gb} / ${totalGb} GB (${pct}%)`);
+          } else {
+            setStatus(`Laster ned Gemini Nano: ${gb} GB`);
+          }
+        },
+      });
+    } catch (err) {
+      setStatus(`Kunne ikke klargjøre modellen: ${err.message}`);
+      enrichBtn.disabled = false;
+      return;
+    }
+
     setStatus(`Beriker ${n} tabs on-device…`);
     const t0 = performance.now();
     let ok = 0, fail = 0;
