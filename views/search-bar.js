@@ -120,11 +120,13 @@ function runSearch(query, results) {
     r.suggest ? `<p>Mente du <a href="#" data-suggest="${escapeHtml(r.suggest)}">${escapeHtml(r.suggest)}</a>?</p>` : null
   );
 
+  const ugCls = (obj) => (obj?._source === 'ug' ? ' class="ug-import"' : '');
+
   setFrame(
     'artists',
     r.artists.length
       ? `<h3>Artister (${r.artists.length})</h3><ul>${r.artists.map(a =>
-          `<li><a href="#/artist/${a.artist.id}">${escapeHtml(a.artist.name)}</a></li>`
+          `<li${ugCls(a.artist)}><a href="#/artist/${a.artist.id}">${escapeHtml(a.artist.name)}</a></li>`
         ).join('')}</ul>`
       : null
   );
@@ -133,7 +135,7 @@ function runSearch(query, results) {
     'songs',
     r.songs.length
       ? `<h3>Sanger (${r.songs.length})</h3><ul>${r.songs.map(s =>
-          `<li><a href="#/song/${s.song.id}">${escapeHtml(s.artist.name)} &mdash; ${escapeHtml(s.song.name)} <span class="muted">(${s.song.tabs.length})</span></a></li>`
+          `<li${ugCls(s.song) || ugCls(s.artist)}><a href="#/song/${s.song.id}">${escapeHtml(s.artist.name)} &mdash; ${escapeHtml(s.song.name)} <span class="muted">(${s.song.tabs.length})</span></a></li>`
         ).join('')}</ul>`
       : null
   );
@@ -142,7 +144,7 @@ function runSearch(query, results) {
     'lyrics',
     r.bodyHits.length
       ? `<h3>Tekstlinjer (${r.bodyHits.length})</h3><ul>${r.bodyHits.map(h =>
-          `<li><a href="#/song/${h.song.id}">${escapeHtml(h.artist.name)} &mdash; ${escapeHtml(h.song.name)} <span class="muted">(${h.song.tabs.length})</span></a></li>`
+          `<li${ugCls(h.song) || ugCls(h.artist)}><a href="#/song/${h.song.id}">${escapeHtml(h.artist.name)} &mdash; ${escapeHtml(h.song.name)} <span class="muted">(${h.song.tabs.length})</span></a></li>`
         ).join('')}</ul>`
       : null
   );

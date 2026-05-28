@@ -16,11 +16,11 @@ const _byTabId = new Map();
 function _registerBundle(bundle) {
   if (!bundle) return;
   for (const artist of Object.values(bundle.artists ?? {})) {
-    const syntheticArtist = { id: artist.id, name: artist.name, songs: [], enrichment: artist.enrichment };
+    const syntheticArtist = { id: artist.id, name: artist.name, songs: [], enrichment: artist.enrichment, _source: 'ug' };
     for (const sid of artist.song_ids ?? []) {
       const song = bundle.songs?.[sid];
       if (!song) continue;
-      const syntheticSong = { id: song.id, name: song.name, tabs: [], enrichment: song.enrichment };
+      const syntheticSong = { id: song.id, name: song.name, tabs: [], enrichment: song.enrichment, _source: 'ug' };
       for (const tid of song.tab_ids ?? []) {
         const tab = bundle.tabs?.[tid];
         if (!tab) continue;

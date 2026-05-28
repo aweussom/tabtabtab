@@ -41,7 +41,10 @@ export function render(state, root) {
     <p><a href="#/">&larr; Letters</a></p>
     <h1>${label}</h1>
     <ul>
-      ${artists.map(a => `<li><a href="#/artist/${a.id}">${escapeHtml(a.name)}</a></li>`).join('')}
+      ${artists.map(a => {
+        const cls = a._source === 'ug' ? ' class="ug-import"' : '';
+        return `<li${cls}><a href="#/artist/${a.id}">${escapeHtml(a.name)}</a></li>`;
+      }).join('')}
     </ul>
   `;
 }
