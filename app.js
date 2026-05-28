@@ -50,9 +50,19 @@ export function rebuildIndex() {
 
 async function main() {
   const root = document.getElementById('app');
-  root.textContent = 'Loading…';
+  root.innerHTML = `
+    <div class="app-loading">
+      <p>Laster TabTabTab…</p>
+      <p id="loading-detail" class="muted"></p>
+    </div>
+  `;
+  const detail = root.querySelector('#loading-detail');
   try {
-    await loadCatalog();
+    await loadCatalog({
+      onProgress: ({ loaded }) => {
+        detail.textContent = `${(loaded / (1024 * 1024)).toFixed(1)} MB lastet`;
+      },
+    });
   } catch (err) {
     root.textContent = `Failed to load catalog: ${err.message}`;
     return;

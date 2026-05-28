@@ -53,11 +53,30 @@ function _slug(s) {
     .slice(0, 40);
 }
 
-export async function loadCatalog() {
+export async function loadCatalog(opts = {}) {
   if (_data) return _data;
   const res = await fetch(`catalog.json?v=${APP_VERSION}`);
   if (!res.ok) throw new Error(`Failed to load catalog.json: ${res.status}`);
-  _data = await res.json();
+  // Stream the body and report decompressed-bytes progress. Pages serves the
+  // catalog gzipped, so Content-Length is compressed (~5 MB) while the
+  // reader emits decompressed bytes (~24 MB). We report only `loaded` —
+  // a ratio would be misleading. Falls back to res.json() when streaming
+  // isn't supported or no callback is given.
+  if (opts.onProgress && res.body?.getReader) {
+    const reader = res.body.getReader();
+    const chunks = [];
+    let loaded = 0;
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      chunks.push(value);
+      loaded += value.length;
+      opts.onProgress({ loaded });
+    }
+    _data = JSON.parse(await new Blob(chunks).text());
+  } else {
+    _data = await res.json();
+  }
   for (const [letter, bucket] of Object.entries(_data.letters ?? {})) {
     for (const artist of bucket.artists) {
       _byArtistId.set(artist.id, { artist, letter });
