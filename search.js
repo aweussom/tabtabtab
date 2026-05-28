@@ -73,6 +73,12 @@ let _artistById = new Map();
 let _songById = new Map();
 let _tabById = new Map();
 
+// User-curated (UG-imported) entries are tabs the user actively sought out
+// and imported — a strong relevance signal beyond pure token overlap. Boost
+// matches in their favor over tangentially-tagged catalog entries. Marker
+// in the lookup maps is `letter === null` (vs a real letter for catalog).
+const UG_IMPORT_BOOST = 2.5;
+
 export function fold(s) {
   return String(s).toLowerCase()
     .replace(/ø/g, 'o').replace(/æ/g, 'a').replace(/å/g, 'a')
@@ -284,20 +290,31 @@ export function search(query, opts = {}) {
 
   for (const qt of tokens) {
     if (usesNameIndexes) {
+      // Dedup prefix-match contributions PER query-token: an entry indexed
+      // under multiple morphological variants of the same root (e.g. enrichment
+      // search_text saying both "mountain" and "mountains") should be rewarded
+      // for matching the query, not multiplied by variant count. Take the best
+      // per entry per qt; sum across qt's only.
       const matched = prefixMatches(qt);
+      const aBestPerQt = new Map();
+      const sBestPerQt = new Map();
       for (const t of matched) {
         const exactBonus = t === qt ? 1.0 : 0.6;
         const aIdf = _artistIdf.get(t) ?? 0.5;
         const sIdf = _songIdf.get(t) ?? 0.5;
         for (const aid of (_artistIndex.get(t) ?? [])) {
-          bumpScore(artistScores, aid, exactBonus * aIdf * 10);
+          const score = exactBonus * aIdf * 10;
+          if ((aBestPerQt.get(aid) ?? 0) < score) aBestPerQt.set(aid, score);
           anyHit = true;
         }
         for (const sid of (_songIndex.get(t) ?? [])) {
-          bumpScore(songScores, sid, exactBonus * sIdf * 5);
+          const score = exactBonus * sIdf * 5;
+          if ((sBestPerQt.get(sid) ?? 0) < score) sBestPerQt.set(sid, score);
           anyHit = true;
         }
       }
+      for (const [aid, score] of aBestPerQt) bumpScore(artistScores, aid, score);
+      for (const [sid, score] of sBestPerQt) bumpScore(songScores, sid, score);
     }
     // Body index uses EXACT match + IDF in BOTH modes. The distinctive tokens
     // (tjene, kroppen, fairytale) dominate via high IDF; common-token noise
@@ -356,6 +373,20 @@ export function search(query, opts = {}) {
         bestTabId: tid,
       });
     }
+  }
+
+  // UG-import boost: user-curated entries (letter === null) get a flat
+  // multiplier. The user actively imported these — they're a stronger
+  // relevance signal than tangentially-tagged catalog entries with the
+  // same token overlap. Catalog can still win on stronger token coverage.
+  for (const [aid, cur] of artistScores) {
+    if (_artistById.get(aid)?.letter === null) cur.score *= UG_IMPORT_BOOST;
+  }
+  for (const [sid, cur] of songScores) {
+    if (_songById.get(sid)?.letter === null) cur.score *= UG_IMPORT_BOOST;
+  }
+  for (const entry of bodySongMap.values()) {
+    if (entry.letter === null) entry.score *= UG_IMPORT_BOOST;
   }
 
   const sortByScore = (a, b) => b[1].score - a[1].score || b[1].hits - a[1].hits;
