@@ -2,7 +2,7 @@ import { loadCatalog, loadEnrichment, loadPrivateBundle, loadLocalImports, getLo
 import { setState, subscribe } from './state.js';
 import { startRouter } from './router.js';
 import { buildIndex } from './search.js';
-import { subscribe as subscribeEnrich } from './enrich-queue.js';
+import { subscribe as subscribeEnrich, prefetchModel } from './enrich-queue.js';
 import { mount as mountSearchBar } from './views/search-bar.js';
 import { render as renderLetterIndex } from './views/letter-index.js';
 import { render as renderArtist } from './views/artist.js';
@@ -79,6 +79,14 @@ async function main() {
   wireEnrichPill();
   subscribe(renderCurrent);
   startRouter(route => setState({ route }));
+
+  // Best-effort background warm-up of Gemini Nano. No-op when already
+  // provisioned, when offline, or when the Prompt API isn't available.
+  // Failures are silent — the user gets a clearer error in #/import/ug
+  // if and when they actually try to enrich. Doing this here means the
+  // first "Berik on-device" click is instant for users who'd otherwise
+  // sit through a multi-minute download.
+  prefetchModel();
 }
 
 // Background-enrichment status pill: shown bottom-right whenever the
@@ -91,8 +99,12 @@ function wireEnrichPill() {
   if (!pill) return;
   let wasRunning = false;
   subscribeEnrich(state => {
-    if (state.running) {
-      wasRunning = true;
+    // Show the pill for either an active enrichment OR a background model
+    // download (prefetch). wasRunning is only flipped by `running` so the
+    // post-batch rebuildIndex doesn't fire after a pure prefetch (nothing
+    // changed in the local-imports store).
+    if (state.running) wasRunning = true;
+    if (state.running || state.modelDownload) {
       pill.hidden = false;
       if (state.modelDownload) {
         const gb = (state.modelDownload.loaded / (1024 ** 3)).toFixed(2);

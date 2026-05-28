@@ -22,6 +22,7 @@ import { addLocalImport } from './catalog.js';
 
 let _state = {
   running: false,
+  prefetching: false,
   total: 0,
   done: 0,
   failed: 0,
@@ -120,4 +121,31 @@ export async function enqueue(tabs, opts = {}) {
   };
   emit({ running: false, current: null });
   opts.onComplete?.();
+}
+
+/**
+ * Best-effort background warm-up of the on-device model. Skips work when
+ * the model is already provisioned, when we look offline, or when the
+ * Prompt API isn't available. The actual fetch is delegated to
+ * prepareModel; any download-progress events flow into _state so the
+ * shared status pill surfaces them — no extra UI needed.
+ *
+ * Fire-and-forget from app boot. Failures are silent: the user will see
+ * a clearer error if and when they actually try to enrich.
+ */
+export async function prefetchModel() {
+  if (_state.running || _state.prefetching) return;
+  if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
+  emit({ prefetching: true });
+  try {
+    await prepareModel({
+      onDownloadProgress: ({ loaded, total }) => {
+        emit({ modelDownload: { loaded, total } });
+      },
+    });
+  } catch {
+    // Silent — diagnostic surfaces in #/import/ug if the user tries.
+  } finally {
+    emit({ prefetching: false, modelDownload: null });
+  }
 }
