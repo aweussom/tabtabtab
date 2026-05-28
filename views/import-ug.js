@@ -1,5 +1,5 @@
 import { getAvailability } from '../enrich-ondevice.js';
-import { enqueue, subscribe as subscribeEnrich, getLastSummary, getFailures, isRunning } from '../enrich-queue.js';
+import { enqueue, subscribe as subscribeEnrich, getState as getQueueState, getLastSummary, getFailures, isRunning } from '../enrich-queue.js';
 
 /**
  * #/import/ug — drop a Tampermonkey-exported Ultimate Guitar bookmarks JSON,
@@ -111,13 +111,23 @@ function wireImport(root) {
   });
 
   enrichBtn.addEventListener('click', () => {
+    if (isRunning()) {
+      // Button stays clickable while a batch runs so the user gets a clear
+      // explanation rather than the previous silent-no-op (disabled button
+      // gave no feedback). Real fix would be a job queue; for now the
+      // contract is one batch at a time.
+      progressCard.hidden = false;
+      statusEl.textContent = renderQueueText(getQueueState()) +
+        '\n\n— Vent til denne batchen er ferdig før du starter en ny. Du kan navigere bort i mellomtiden; pillet nederst-til-høyre følger med.';
+      return;
+    }
     const n = Math.min(parseInt(limitEl.value, 10) || 10, _loadedTabs.length);
     if (n === 0) return;
     progressCard.hidden = false;
     // Fire-and-forget — the queue does the actual work, and our subscriber
-    // below (renderQueueState) reflects progress into the status pre. The
-    // batch keeps running if the user navigates away; the status pill in
-    // the header takes over the surfacing job there.
+    // below reflects progress into the status pre. The batch keeps running
+    // if the user navigates away; the status pill in the header takes
+    // over the surfacing job there.
     enqueue(_loadedTabs.slice(0, n)).catch(err => {
       statusEl.textContent = `Kunne ikke starte: ${err.message}`;
     });
@@ -128,7 +138,10 @@ function wireImport(root) {
   if (_unsubscribe) _unsubscribe();
   _unsubscribe = subscribeEnrich(state => {
     if (!statusEl.isConnected) return;
-    enrichBtn.disabled = state.running || _loadedTabs.length === 0;
+    // Button is only disabled when there's nothing to enrich. While a batch
+    // runs the button stays clickable so the click handler can show a clear
+    // "wait for current batch" message — silent dead clicks were confusing.
+    enrichBtn.disabled = _loadedTabs.length === 0;
     if (state.running || state.modelDownload || getLastSummary()) {
       progressCard.hidden = false;
     }
