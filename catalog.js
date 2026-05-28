@@ -179,8 +179,30 @@ export function getCrawledLetters() {
   return _data?.letters ? Object.keys(_data.letters) : [];
 }
 
+// UG-imported artists are registered with letter=null (the marker for
+// private entries), so the raw catalog letter-buckets don't include them.
+// Surface them here too — same first-letter-of-name bucketing the catalog
+// uses, no visual distinction. Keeps UG entries first-class everywhere:
+// they're already in search and have a relevance boost; letter-browse
+// shouldn't be the one place they hide.
+function _ugArtistsForLetter(letter) {
+  if (!letter) return [];
+  const target = letter.toLowerCase();
+  const out = [];
+  for (const { artist, letter: l } of _byArtistId.values()) {
+    if (l !== null) continue;
+    const first = (artist.name || '').trim().charAt(0).toLowerCase();
+    if (first === target) out.push(artist);
+  }
+  return out;
+}
+
 export function getArtistsForLetter(letter) {
-  return _data?.letters?.[letter.toLowerCase()]?.artists ?? null;
+  const cat = _data?.letters?.[letter.toLowerCase()]?.artists ?? [];
+  const ug = _ugArtistsForLetter(letter);
+  if (!cat.length && !ug.length) return null;
+  if (!ug.length) return cat;
+  return [...cat, ...ug].sort((a, b) => a.name.localeCompare(b.name, 'no'));
 }
 
 export function getArtist(id) {
