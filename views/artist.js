@@ -8,11 +8,16 @@ export function render(state, root) {
     return;
   }
   const { artist, letter } = result;
-  // letter === null marks a private (UG-imported) artist that lives outside
-  // the letter-index browse — point its back-link at Sangbøker, which is the
-  // canonical surface for private entries.
-  const backLink = letter
-    ? `<a href="#/letter/${escapeHtml(letter)}">&larr; ${escapeHtml(letter.toUpperCase())}</a>`
+  // UG-imported artists carry letter=null in the lookup map (they live
+  // outside catalog letter-buckets in the underlying data), but they now
+  // appear in the letter-index browse via getArtistsForLetter's UG injection.
+  // Derive the effective letter from the artist name's first char so the
+  // back-link routes to the letter the user clicked, matching how catalog
+  // artists already behave (always letter-back, regardless of entry path —
+  // browser back covers song-book / search origins).
+  const effectiveLetter = letter ?? (artist.name || '').trim().charAt(0).toLowerCase();
+  const backLink = effectiveLetter
+    ? `<a href="#/letter/${escapeHtml(effectiveLetter)}">&larr; ${escapeHtml(effectiveLetter.toUpperCase())}</a>`
     : `<a href="#/songbooks">&larr; Sangbøker</a>`;
   root.innerHTML = `
     <p>${backLink}</p>
