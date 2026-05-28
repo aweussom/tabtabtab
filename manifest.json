@@ -1,7 +1,7 @@
 {
-  "name": "NorTabs",
-  "short_name": "NorTabs",
-  "description": "Norske akkordtabs — offline, uten reklame, uten nett.",
+  "name": "TabTabTab",
+  "short_name": "TabTabTab",
+  "description": "Akkordtabs — offline, uten reklame, uten nett. Bla i nortabs.net-katalogen eller importer dine egne UG-tabs.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
