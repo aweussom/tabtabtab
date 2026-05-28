@@ -9,6 +9,11 @@ crawler/*.log
 # Per-run UG export samples (derivative of ug-export-*.json)
 ug/ug-export-sample-*.json
 
+# Shipped UG-bundle artifact — intentionally absent until we ship a
+# cleanly-licensed demo bundle. crawler/build-private-bundle.py still
+# regenerates it locally; just don't auto-commit Tommy's personal lib.
+private-bundle.json
+
 # Enrichment per-letter lock files (per-process state, not data)
 enrichment/*.lock
 
