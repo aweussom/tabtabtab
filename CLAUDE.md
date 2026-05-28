@@ -28,7 +28,8 @@ Flat module layout:
 - `storage.js` — localStorage for songbooks, favorites, playback, chord-mode, text-scale. Synthesizes the always-present `ug-import-main` songbook on every read from `_localImports`.
 - `playback.js` — auto-scroll engine with countdown / pause / resume / variable speed.
 - `exporter.js` — songbook → standalone HTML export.
-- `enrich-ondevice.js` — on-device UG enrichment via Chrome's Prompt API (Gemini Nano). Exports `getAvailability()` / `enrichOne(tab)`. Includes the JSON-recovery stack (strip think/fences → balanced-block → JSON5.parse → salvage → one retry). Requires global `JSON5` (vendored).
+- `enrich-ondevice.js` — on-device UG enrichment via Chrome's Prompt API (Gemini Nano). Exports `getAvailability()` / `prepareModel(opts)` / `enrichOne(tab, opts)`. Includes the JSON-recovery stack (strip think/fences → balanced-block → JSON5.parse → salvage → one retry) and a `monitor` hook on `LanguageModel.create` that surfaces `downloadprogress` events. Requires global `JSON5` (vendored).
+- `enrich-queue.js` — background-enrichment queue. Owns the on-device loop so the user can navigate away from `#/import/ug` while a batch keeps running. Exports `enqueue(tabs)` / `prefetchModel()` / `subscribe(fn)` / `getState()` / `isRunning()` / `getLastSummary()` / `getFailures()`. State shape `{running, prefetching, total, done, failed, current, modelDownload, error}`.
 - `vendor/json5.min.js` — JSON5 2.2.3 UMD (~31 KB). Vendored, not CDN — works offline. Sets `window.JSON5`.
 - `sw.js` — service worker, see "Cache-busting + service worker" below.
 - `views/` — one file per screen, each exports `render(state, root)`.
@@ -93,9 +94,15 @@ Enrichment scripts (all in `crawler/`):
 UG enrichment runs **on the user's machine** via Chrome's Prompt API (Gemini Nano). No backend, no API key, no upload of copyrighted content. User flow:
 
 1. User runs `crawler/userscripts/nortabs-ug-exporter.user.js` (Tampermonkey) on UG bookmarks → downloads `nortabs-ug-import-*.json`.
-2. User opens `#/import/ug` in Chrome, drops the JSON, clicks "Berik on-device". `enrich-ondevice.js` `enrichOne(tab)` runs per tab (~9-10 s/tab on RTX 5090, ~10-20 s on regular hardware).
-3. Each enriched tab lands in `localStorage['nortabs:local-imports:v1']` via `addLocalImport(tab, enrichment)` in `catalog.js`. Synthetic artist/song/tab IDs (`ug-artist-…`, `ug-song-…`, `ug-tab-…`) derived from slugified names.
+2. User opens `#/import/ug` and **drops the JSON** (no separate button click — the drop is the action).
+   - **Chrome (Prompt API available)**: auto-enqueue into the background-enrichment queue (`enrich-queue.js`). `enrichOne(tab)` runs per tab (~9-10 s/tab on RTX 5090, ~10-20 s on regular hardware).
+   - **Anywhere else**: literal-only import. `addLocalImport(tab, {})` per tab + `rebuildIndex()`. Tabs surface via plain text search (artist/song/body) but skip the LLM vibe layer (theme/mood/occasion). The availability card frames this positively: "💡 Bruk Google Chrome — da blir søket MYE smartere".
+3. Each tab (enriched or literal) lands in `localStorage['nortabs:local-imports:v1']` via `addLocalImport(tab, enrichment)` in `catalog.js`. Synthetic artist/song/tab IDs (`ug-artist-…`, `ug-song-…`, `ug-tab-…`) derived from slugified names. UG `[ch]`/`[tab]` wrappers stripped at write-time via `cleanUgBody`.
 4. `rebuildIndex()` re-runs `search.js`'s indexer over catalog + local imports so new tabs are searchable immediately.
+
+**Background queue + status pill.** `enrich-queue.js` owns the loop; the click handler in `views/import-ug.js` calls `enqueue(tabs)` fire-and-forget. The `#enrich-pill` element (fixed bottom-right in `index.html`) shows `"⚙ Indekserer 7/12…"` or `"↓ Gemini Nano 1.3 GB…"` from whatever view the user is on, and routes back to `#/import/ug` on click. Once `running` flips false, `wireEnrichPill` calls `rebuildIndex` so new entries become searchable. The contract is one batch at a time — a second drop while running shows a clear "vent til denne er ferdig" message instead of silent-no-op.
+
+**Background prefetch on app start.** `app.js`'s `main()` fires `prefetchModel()` after the catalog is loaded. If the model is downloadable AND we look online (`navigator.onLine`), Chrome starts pulling the 2-4 GB Gemini Nano model in the background — pill shows progress. First user-triggered enrichment is then instant. No-op when already provisioned, offline, or no Prompt API.
 
 For fast iteration during dev, `crawler/sample-ug-export.py` produces a small random sample (default 15 of 253 tabs, `--seed` for reproducibility) so a full import-flow test takes ~2-3 min instead of ~40.
 
