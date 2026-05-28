@@ -2,6 +2,16 @@ import { APP_VERSION } from './version.js';
 
 const LOCAL_IMPORTS_KEY = 'nortabs:local-imports:v1';
 
+// Ultimate Guitar wraps chord tokens with [ch]X[/ch] and chord-over-lyric
+// blocks with [tab]...[/tab]. We strip both — lossless, the chord letter
+// stays in its original column position because only the wrapping tags go
+// away. Mirrors crawler/build-private-bundle.py's clean_body() so on-device
+// imports match the shipped pipeline's body shape exactly.
+const UG_WRAP_RE = /\[\/?(?:ch|tab)\]/g;
+function cleanUgBody(body) {
+  return typeof body === 'string' ? body.replace(UG_WRAP_RE, '') : body;
+}
+
 let _data = null;
 let _privateBundle = null;
 let _localImports = null;
@@ -106,6 +116,19 @@ export function loadLocalImports() {
   } catch {
     _localImports = null;
   }
+  // One-pass migration: previously-imported tabs predate UG-markup stripping.
+  // Clean their bodies in-place and persist so the cache is clean forever.
+  // Idempotent — re-cleaning an already-clean body changes nothing.
+  if (_localImports?.tabs) {
+    let changed = false;
+    for (const tab of Object.values(_localImports.tabs)) {
+      const cleaned = cleanUgBody(tab.body);
+      if (cleaned !== tab.body) { tab.body = cleaned; changed = true; }
+    }
+    if (changed) {
+      try { localStorage.setItem(LOCAL_IMPORTS_KEY, JSON.stringify(_localImports)); } catch {}
+    }
+  }
   if (_localImports) _registerBundle(_localImports);
   return _localImports;
 }
@@ -142,7 +165,7 @@ export function addLocalImport(tab, enrichment) {
     id: tabId,
     source: 'ug',
     artist, song,
-    body: tab.body || '',
+    body: cleanUgBody(tab.body || ''),
     chordnames: Array.isArray(tab.chordnames) ? tab.chordnames : [],
     imported_at: new Date().toISOString(),
   };
