@@ -8,7 +8,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository state
 
-Phases 1-2 are shipped and the app is live at [aweussom.github.io/nortabs-web](https://aweussom.github.io/nortabs-web/). Active work is in the UG-import phase (private-bundle pipeline + UI polish on the `tommy-tester-ug` branch). Stack is still **vanilla JS modules + HTML + CSS, no bundler** — no `package.json`, no build step, no test runner, no lint config. Do not invent build/test commands; opening `index.html` (or serving with `python -m http.server`) is the dev loop. Do not introduce node tooling without asking.
+The project is renamed `tabtabtab` (formerly NorTabs). Default branch is `main`; the old `tommy-tester-ug` branch is merged. Phase 1-2 (catalog browse + search + songbooks + chord wrap + playback) is shipped. Phase 2.5 was superseded by an **on-device UG-enrichment** path (Chrome Prompt API / Gemini Nano) — see PLAN.md Phase 2.5 "SUPERSEDED" + the "On-device UG enrichment + local imports" section below. Active polish + features land on `main` directly.
+
+Live URL is in flux: the README says `tabtabtab.no` (deploy in progress, served as static files from Tommy's Azure VM); the old GitHub Pages URL (`aweussom.github.io/nortabs-web`) is dead because the repo went private. Don't rely on either being reachable.
+
+Stack is still **vanilla JS modules + HTML + CSS, no bundler** — no `package.json`, no build step, no test runner, no lint config. Do not invent build/test commands; opening `index.html` (or serving with `python -m http.server`) is the dev loop. Do not introduce node tooling without asking.
 
 ## Architecture
 
@@ -17,18 +21,20 @@ Flat module layout:
 - `index.html` — single `<div id="app">`, loads `app.js` as a module.
 - `state.js` — central state + `getState()` / `setState(patch)` / `subscribe(fn)`. Re-render the current view on change.
 - `router.js` — parses `location.hash`, dispatches to a view, updates state.
-- `catalog.js` — **in-memory catalog accessor**. Loads `catalog.json` once, indexes by id. It does **not** hit nortabs.net. (Deliberately *not* called `api.js` — the shipped web app makes no network calls; only the Python crawler does.)
-- `search.js` — three inverted indexes + IDF + token aliases. README has the full tour.
+- `catalog.js` — **in-memory catalog accessor**. Loads `catalog.json` once, indexes by id. Also owns `_localImports` (UG-imported tabs in localStorage) — see "On-device UG enrichment + local imports" below. (Deliberately *not* called `api.js` — the shipped web app makes no network calls; only the Python crawler does.)
+- `search.js` — three inverted indexes + IDF + token aliases + UG-import boost. README has the full tour.
 - `chord-wrap.js` — context-sensitive line wrapping for chord-over-lyric tabs on narrow viewports.
 - `chord-data.js` + `chord-diagrams.js` — fingerings (with vise↔barré alts) and SVG renderer.
-- `storage.js` — localStorage for songbooks, favorites, playback, chord-mode, text-scale.
+- `storage.js` — localStorage for songbooks, favorites, playback, chord-mode, text-scale. Synthesizes the always-present `ug-import-main` songbook on every read from `_localImports`.
 - `playback.js` — auto-scroll engine with countdown / pause / resume / variable speed.
 - `exporter.js` — songbook → standalone HTML export.
+- `enrich-ondevice.js` — on-device UG enrichment via Chrome's Prompt API (Gemini Nano). Exports `getAvailability()` / `enrichOne(tab)`. Includes the JSON-recovery stack (strip think/fences → balanced-block → JSON5.parse → salvage → one retry). Requires global `JSON5` (vendored).
+- `vendor/json5.min.js` — JSON5 2.2.3 UMD (~31 KB). Vendored, not CDN — works offline. Sets `window.JSON5`.
 - `sw.js` — service worker, see "Cache-busting + service worker" below.
 - `views/` — one file per screen, each exports `render(state, root)`.
 - `crawler/` — Python; the **only** code in the project that calls nortabs.net.
 
-The hard architectural rule: **the shipped web app never makes network calls to nortabs.net's API.** All browsing is served from the embedded `catalog.json` (+ optional `enrichment.json`, `private-bundle.json`). Only the nightly GitHub Action crawler talks to the upstream API. Preserve this boundary — it's the whole reason the project exists.
+The hard architectural rule: **the shipped web app never makes network calls to nortabs.net's API.** All browsing is served from the embedded `catalog.json` (+ optional `enrichment.json`). The on-device LLM (Gemini Nano via Chrome's Prompt API) is allowed — it's not a network call, it's a local model. Only the nightly GitHub Action crawler talks to the upstream API. Preserve this boundary — it's the whole reason the project exists.
 
 ## Reference: the Python app at `C:\devel\python\nortabs-app`
 
@@ -55,7 +61,7 @@ The Python app is a **frozen reference**, not a sibling to keep in sync.
 ## Cache-busting + service worker
 
 `version.js` exports `APP_VERSION` (Unix epoch). Two consumers:
-- `catalog.js` appends `?v=${APP_VERSION}` to `catalog.json` / `enrichment.json` / `private-bundle.json` fetches.
+- `catalog.js` appends `?v=${APP_VERSION}` to `catalog.json` / `enrichment.json` (+ `private-bundle.json` if/when re-shipped) fetches.
 - `sw.js` uses `APP_VERSION` as the cache key (`nortabs-v${APP_VERSION}`) for the precached app shell. Old caches are deleted on activate.
 
 **Auto-bumped on commit** by `.githooks/pre-commit` (Python one-liner). Activate the hook once per clone:
@@ -82,16 +88,34 @@ Enrichment scripts (all in `crawler/`):
 - `run-enrich.ps1` / `run-enrich-parallel.ps1` / `scheduled-enrich.ps1` — quota-aware drivers (Windows Task Scheduler runs the scheduled one at 06:00 Oslo).
 - `enrich-private.py` + `build-private-bundle.py` — private-tabs pipeline (see below).
 
-## Private-tabs bundle (UG imports)
+## On-device UG enrichment + local imports
 
-`private-bundle.json` is a separately-loaded artifact alongside `catalog.json`; it carries user-imported Ultimate Guitar tabs. Pipeline:
+UG enrichment runs **on the user's machine** via Chrome's Prompt API (Gemini Nano). No backend, no API key, no upload of copyrighted content. User flow:
 
-1. `crawler/userscripts/nortabs-ug-exporter.user.js` — Tampermonkey script that scrapes a UG tab page into JSON.
-2. `crawler/private/ug-import.json` — accumulated raw exports (committed for transparency).
-3. `crawler/enrich-private.py` — LLM-enriches private tabs into `crawler/private/ug-enrichment.json` (STRICT_SUFFIX prompt + JSON salvage + `--retry-thin`).
-4. `crawler/build-private-bundle.py` — emits `private-bundle.json` for the shipped app.
+1. User runs `crawler/userscripts/nortabs-ug-exporter.user.js` (Tampermonkey) on UG bookmarks → downloads `nortabs-ug-import-*.json`.
+2. User opens `#/import/ug` in Chrome, drops the JSON, clicks "Berik on-device". `enrich-ondevice.js` `enrichOne(tab)` runs per tab (~9-10 s/tab on RTX 5090, ~10-20 s on regular hardware).
+3. Each enriched tab lands in `localStorage['nortabs:local-imports:v1']` via `addLocalImport(tab, enrichment)` in `catalog.js`. Synthetic artist/song/tab IDs (`ug-artist-…`, `ug-song-…`, `ug-tab-…`) derived from slugified names.
+4. `rebuildIndex()` re-runs `search.js`'s indexer over catalog + local imports so new tabs are searchable immediately.
 
-The web app pulls private-bundle.json optionally — absence is fine. UG tabs surface in the catalog as a hardcoded songbook (`ug-import-main`), reachable via `#/songbook/ug-import-main` and via the search index.
+For fast iteration during dev, `crawler/sample-ug-export.py` produces a small random sample (default 15 of 253 tabs, `--seed` for reproducibility) so a full import-flow test takes ~2-3 min instead of ~40.
+
+**UG entries are first-class everywhere** the user encounters mixed content:
+
+- **Letter browse**: `getArtistsForLetter()` in `catalog.js` merges UG artists with catalog artists by first letter (Norwegian locale sort).
+- **Search**: UG-matching entries get a ×2.5 boost (`UG_IMPORT_BOOST` in `search.js`). Marker is `letter === null` in lookup map refs. Prefix-variant matches are deduped per query token so a single morphological match in the enrichment doesn't compound.
+- **Always-present songbook**: `storage.js`'s `read()` synthesizes `{id:'ug-import-main', name:'Mine UG-importer', tab_ids:[…all UG tab IDs…], _synthetic:true}` on every read, slotted after Favoritter. Never persisted — can't be deleted, can't fall out of sync. Views check `_synthetic` to disable rename/delete/remove/reorder controls. `getSongbooksContaining` + `favoriteTabIds` skip synthetic so UG tabs aren't double-boosted in search.
+- **Visual marker**: small superscript red "U" via `li.ug-import::after` in `style.css`. Views set the class when `_source === 'ug'` (a flag `_registerBundle` stamps on synthetic artist/song objects). Used in letter-browse, all three search-result frames, and songbook-detail rows.
+- **Back-link**: `views/artist.js` derives the effective letter from the artist name's first char when `letter === null`, so "T → Townes → tilbake" returns to T, not to Sangbøker.
+
+**Shipped `private-bundle.json` is intentionally absent** (gitignored, see `da00fbb`). The plumbing is intact (`loadPrivateBundle` handles 404 → null) so we can ship a curated demo bundle in the future. The old "Tommy's personal 253-tab library auto-injected into every visitor's localStorage" UX is gone.
+
+**Other UG markup**: `[ch]X[/ch]` and `[tab]…[/tab]` are stripped in both pipelines (`crawler/build-private-bundle.py` → `clean_body`; `catalog.js` → `cleanUgBody` at write-time + one-pass migration on `loadLocalImports`). PLAN.md backlog: revisit later as styling hints.
+
+**Legacy Python pipeline** (cross-check / build-bundle, kept though no longer the primary path):
+
+- `crawler/private/ug-import.json` — accumulated raw exports (committed for transparency).
+- `crawler/enrich-private.py` — LLM-enriches private tabs into `crawler/private/ug-enrichment.json` (STRICT_SUFFIX prompt + JSON salvage + `--retry-thin`). Useful as a QA cross-check against the on-device model.
+- `crawler/build-private-bundle.py` — emits `private-bundle.json` if/when we ship a demo bundle. Gitignored output; `git add -f` to commit deliberately.
 
 ## Docs and screenshots
 
@@ -115,22 +139,6 @@ Don't remove any of these without re-testing on a physical iPhone:
 **Surfaced-but-parked:** `wrapPlain` hard-breaks lines that have no whitespace within `maxCols` (long URLs split mid-token: `Tumbleweed_C` / `onnection`). Better behavior: pass such lines through unchanged and let `overflow-x: auto` on `.tab-body` handle them with horizontal scroll. Low priority.
 
 **SW-cache double-bind during iteration:** because `APP_VERSION` only bumps at commit, every speculative shell-file change during local debugging needs a manual `version.js` bump to reach iOS (see "Cache-busting + service worker" above). The 2026-05-16/17 session bumped manually four times before landing the final state.
-
-## iOS chord-wrap: defensive shotgun in place (2026-05-17)
-
-The chord-wrap pipeline carries five overlapping defenses against iOS Safari's stale-layout-after-rotation behavior. They were landed together as a shotgun fix on 2026-05-16/17 after a debugging session confirmed they make the wrap correct on a real iPhone. We did not bisect to find the minimum-necessary subset — the iOS user count for this app is effectively zero, so the overkill is acceptable. If anyone ever wants to minimize, the PLAN.md "Narrow down exactly what is needed for iOS" entry has the bisection plan.
-
-Don't remove any of these without re-testing on a physical iPhone:
-
-1. `chord-wrap.js` `measureMaxCols` reads `preEl.parentElement.clientWidth` instead of `preEl.clientWidth`. The pre shrinks to its post-wrap content (flex auto-basis in portrait, `width: max-content` in bleed mode), so reading its own clientWidth creates a feedback loop — a wider viewport never gets a bigger budget. **Fundamental: PC needs it too.**
-2. `chord-wrap.js` `measureMaxCols` copies font *longhands* (`fontFamily`, `fontSize`, `fontWeight`, `fontStyle`, `letterSpacing`) to the temp measurement span instead of the `cs.font` shorthand, because WebKit returns `""` for the shorthand when any longhand isn't explicit, which would silently fall through to body's proportional font and skew `charW`.
-3. `views/tab.js` `wireChordWrap` schedules `apply()` *four times* per viewport event: immediate, double-RAF, 250 ms, 600 ms. iOS fires `resize` mid-rotation-animation before viewport / media-query / font metrics have settled; spreading retries across this window means at least one measurement lands after Safari catches up. Each `apply()` re-reads fresh dimensions, so duplicates are idempotent and cheap.
-4. `views/tab.js` `wireChordWrap` listens to `orientationchange` and `visualViewport.resize` in addition to `window.resize`. Both are more reliable than plain `resize` on iOS for rotation, and `visualViewport` additionally covers browser-chrome show/hide.
-5. `views/tab.js` `wireTextSize` defers `applyWrap()` to the next `requestAnimationFrame` after writing `--tab-text-scale`, so `getComputedStyle`'s font metrics have reflowed before `charW` is measured. Without this, A−/zoom-out is asymmetric on iOS — wrap doesn't widen when the budget grows.
-
-**Surfaced-but-parked:** `wrapPlain` hard-breaks lines that have no whitespace within `maxCols` (long URLs split mid-token: `Tumbleweed_C` / `onnection`). Better behavior: pass such lines through unchanged and let `overflow-x: auto` on `.tab-body` handle them with horizontal scroll. Low priority.
-
-**SW-cache double-bind during iteration:** because `APP_VERSION` only bumps at commit, every speculative shell-file change during local debugging needs a manual `version.js` bump to reach iOS. PC dev tools usually bypass this via "Disable cache" while DevTools is open; iOS Safari has no such switch and will serve stale cached code until either (a) you commit so `APP_VERSION` bumps, (b) you clear Safari's website data for the host, or (c) you manually `caches.delete()` from the JS console. The 2026-05-16/17 session bumped manually four times before landing the final state. If a code change "works on desktop but not on iOS," suspect SW cache first.
 
 ## Working artifacts outside the repo
 

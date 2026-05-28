@@ -85,7 +85,7 @@ A query goes through several stages:
 3. **Match.** Short queries use prefix expansion on names (`ryba` → `rybak`, `barnsanger` → `barnesanger`), with an `exact > prefix` score multiplier. Body matches are always exact, but weighted by IDF.
 4. **Propagate body matches upward.** When a lyric matches a tab, the *song* it belongs to gets a 3× boost on the song frame. So typing a half-remembered line lands you on the right song, not just the right tab.
 5. **Dedup multi-tab songs.** A song with five user-uploaded tabs would otherwise score 5× a song with one — unfair. The body score is the *max* across the song's tabs, not the sum.
-6. **Songbook boost.** Tabs the user has bookmarked get a 4× multiplier — if you've added Bjørn Eidsvåg to a songbook, his name wins over a less-known same-letter artist.
+6. **Songbook + UG-import boost.** Tabs in a user-curated songbook get a 4× multiplier — if you've added Bjørn Eidsvåg to a sangbok, his name wins over a less-known same-letter artist. Separately, anything you imported from Ultimate Guitar gets a 2.5× boost in its own right: you actively sought that tab out, so it's a stronger relevance signal than a tangentially-tagged catalog entry. Prefix-expansion contributions are also deduped per query token, so a song whose enrichment mentions both `mountain` and `mountains` doesn't double-score over one that mentions only `mountain`.
 7. **Three result frames** — Songs, Artists, Lyrics, in that order, twenty entries each.
 8. **"Mente du …?"** Only when nothing hit and the query was a single token. Multi-token zero-result is usually a hopeless query and Damerau-Levenshtein guessing makes it worse, not better.
 9. **Fall-through.** Zero hits always shows a `Søk live på nortabs.net` link at the bottom — honest UX, no embedded iframe, just a new tab.
@@ -147,7 +147,7 @@ How it works:
 
 That third step is the whole trick. Enrichment is the one thing that *looked* like it needed a backend — you can't run a decent LLM in a browser, surely? Except now you can: Chrome ships one. Your copyrighted tabs never touch anyone's server; they're enriched by your own machine, and (optionally) synced across your devices through *your own* Google Drive — a hidden per-app folder (`appDataFolder`, scope `drive.appdata`) that's invisible to everyone, including me.
 
-**Status — honest, it's a hobby in motion:** the userscript and the catalog-side bundling are shipped. On-device enrichment is *validated* (Chrome 148, Gemini Nano; semantic quality matched the cloud models that built the catalog). The drop-it-in-yourself import UI and Drive sync are in progress.
+**Status — honest, it's a hobby in motion:** the userscript, the drop-it-in-yourself import UI (`#/import/ug`), and on-device enrichment are all *shipped* — drop a JSON, watch Gemini Nano tag each tab in your own browser, and your imports land in the same search index as the catalog with a small relevance boost (so the song you imported beats a tangentially-tagged catalog one). The auto-synthesized "Mine UG-importer" songbook is always present in your sangbok-list, you can browse UG artists under their letter alongside the catalog (a tiny red "U" marks user-imported entries), and back-navigation works the way you'd expect. Cross-device sync via your own Google Drive `appDataFolder` is the next moving part.
 
 **Chrome-only, by choice.** On-device AI is a Chrome feature today (Edge/other Chromium will inherit it; feature-detection means they light up automatically when they do). Other browsers still get full *literal* search over your imports — artist, title, lyric, chord text — they just don't get the AI semantic layer in-browser. An acceptable asymmetry for a design that refuses to run a backend.
 
@@ -163,17 +163,21 @@ tabtabtab/                    # repo (local folder may still be nortabs-web)
 ├── app.js                    # router + state + view dispatch
 ├── state.js                  # central state with pub/sub
 ├── router.js                 # hash routing
-├── catalog.js                # loads catalog.json once, indexes by id
+├── catalog.js                # loads catalog.json + local UG-imports, indexes by id
 ├── search.js                 # the star player — see above
 ├── chord-wrap.js             # context-sensitive line wrapping for mobile
-├── storage.js                # localStorage for songbooks + playback
+├── storage.js                # localStorage for songbooks + playback (synthesizes UG songbook)
 ├── playback.js               # auto-scroll engine
 ├── exporter.js               # songbook → standalone HTML export
+├── enrich-ondevice.js        # on-device UG enrichment via Chrome Prompt API
+├── vendor/json5.min.js       # JSON5 (vendored, lenient parser for LLM output)
 ├── version.js                # cache-busting stamp (auto-bumped on commit)
 ├── views/                    # one file per screen
 ├── catalog.json              # crawler output (committed, ~23 MB raw / 5 MB gzipped)
 ├── enrichment.json           # merged LLM enrichment (committed)
 ├── enrichment/<letter>.json  # per-letter enrichment checkpoints
+├── private-bundle.json       # gitignored — shipped UG bundle, intentionally absent
+│                             #   until we ship a cleanly-licensed demo set
 ├── home-wordcloud.svg        # decorative background
 ├── style.css
 ├── .github/workflows/
@@ -187,9 +191,10 @@ tabtabtab/                    # repo (local folder may still be nortabs-web)
 │   ├── run-enrich.ps1        # quota-aware serial wrapper for Claude
 │   ├── run-enrich-parallel.ps1 # disjoint-letter parallel driver
 │   ├── scheduled-enrich.ps1  # daily 06:00 Oslo Task Scheduler entry
+│   ├── sample-ug-export.py   # random small UG-sample generator (fast iteration)
 │   ├── userscripts/          # UG bookmark exporter (Tampermonkey)
 │   ├── enrich-private.py     # UG enrichment — kept as a QA cross-check
-│   └── build-private-bundle.py # builds private-bundle.json (personal/QA)
+│   └── build-private-bundle.py # builds private-bundle.json (for future demo bundle)
 └── archive/                  # superseded cloud-proxy era — see archive/README.md
 ```
 
