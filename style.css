@@ -130,20 +130,17 @@ a:hover { text-decoration: underline; }
 ul { padding-left: 1.25rem; }
 li { margin: 0.25rem 0; }
 
-/* UG-import marker: little red "U" top-right of the line item, nodding to
-   Ultimate Guitar's logo. Used on letter-browse to flag user-imported
-   entries among catalog ones — same shape any view can reuse later. */
-li.ug-import { position: relative; }
+/* UG-import marker: little red "U" right after the entry text (superscript
+   feel), nodding to Ultimate Guitar's logo. Inline placement keeps it
+   adjacent to the artist/song name regardless of row width. */
 li.ug-import::after {
   content: "U";
-  position: absolute;
-  top: -0.15em;
-  right: 0.25rem;
   color: #d33;
   font-weight: 700;
-  font-size: 0.75em;
+  font-size: 0.7em;
   font-family: Georgia, "Times New Roman", serif;
-  letter-spacing: -0.04em;
+  vertical-align: super;
+  margin-left: 0.2em;
   pointer-events: none;
 }
 
