@@ -36,6 +36,7 @@ export function parseHash() {
   if (head === 'tab' && arg) return { name: 'tab', id: parseId(), sb };
   if (head === 'songbooks') return { name: 'songbooks' };
   if (head === 'songbook' && arg) return { name: 'songbook', id: arg };
+  if (head === 'import' && arg === 'ug') return { name: 'import-ug' };
   if (head === 'share') {
     const ids = (query.ids || '').split(',').map(Number).filter(n => Number.isFinite(n));
     return { name: 'share', shareName: query.name || 'Delt sangbok', tab_ids: ids };

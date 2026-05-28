@@ -15,6 +15,7 @@ export function render(state, root) {
       `).join('')}
     </ul>
     <button id="new-songbook">+ Ny sangbok</button>
+    <a href="#/import/ug" class="import-link" style="margin-left:.6rem">⤓ Importer UG-tabs</a>
   `;
   root.querySelector('#new-songbook').addEventListener('click', () => {
     const name = prompt('Navn på sangbok:');

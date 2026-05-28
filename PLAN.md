@@ -378,6 +378,8 @@ Anonymous/offline-only usage continues to work without ever touching the API —
 
 ## Backlog / TODO
 
+- **Progress UX for long downloads** (TODO 2026-05-28): the app currently shows a static "Loading…" during two real-but-silent waits: (a) initial `catalog.json` fetch (~5 MB gzipped, can be several seconds on slow links — service worker hides the network on repeat visits but the first hit is bare), and (b) when on-device enrichment first needs to download Gemini Nano (~2-4 GB via `chrome://components`, but `LanguageModel.create()` exposes a `monitor` callback with `downloadprogress` events the user could see). Add a progress bar / traffic-light indicator for both. Low-priority polish; the load works, it just feels dead.
+
 - **Tolerant JSON parser for LLM output in enrich.py** (✅ implemented): `extract_json()` now does (a) a string-aware balanced `{...}` finder so the first complete top-level object wins regardless of trailing prose or a second emitted object, then (b) falls back from strict `json.loads` to `json5.loads` so unquoted keys / single quotes / trailing commas / comments parse cleanly. `json5` is a local-only dep (`pip install json5`) — never installed on the GitHub Actions crawler or shipped to the browser. The failure mode that motivated this was "Extra data" on Børge Rømma 2026-05-15 — LLM emitted a clean JSON object followed by an apologetic prose paragraph; greedy regex matched everything, `json.loads` choked. Smoke-tested against 8 cases covering trailing prose, two emitted objects, leading prose, braces inside strings, code fences, trailing commas, and unquoted keys.
 
 - **Take direct control of catalog/enrichment compression in the browser** (planned, not yet built):

@@ -488,6 +488,12 @@ button.heart:hover { background: rgba(221, 51, 51, 0.1); }
 
 .muted { color: var(--muted); }
 
+/* Import-UG view (#/import/ug) */
+.card { border: 1px solid var(--muted); border-radius: 8px; padding: .8rem 1rem; margin: .8rem 0; opacity: .92; }
+.ug-drop-zone { border: 2px dashed var(--muted); border-radius: 8px; padding: 1.2rem; text-align: center; transition: border-color .15s; }
+.ug-drop-zone.over { border-color: var(--accent, #4a9); }
+.import-link { display: inline-block; padding: .35rem .7rem; border: 1px solid var(--muted); border-radius: 6px; text-decoration: none; }
+
 #playback-hud {
   position: fixed;
   bottom: 1rem;
