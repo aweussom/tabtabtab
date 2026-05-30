@@ -1,7 +1,21 @@
 import { getSongbooks, createSongbook } from '../storage.js';
-import { isConfigured, isSignedIn, signIn, signOut, push as drivePush, getLastSyncedAt } from '../drive-sync.js';
-import { getLocalImports } from '../catalog.js';
+import { isConfigured, isSignedIn, signIn, signOut, push as drivePush, pull as drivePull, getLastSyncedAt } from '../drive-sync.js';
+import { getLocalImports, mergeLocalImports, replaceLocalImports } from '../catalog.js';
+import { rebuildIndex } from '../app.js';
 import { escapeHtml } from '../util.js';
+
+// Pull from Drive → merge with local (per-tab newer-wins via imported_at) →
+// replace local with merged → rebuild search index → push merged back so
+// Drive reflects the union. The merge is intentionally idempotent — re-
+// running it leaves data unchanged once a device is caught up.
+async function syncRoundTrip() {
+  const remote = await drivePull();
+  const local = getLocalImports();
+  const merged = mergeLocalImports(local, remote);
+  replaceLocalImports(merged);
+  rebuildIndex();
+  await drivePush(merged);
+}
 
 export function render(state, root) {
   const songbooks = getSongbooks();
@@ -72,10 +86,16 @@ function wireDriveButtons(root, state) {
       setMsg('Logger inn…');
       try {
         await signIn();
-        setMsg('');
+        setMsg('Henter Drive-data og sletter konflikter…');
+        // First-sign-in does a full round-trip so existing Drive data
+        // (from another device) merges into local immediately. If Drive
+        // is empty, the merge is a no-op and the push uploads local.
+        await syncRoundTrip();
+        setMsg('Synket.');
         refresh();
       } catch (err) {
-        setMsg(`Innlogging feilet: ${err.message}`);
+        setMsg(`Innlogging/sync feilet: ${err.message}`);
+        refresh();
       }
     });
   }
@@ -86,8 +106,7 @@ function wireDriveButtons(root, state) {
       setMsg('Synker…');
       syncBtn.disabled = true;
       try {
-        const local = getLocalImports() || { artists: {}, songs: {}, tabs: {} };
-        await drivePush(local);
+        await syncRoundTrip();
         setMsg('Synket.');
         refresh();
       } catch (err) {

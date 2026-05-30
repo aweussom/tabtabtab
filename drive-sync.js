@@ -209,6 +209,31 @@ export async function push(payload) {
   return fileId;
 }
 
+// Push-coalescing: many small writes during a fast enrichment batch get
+// collapsed into at-most-one-in-flight + at-most-one-pending. The newest
+// payload always wins — `getPayload` is re-invoked when the pending push
+// fires, so it captures the latest local state, not whatever was current
+// when the call was made.
+let _pushInFlight = null;
+let _pushAgain = false;
+export function pushIfChanged(getPayload) {
+  if (_pushInFlight) {
+    _pushAgain = true;
+    return _pushInFlight;
+  }
+  _pushInFlight = (async () => {
+    try {
+      do {
+        _pushAgain = false;
+        await push(getPayload());
+      } while (_pushAgain);
+    } finally {
+      _pushInFlight = null;
+    }
+  })();
+  return _pushInFlight;
+}
+
 /**
  * Read the appDataFolder file. Returns the parsed object, or `null` if
  * no file exists yet (first-time sync from this device).

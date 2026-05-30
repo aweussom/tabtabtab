@@ -18,7 +18,8 @@
 //     error: string | null }
 
 import { prepareModel, enrichOne } from './enrich-ondevice.js';
-import { addLocalImport } from './catalog.js';
+import { addLocalImport, getLocalImports } from './catalog.js';
+import { isSignedIn as isDriveSignedIn, pushIfChanged as drivePushIfChanged } from './drive-sync.js';
 
 let _state = {
   running: false,
@@ -107,6 +108,15 @@ export async function enqueue(tabs, opts = {}) {
       const enrichment = await enrichOne(tab);
       addLocalImport(tab, enrichment);
       emit({ done: _state.done + 1 });
+      // Auto-push to Drive after each successful tab. The push is debounced
+      // by `pushIfChanged` so a burst of fast tabs coalesces into at most
+      // one in-flight + one pending request — effectively per-tab when
+      // network is faster than enrichment, automatically batched when not.
+      if (isDriveSignedIn()) {
+        drivePushIfChanged(getLocalImports).catch(err => {
+          console.warn('[drive-sync] background push failed:', err.message);
+        });
+      }
     } catch (err) {
       _failures.push({ tab, error: err.message });
       emit({ failed: _state.failed + 1 });

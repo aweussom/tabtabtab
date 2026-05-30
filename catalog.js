@@ -207,6 +207,53 @@ export function addLocalImport(tab, enrichment) {
 }
 
 /**
+ * Replace the entire _localImports store with a new bundle (e.g. after
+ * a Drive pull + merge). Drops old letter=null entries from the catalog
+ * lookup maps, re-registers the new bundle, and persists to localStorage.
+ * Caller is responsible for calling rebuildIndex() afterwards.
+ */
+export function replaceLocalImports(bundle) {
+  _localImports = bundle || { artists: {}, songs: {}, tabs: {} };
+  // Clear previous UG entries from lookup maps; catalog entries (letter
+  // !== null) survive untouched.
+  for (const [id, ref] of [..._byArtistId.entries()]) {
+    if (ref.letter === null) _byArtistId.delete(id);
+  }
+  for (const [id, ref] of [..._bySongId.entries()]) {
+    if (ref.letter === null) _bySongId.delete(id);
+  }
+  for (const [id, ref] of [..._byTabId.entries()]) {
+    if (ref.letter === null) _byTabId.delete(id);
+  }
+  _registerBundle(_localImports);
+  try { localStorage.setItem(LOCAL_IMPORTS_KEY, JSON.stringify(_localImports)); } catch {}
+}
+
+/**
+ * Merge a remote private-bundle (from Drive) into a local one. Per-tab
+ * union with newer `imported_at` winning on collision; songs and artists
+ * spread-union with remote winning ties (acceptable for v1 — songs/artists
+ * are largely derived from tabs anyway). Returns a new bundle; does NOT
+ * mutate inputs.
+ */
+export function mergeLocalImports(local, remote) {
+  local = local || { artists: {}, songs: {}, tabs: {} };
+  remote = remote || { artists: {}, songs: {}, tabs: {} };
+  const tabs = { ...local.tabs };
+  for (const [id, t] of Object.entries(remote.tabs || {})) {
+    const localT = tabs[id];
+    if (!localT || (t.imported_at || '') > (localT.imported_at || '')) {
+      tabs[id] = t;
+    }
+  }
+  return {
+    artists: { ...local.artists, ...remote.artists },
+    songs: { ...local.songs, ...remote.songs },
+    tabs,
+  };
+}
+
+/**
  * Merge two private-bundle-shaped objects (shipped + local). Used to hand
  * search.js a single combined privateBundle. The two MAY overlap on artist
  * IDs (slug collision); on overlap, the second arg wins.
