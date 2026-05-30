@@ -64,8 +64,10 @@ function renderDriveStatus() {
     return `<button id="drive-signin">Logg inn med Google</button>`;
   }
   const last = getLastSyncedAt();
+  const tabCount = Object.keys(getLocalImports()?.tabs || {}).length;
+  const tabSuffix = tabCount ? `, ${tabCount} ${tabCount === 1 ? 'tab' : 'tabs'} synket` : '';
   const lastText = last
-    ? `Sist synket: ${new Date(last).toLocaleString('no')}`
+    ? `Sist synket: ${new Date(last).toLocaleString('no')}${tabSuffix}`
     : 'Ikke synket ennå.';
   return `
     <p class="muted">${lastText}</p>
