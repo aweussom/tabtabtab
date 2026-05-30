@@ -2,11 +2,11 @@ import { getLocalImportTabIds } from './catalog.js';
 
 const UG_SYNTHETIC_ID = 'ug-import-main';
 
-const KEY = 'nortabs:songbooks:v1';
-const PB_KEY = 'nortabs:playback:v1';
+const KEY = 'tabtabtab:songbooks:v1';
+const PB_KEY = 'tabtabtab:playback:v1';
 const PB_DEFAULT_DURATION_S = 180;
-const TS_KEY = 'nortabs:textscale:v1';
-const CHORD_MODE_KEY = 'nortabs:chord-mode:v1';
+const TS_KEY = 'tabtabtab:textscale:v1';
+const CHORD_MODE_KEY = 'tabtabtab:chord-mode:v1';
 
 /**
  * Global chord-rendering preference: 'vise' (default — open / visegrep

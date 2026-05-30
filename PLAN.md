@@ -167,7 +167,7 @@ Tasks:
 
 Concept: a **songbook** is a named, ordered collection of tabs. "Favorites" is just the default songbook ("Favoritter") — same data model, special slot in UI.
 
-- Storage: `localStorage`, namespaced `nortabs:songbooks:v1`. Shape:
+- Storage: `localStorage`, namespaced `tabtabtab:songbooks:v1`. Shape:
   ```json
   {
     "songbooks": [
@@ -552,7 +552,7 @@ When the Azure VM API (see "Phase 5+ — Long-term vision") is in place, the bro
 **Pipeline integration:**
 - Telemetry accumulates on the Azure VM between deploys.
 - Crawler (or a sidecar batch process) reads the aggregated counts → computes median per signal per tab → writes to `enrichment.songs[sid].playback_defaults: {duration_s: 247, start_y_ratio: 0.18, sample_count: 47}`.
-- Browser reads `playback_defaults` from enrichment when populating HUD initial state, but the user's own `nortabs:playback:v1` localStorage entry overrides always — crowd-default is a *starting point*, not a *correction*.
+- Browser reads `playback_defaults` from enrichment when populating HUD initial state, but the user's own `tabtabtab:playback:v1` localStorage entry overrides always — crowd-default is a *starting point*, not a *correction*.
 
 User's own tuning always wins. Crowd-default only kicks in for tabs the user has never customized.
 

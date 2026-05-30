@@ -50,7 +50,29 @@ export function rebuildIndex() {
   return stats;
 }
 
+// One-pass rebrand: rename any localStorage keys still on the old
+// `nortabs:` prefix to the current `tabtabtab:` prefix. Must run before
+// the first localStorage read (loadLocalImports, storage.js getSongbooks,
+// etc.) so callers see the new keys. Safe to run on every boot — after
+// the first migration the loop finds nothing. Existing tabtabtab: targets
+// are not overwritten (in case of a partial prior run).
+function migrateLocalStorageKeys() {
+  const toMigrate = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k && k.startsWith('nortabs:')) toMigrate.push(k);
+  }
+  for (const oldKey of toMigrate) {
+    const newKey = 'tabtabtab:' + oldKey.slice('nortabs:'.length);
+    if (localStorage.getItem(newKey) === null) {
+      localStorage.setItem(newKey, localStorage.getItem(oldKey));
+    }
+    localStorage.removeItem(oldKey);
+  }
+}
+
 async function main() {
+  migrateLocalStorageKeys();
   const root = document.getElementById('app');
   root.innerHTML = `
     <div class="app-loading">

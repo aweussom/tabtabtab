@@ -1,6 +1,6 @@
 import { APP_VERSION } from './version.js';
 
-const LOCAL_IMPORTS_KEY = 'nortabs:local-imports:v1';
+const LOCAL_IMPORTS_KEY = 'tabtabtab:local-imports:v1';
 
 // Ultimate Guitar wraps chord tokens with [ch]X[/ch] and chord-over-lyric
 // blocks with [tab]...[/tab]. We strip both — lossless, the chord letter

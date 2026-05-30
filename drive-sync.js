@@ -26,15 +26,15 @@
 // serve the app from must be registered as an "Authorized JavaScript
 // origin" in the same OAuth client config.
 export const DRIVE_CONFIG = {
-  CLIENT_ID: 'TODO-PUT-CLIENT-ID-HERE.apps.googleusercontent.com',
+  CLIENT_ID: '1081890070566-7j26h9ucg6q342ik7o8j560sjuum6o59.apps.googleusercontent.com',
   SCOPE: 'https://www.googleapis.com/auth/drive.appdata',
   FILE_NAME: 'tabtabtab-local-imports.json',
   GIS_SRC: 'https://accounts.google.com/gsi/client',
 };
 
-const TOKEN_KEY = 'nortabs:drive:token:v1';        // { access_token, expires_at }
-const FILE_ID_KEY = 'nortabs:drive:file-id:v1';    // remembered Drive file id
-const LAST_SYNCED_KEY = 'nortabs:drive:last-synced:v1';
+const TOKEN_KEY = 'tabtabtab:drive:token:v1';        // { access_token, expires_at }
+const FILE_ID_KEY = 'tabtabtab:drive:file-id:v1';    // remembered Drive file id
+const LAST_SYNCED_KEY = 'tabtabtab:drive:last-synced:v1';
 
 let _tokenClient = null;
 let _gisLoading = null;
