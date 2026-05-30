@@ -1,8 +1,9 @@
-import { loadCatalog, loadEnrichment, loadPrivateBundle, loadLocalImports, getLocalImports, mergePrivateBundles, getCatalogData } from './catalog.js';
-import { setState, subscribe } from './state.js';
+import { loadCatalog, loadEnrichment, loadPrivateBundle, loadLocalImports, getLocalImports, mergePrivateBundles, getCatalogData, mergeLocalImports, replaceLocalImports } from './catalog.js';
+import { getState, setState, subscribe } from './state.js';
 import { startRouter } from './router.js';
 import { buildIndex } from './search.js';
 import { subscribe as subscribeEnrich, prefetchModel } from './enrich-queue.js';
+import { isSignedIn as driveIsSignedIn, push as drivePush, pull as drivePull } from './drive-sync.js';
 import { mount as mountSearchBar } from './views/search-bar.js';
 import { render as renderLetterIndex } from './views/letter-index.js';
 import { render as renderArtist } from './views/artist.js';
@@ -109,6 +110,32 @@ async function main() {
   // first "Indekser on-device" click is instant for users who'd otherwise
   // sit through a multi-minute download.
   prefetchModel();
+
+  // Auto-pull on app boot: if the user is signed into Drive, do a full
+  // round-trip in the background so changes from another device land
+  // without needing a manual "Sync nå" click. Merge is conservative
+  // (per-tab union via imported_at) — can only add data, never lose any.
+  // Fire after the initial render so the user isn't waiting on Drive
+  // before seeing local state; re-trigger renderCurrent when pull
+  // completes so the visible view reflects any pulled-in entries.
+  if (driveIsSignedIn()) {
+    syncRoundTrip()
+      .then(() => setState({ ...getState() }))
+      .catch(err => console.warn('[drive-sync] auto-pull failed:', err.message));
+  }
+}
+
+// Pull Drive blob → merge with local → replace local → rebuild index → push
+// the merged result back. Used by both the auto-boot pull and the manual
+// "Sync nå" button in the songbooks view. Exported so it has one canonical
+// implementation.
+export async function syncRoundTrip() {
+  const remote = await drivePull();
+  const local = getLocalImports();
+  const merged = mergeLocalImports(local, remote);
+  replaceLocalImports(merged);
+  rebuildIndex();
+  await drivePush(merged);
 }
 
 // Background-enrichment status pill: shown bottom-right whenever the

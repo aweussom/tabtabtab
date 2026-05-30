@@ -1,21 +1,8 @@
 import { getSongbooks, createSongbook } from '../storage.js';
-import { isConfigured, isSignedIn, signIn, signOut, push as drivePush, pull as drivePull, getLastSyncedAt } from '../drive-sync.js';
-import { getLocalImports, mergeLocalImports, replaceLocalImports } from '../catalog.js';
-import { rebuildIndex } from '../app.js';
+import { isConfigured, isSignedIn, signIn, signOut, getLastSyncedAt } from '../drive-sync.js';
+import { getLocalImports } from '../catalog.js';
+import { syncRoundTrip } from '../app.js';
 import { escapeHtml } from '../util.js';
-
-// Pull from Drive → merge with local (per-tab newer-wins via imported_at) →
-// replace local with merged → rebuild search index → push merged back so
-// Drive reflects the union. The merge is intentionally idempotent — re-
-// running it leaves data unchanged once a device is caught up.
-async function syncRoundTrip() {
-  const remote = await drivePull();
-  const local = getLocalImports();
-  const merged = mergeLocalImports(local, remote);
-  replaceLocalImports(merged);
-  rebuildIndex();
-  await drivePush(merged);
-}
 
 export function render(state, root) {
   const songbooks = getSongbooks();
