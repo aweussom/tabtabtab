@@ -29,7 +29,8 @@ Flat module layout:
 - `playback.js` — auto-scroll engine with countdown / pause / resume / variable speed.
 - `exporter.js` — songbook → standalone HTML export.
 - `enrich-ondevice.js` — on-device UG enrichment via Chrome's Prompt API (Gemini Nano). Exports `getAvailability()` / `prepareModel(opts)` / `enrichOne(tab, opts)`. Includes the JSON-recovery stack (strip think/fences → balanced-block → JSON5.parse → salvage → one retry) and a `monitor` hook on `LanguageModel.create` that surfaces `downloadprogress` events. Requires global `JSON5` (vendored).
-- `enrich-queue.js` — background-enrichment queue. Owns the on-device loop so the user can navigate away from `#/import/ug` while a batch keeps running. Exports `enqueue(tabs)` / `prefetchModel()` / `subscribe(fn)` / `getState()` / `isRunning()` / `getLastSummary()` / `getFailures()`. State shape `{running, prefetching, total, done, failed, current, modelDownload, error}`.
+- `enrich-queue.js` — background-enrichment queue. Owns the on-device loop so the user can navigate away from `#/import/ug` while a batch keeps running. Exports `enqueue(tabs)` / `prefetchModel()` / `subscribe(fn)` / `getState()` / `isRunning()` / `getLastSummary()` / `getFailures()`. State shape `{running, prefetching, total, done, failed, current, modelDownload, error}`. Calls `drivePushIfChanged` after each successful tab so changes propagate to the user's Drive as the batch runs.
+- `drive-sync.js` — cross-device sync via the user's own Google Drive `appDataFolder` (scope `drive.appdata`). Lazy-loaded Google Identity Services (GIS) for OAuth + Drive REST calls. Exports `isConfigured()` / `isReady()` / `isSignedIn()` / `signIn()` / `signOut()` / `push(payload)` / `pull()` / `pushIfChanged(getPayload)` / `getLastSyncedAt()`. `pushIfChanged` coalesces bursts into at-most-one-in-flight + at-most-one-pending. Client ID lives in `DRIVE_CONFIG.CLIENT_ID` (public info, hardcoded — see `DRIVE-SETUP.md` for Google Cloud Console setup).
 - `vendor/json5.min.js` — JSON5 2.2.3 UMD (~31 KB). Vendored, not CDN — works offline. Sets `window.JSON5`.
 - `sw.js` — service worker, see "Cache-busting + service worker" below.
 - `views/` — one file per screen, each exports `render(state, root)`.
@@ -124,7 +125,23 @@ For fast iteration during dev, `crawler/sample-ug-export.py` produces a small ra
 - `crawler/enrich-private.py` — LLM-enriches private tabs into `crawler/private/ug-enrichment.json` (STRICT_SUFFIX prompt + JSON salvage + `--retry-thin`). Useful as a QA cross-check against the on-device model.
 - `crawler/build-private-bundle.py` — emits `private-bundle.json` if/when we ship a demo bundle. Gitignored output; `git add -f` to commit deliberately.
 
-## Docs and screenshots
+## Cross-device sync via Google Drive
+
+Optional, opt-in sync of UG imports across devices via the user's own Google Drive `appDataFolder` (scope `drive.appdata` — hidden per-app folder, invisible in normal Drive UI, no verification required since it's a non-sensitive scope). We host nothing; Google handles auth + storage + propagation.
+
+**Setup (one-time per deployment)**: see `DRIVE-SETUP.md` for the Google Cloud Console steps. Client ID is hardcoded in `drive-sync.js`'s `DRIVE_CONFIG` (public info, no secret). Each app origin (localhost dev, tabtabtab.no, etc.) must be added as an "Authorized JavaScript origin" in the same OAuth client config.
+
+**Flow**:
+- **Sign-in**: `views/songbooks.js` Sangbøker view has the only sign-in surface. First click lazy-loads GIS, opens a popup, stores the access token in `localStorage['tabtabtab:drive:token:v1']` (with `expires_at`).
+- **Auto-push during enrichment**: `enrich-queue.js`'s loop calls `drivePushIfChanged(getLocalImports)` after each successful `addLocalImport`. The `pushIfChanged` helper in `drive-sync.js` coalesces bursts into at-most-one-in-flight + at-most-one-pending — when network is faster than enrichment it's effectively per-tab, when slower it auto-batches. Failures log and move on; the next tab triggers another push that catches up.
+- **Auto-pull on app boot**: `app.js`'s `main()` fires `syncRoundTrip()` in the background after the initial render if `driveIsSignedIn()`. Completes silently or `console.warn`'s on failure. Triggers a state nudge (`setState({ ...getState() })`) so the visible view re-renders with any pulled-in entries.
+- **Manual "Sync nå"** (Sangbøker UI): calls the same exported `syncRoundTrip()` in `app.js`. Surfaces errors visibly for diagnosis (unlike the silent auto-pull).
+- **Round-trip semantics** (`syncRoundTrip`): pull → `mergeLocalImports(local, remote)` → `replaceLocalImports(merged)` → `rebuildIndex()` → push merged back. Merge is per-tab union with newer `imported_at` winning on collision; songs/artists spread-union with remote winning ties. Monotonic — can only add data, never lose any.
+
+**Trade-offs (deliberate, v1)**:
+- Auto-push does NOT pre-pull. Two devices importing different tabs concurrently → last pusher's data ends up on Drive after that moment. The next manual Sync nå (or app reload) on the other device merges everything back via the round-trip. Race window is rare; merge is idempotent.
+- Each push carries the full `localImports` payload (no diffs, no compression). ~14 kB / 15 tabs in practice. Revisit if libraries grow past ~1 MB.
+- File-id is cached in `localStorage['tabtabtab:drive:file-id:v1']` to skip a list-files lookup on every push. If the Drive file is deleted out-of-band, the next PATCH 404s — manual fix: clear that key in DevTools.
 
 - `README.md` — outward-facing project intro (motivations + search journey).
 - `PLAN.md` — design log and backlog (canonical spec).

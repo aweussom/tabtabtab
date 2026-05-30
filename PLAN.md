@@ -199,20 +199,23 @@ Concept: a **songbook** is a named, ordered collection of tabs. "Favorites" is j
 
 **CLI enrichment pipeline retained as QA cross-check** (not the product path): `crawler/enrich-private.py` + `crawler/build-private-bundle.py` are NOT archived, even though on-device enrichment is the product path. They survive deliberately as a **quality cross-check source** — the principle is *never trust a single LLM*. On-device Gemini Nano output gets cross-checked against the CLI pipeline's cloud/Claude output (the same cross-check discipline that produced the public catalog's `enrichment.json` via Claude+GPT). When the on-device `#/import/ug` client flow ships, these CLI tools stay as the QA/reference path, not the user-facing one.
 
-**Next near-term piece — cross-device sync via Google Drive `appDataFolder`** (elevated to near-term 2026-05-27): now that enrichment runs on-device, a user's imported + enriched UG library lives in their browser's localStorage/IndexedDB — which is *per-device*. The moment in-browser enrichment works (it does), the obvious next want is "take my tabs with me" across laptop / phone / desktop.
+**Cross-device sync via Google Drive `appDataFolder`** (✅ shipped 2026-05-30 — `39e423b` scaffold, `bd58959` UI, `855604a` auto-push + merge, `18360f5` auto-pull on boot, `4bcf111` localStorage rebrand including drive-sync keys, `dbb4565` count in last-synced):
 
-The clean, still-serverless answer: **Google sign-in (OAuth) + store the user's private-tabs + enrichment JSON in Google Drive's hidden `appDataFolder`.**
+A user's imported + enriched UG library lives in their browser's localStorage — per-device. Now it also syncs to their own Drive in the hidden `appDataFolder` (OAuth scope `drive.appdata`), invisible in their normal Drive UI. We host nothing; Google handles auth + storage + cross-device propagation.
 
-- `appDataFolder` is Drive's special per-app hidden folder (OAuth scope `drive.appdata`) — invisible in the user's normal Drive UI, and each app can only see its own. Minimal scope, easy for a user to trust, and Google's verification for it is lighter than full-Drive access.
-- The copyrighted UG content lives in the **user's own Google Drive**, never our infrastructure — exactly the "NorTabs never stores user-content bodies" legal posture. We host nothing but the static app shell; Google handles auth + storage + cross-device sync.
-- Result: a fully serverless, per-user-private, cross-device-synced UG library — **static app + on-device AI (enrichment) + the user's own Drive (sync). No backend of ours anywhere in the loop.**
+**What landed**:
+- Auth: Google Identity Services (GIS) token flow, lazy-loaded on first sign-in so users who never sync don't fetch from Google. Token cached in `localStorage['tabtabtab:drive:token:v1']` with expires_at; 401 auto-retry via silent GIS re-grant.
+- Module `drive-sync.js` is the byte-mover: `signIn` / `signOut` / `isSignedIn` / `push(payload)` / `pull()` / `pushIfChanged(getPayload)`. `pushIfChanged` coalesces bursts into at-most-one-in-flight + at-most-one-pending so a fast enrichment loop doesn't fire 15 parallel uploads.
+- Sync orchestration lives in `app.js`'s exported `syncRoundTrip()` (pull → merge → replace local → rebuild index → push). One canonical implementation used by both the manual "Sync nå" button and the auto-pull-on-boot path.
+- Merge: per-tab union with newer `imported_at` winning on collision (`catalog.js` `mergeLocalImports`). Songs/artists spread-union with remote winning ties — acceptable for v1 since those structures are largely derived from tabs anyway. Merge is monotonic — can only add data, never lose any.
+- UI in `views/songbooks.js` Sangbøker view: sign-in button → Logg ut + Sync nå + "Sist synket: ⟨time⟩, N tabs synket".
+- Auto-push during enrichment: `enrich-queue.js`'s loop calls `drivePushIfChanged(getLocalImports)` after each successful `addLocalImport`. Effectively per-tab when network is faster than enrichment, auto-coalesces otherwise.
+- Auto-pull on boot: `app.js`'s `main()` fires `syncRoundTrip()` background after the initial render if signed in, then nudges renderCurrent via `setState({ ...getState() })` so the visible view reflects pulled-in entries.
+- Setup docs in `DRIVE-SETUP.md` — step-by-step Google Cloud Console (project → Drive API → consent screen → OAuth Client ID → authorized origins → paste Client ID into `drive-sync.js`). Client ID is public info (no secret), `drive.appdata` is a non-sensitive scope so no verification process required.
 
-This was sketched in "Phase 5+ — Long-term vision" (Google Drive as the auth + storage layer) as a *far-future* item — but only because back then enrichment needed a server, so Drive-sync was bundled into the big-backend story. On-device enrichment removes that server dependency, so the Drive-sync piece **detaches from Phase 5+ and becomes the near-term priority**: it's the last thing standing between "works on one device" and "works everywhere, privately, with zero infra of ours."
-
-Scope notes for when it's built:
-- Auth: Google Identity Services (GIS) token flow in-browser; request only `drive.appdata`. A pure-client app may not need any server-side token exchange (TBD when built).
-- Storage shape: the `nortabs:private-tabs:v1` + `nortabs:private-enrichment:v1` payloads serialize to one (or a few) JSON files in `appDataFolder`. Read on login, write on change (debounced). Conflict handling: last-write-wins is likely fine for single-user-multi-device; revisit if it bites.
-- Offline-first stays intact: localStorage/IndexedDB remains the working copy, Drive is the sync backstop. Anonymous/offline use never touches Google.
+**Deliberate non-shipped pieces (for v1)**:
+- Auto-push doesn't pre-pull. Two devices importing different tabs at the same time → last-pusher's data ends up on Drive after that moment; the *next* manual Sync nå on the other device merges everything back. Acceptable since the race window is rare and merge is idempotent.
+- No bandwidth optimization. Each push carries the full `localImports` payload (~14 kB / 15 tabs). Fine for hundreds of tabs; revisit (gzip request body, or per-tab patches) if a single library exceeds ~1 MB.
 
 ---
 
