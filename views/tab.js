@@ -238,21 +238,36 @@ function wireChordDiagrams(root, chordnames) {
   }
 }
 
-// Wrap each chord-shaped token on a chord-detected line in `<span class="chord">`
-// so CSS can style them (subtle color/weight). Heuristic re-uses chord-wrap's
-// `isChordLine` + `CHORD_TOKEN_RE` — works on both UG-imports (where UG's
-// [ch]X[/ch] markup was stripped on import) and nortabs catalog tabs (where
-// `chopro_chord` HTML spans were stripped via cleanTabBody). Same input shape
-// in both cases: plain-text chord-over-lyric. Non-chord lines pass through
-// untouched. Called after every `wrapTabBody` invocation so resize/wrap don't
-// drop the spans.
+// Two-pass chord-token decoration so the same `.chord` styling applies to:
+//
+//   1. Chord-over-lyric lines: a chord-detected line gets each chord-shaped
+//      token wrapped (e.g. "Am  C  G  F" → all four tokens become spans).
+//      Heuristic via chord-wrap's `isChordLine` + `CHORD_TOKEN_RE`.
+//   2. ChordPro inline-chord notation: `[G]Hello [Am]world` style, where the
+//      chord sits between brackets inline with lyrics. Bracket+chord stays
+//      as `[G]` in the rendered text (no layout shift) but gets the same
+//      color/weight as the chord-over-lyric tokens. Section markers like
+//      `[Intro]` and `[Verse 1]` are excluded — only `[A-G]…`-prefixed
+//      contents that pass CHORD_TOKEN_RE match.
+//
+// Pass order matters: chord-line first (works on plain text), then ChordPro
+// (works on the partially-wrapped text — span markup doesn't contain `[X]`
+// patterns so no double-wrap).
+//
+// Re-runs after every `wrapTabBody` invocation so resize doesn't drop spans.
 function decorateChordTokens(preEl) {
   const lines = preEl.textContent.split('\n');
   const html = lines.map(line => {
-    if (!isChordLine(line)) return escapeHtml(line);
-    return escapeHtml(line).replace(/\S+/g, (m) => {
-      return CHORD_TOKEN_RE.test(m) ? `<span class="chord">${m}</span>` : m;
+    let escaped = escapeHtml(line);
+    if (isChordLine(line)) {
+      escaped = escaped.replace(/\S+/g, (m) => {
+        return CHORD_TOKEN_RE.test(m) ? `<span class="chord">${m}</span>` : m;
+      });
+    }
+    escaped = escaped.replace(/\[([A-G][A-Za-z0-9#b\/]{0,6})\]/g, (m, chord) => {
+      return CHORD_TOKEN_RE.test(chord) ? `<span class="chord">[${chord}]</span>` : m;
     });
+    return escaped;
   }).join('\n');
   preEl.innerHTML = html;
 }

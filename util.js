@@ -35,5 +35,13 @@ export function cleanTabBody(body) {
     .replace(/<span class="chopro_comment">([^<]*)<\/span>/gi, '$1')
     .replace(/<\/?strong>/gi, '')
     .replace(/<div class="chopro_chorus">/gi, '')
-    .replace(/<\/div>/gi, '');
+    .replace(/<\/div>/gi, '')
+    // chopro_tab wrappers: nortabs.net wraps ASCII tablature blocks in
+    // <pre class="chopro_tab">…</pre>. Inside our own <pre class="tab-body">
+    // the nested pre is redundant and would render as literal "<pre…>" text
+    // (escapeHtml). Strip outer + closing; the ASCII tab content stays as
+    // plain text and renders correctly under the surrounding pre. Catch-all
+    // pattern covers any stray <pre> the corpus might have too. (21 catalog
+    // tabs as of 2026-05-30.)
+    .replace(/<\/?pre[^>]*>/gi, '');
 }
