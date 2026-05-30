@@ -39,7 +39,7 @@ const LAST_SYNCED_KEY = 'tabtabtab:drive:last-synced:v1';
 let _tokenClient = null;
 let _gisLoading = null;
 
-function isConfigured() {
+export function isConfigured() {
   return DRIVE_CONFIG.CLIENT_ID && !DRIVE_CONFIG.CLIENT_ID.startsWith('TODO');
 }
 

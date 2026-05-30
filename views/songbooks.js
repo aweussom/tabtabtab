@@ -1,4 +1,6 @@
 import { getSongbooks, createSongbook } from '../storage.js';
+import { isConfigured, isSignedIn, signIn, signOut, push as drivePush, getLastSyncedAt } from '../drive-sync.js';
+import { getLocalImports } from '../catalog.js';
 import { escapeHtml } from '../util.js';
 
 export function render(state, root) {
@@ -14,13 +16,94 @@ export function render(state, root) {
         </li>
       `).join('')}
     </ul>
-    <button id="new-songbook">+ Ny sangbok</button>
-    <a href="#/import/ug" class="import-link" style="margin-left:.6rem">⤓ Importer UG-tabs</a>
+    <p>
+      <button id="new-songbook">+ Ny sangbok</button>
+      <a href="#/import/ug" class="import-link" style="margin-left:.6rem">⤓ Importer UG-tabs</a>
+    </p>
+
+    <section class="drive-sync card">
+      <h3>Sync til Google Drive</h3>
+      <p class="muted">
+        Hold UG-importene dine i sync p&aring; tvers av enheter via din egen Google Drive (skjult per-app-mappe).
+        Vi lagrer ingenting &mdash; alt g&aring;r mellom deg og Google.
+      </p>
+      <div id="drive-status-area">${renderDriveStatus()}</div>
+      <p id="drive-msg" class="muted" aria-live="polite"></p>
+    </section>
   `;
+
   root.querySelector('#new-songbook').addEventListener('click', () => {
     const name = prompt('Navn på sangbok:');
     if (!name || !name.trim()) return;
     const id = createSongbook(name.trim());
     location.hash = `#/songbook/${encodeURIComponent(id)}`;
   });
+
+  wireDriveButtons(root, state);
+}
+
+function renderDriveStatus() {
+  if (!isConfigured()) {
+    return `<p class="muted">Drive-sync er ikke konfigurert (Client ID mangler). Se <code>DRIVE-SETUP.md</code>.</p>`;
+  }
+  if (!isSignedIn()) {
+    return `<button id="drive-signin">Logg inn med Google</button>`;
+  }
+  const last = getLastSyncedAt();
+  const lastText = last
+    ? `Sist synket: ${new Date(last).toLocaleString('no')}`
+    : 'Ikke synket ennå.';
+  return `
+    <p class="muted">${lastText}</p>
+    <button id="drive-syncnow">Sync nå</button>
+    <button id="drive-signout" class="muted-btn">Logg ut</button>
+  `;
+}
+
+function wireDriveButtons(root, state) {
+  const statusArea = root.querySelector('#drive-status-area');
+  const msg = root.querySelector('#drive-msg');
+  const setMsg = t => { if (msg) msg.textContent = t; };
+  const refresh = () => { if (statusArea) statusArea.innerHTML = renderDriveStatus(); wireDriveButtons(root, state); };
+
+  const signInBtn = root.querySelector('#drive-signin');
+  if (signInBtn) {
+    signInBtn.addEventListener('click', async () => {
+      setMsg('Logger inn…');
+      try {
+        await signIn();
+        setMsg('');
+        refresh();
+      } catch (err) {
+        setMsg(`Innlogging feilet: ${err.message}`);
+      }
+    });
+  }
+
+  const syncBtn = root.querySelector('#drive-syncnow');
+  if (syncBtn) {
+    syncBtn.addEventListener('click', async () => {
+      setMsg('Synker…');
+      syncBtn.disabled = true;
+      try {
+        const local = getLocalImports() || { artists: {}, songs: {}, tabs: {} };
+        await drivePush(local);
+        setMsg('Synket.');
+        refresh();
+      } catch (err) {
+        setMsg(`Sync feilet: ${err.message}`);
+      } finally {
+        syncBtn.disabled = false;
+      }
+    });
+  }
+
+  const signOutBtn = root.querySelector('#drive-signout');
+  if (signOutBtn) {
+    signOutBtn.addEventListener('click', () => {
+      signOut();
+      setMsg('Logget ut. Lokal data uendret; Drive-blob beholdes.');
+      refresh();
+    });
+  }
 }
