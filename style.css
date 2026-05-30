@@ -163,6 +163,16 @@ li.ug-import::after {
   pointer-events: none;
 }
 
+/* Chord-token highlight inside tab bodies. Set by decorateChordTokens in
+   views/tab.js after every wrapTabBody pass. Inline span — no layout
+   effect, so chord-over-lyric column alignment in the monospace <pre>
+   stays exact. Subtle warm tint + semibold to make chord letters pop
+   without screaming. */
+.tab-body .chord {
+  color: #b3541e;
+  font-weight: 600;
+}
+
 .letter-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(2.75rem, 1fr));

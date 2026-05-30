@@ -18,7 +18,7 @@
 // characters (sharp/flat, m/maj/min/dim/aug/sus/add, digits, slash, root).
 // Permissive on purpose — false positives on chord-line detection are fine
 // because we then check the overall token mix.
-const CHORD_TOKEN_RE = /^[A-G][A-Za-z0-9#b\/]{0,6}$/;
+export const CHORD_TOKEN_RE = /^[A-G][A-Za-z0-9#b\/]{0,6}$/;
 
 export function isChordLine(line) {
   const trimmed = line.trim();

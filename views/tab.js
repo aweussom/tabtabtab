@@ -22,7 +22,7 @@ import {
 } from '../storage.js';
 import { escapeHtml, cleanTabBody } from '../util.js';
 import * as playback from '../playback.js';
-import { wrapTabBody, measureMaxCols } from '../chord-wrap.js';
+import { wrapTabBody, measureMaxCols, isChordLine, CHORD_TOKEN_RE } from '../chord-wrap.js';
 import { renderChordSvg } from '../chord-diagrams.js';
 import { getChordFingering } from '../chord-data.js';
 
@@ -238,6 +238,25 @@ function wireChordDiagrams(root, chordnames) {
   }
 }
 
+// Wrap each chord-shaped token on a chord-detected line in `<span class="chord">`
+// so CSS can style them (subtle color/weight). Heuristic re-uses chord-wrap's
+// `isChordLine` + `CHORD_TOKEN_RE` — works on both UG-imports (where UG's
+// [ch]X[/ch] markup was stripped on import) and nortabs catalog tabs (where
+// `chopro_chord` HTML spans were stripped via cleanTabBody). Same input shape
+// in both cases: plain-text chord-over-lyric. Non-chord lines pass through
+// untouched. Called after every `wrapTabBody` invocation so resize/wrap don't
+// drop the spans.
+function decorateChordTokens(preEl) {
+  const lines = preEl.textContent.split('\n');
+  const html = lines.map(line => {
+    if (!isChordLine(line)) return escapeHtml(line);
+    return escapeHtml(line).replace(/\S+/g, (m) => {
+      return CHORD_TOKEN_RE.test(m) ? `<span class="chord">${m}</span>` : m;
+    });
+  }).join('\n');
+  preEl.innerHTML = html;
+}
+
 function wireChordWrap(root, rawBody) {
   const preEl = root.querySelector('.tab-body');
   if (!preEl) return () => {};
@@ -245,6 +264,7 @@ function wireChordWrap(root, rawBody) {
     if (!preEl.isConnected) return;
     const cols = measureMaxCols(preEl);
     preEl.textContent = wrapTabBody(rawBody, cols);
+    decorateChordTokens(preEl);
   };
   apply();
   // iOS Safari fires `resize` mid-rotation-animation, *before* viewport
