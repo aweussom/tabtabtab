@@ -43,12 +43,12 @@ const SHELL = [
   './views/songbook.js',
   './views/songbooks.js',
   './views/tab.js',
-  './home-wordcloud.svg',
+  './images/home-wordcloud.svg',
   './manifest.json',
-  './icon-192.png',
-  './icon-512.png',
-  './icon-maskable-512.png',
-  './apple-touch-icon.png',
+  './images/icon-192.png',
+  './images/icon-512.png',
+  './images/icon-maskable-512.png',
+  './images/apple-touch-icon.png',
 ];
 
 self.addEventListener('install', (event) => {

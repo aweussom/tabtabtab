@@ -180,7 +180,7 @@ tabtabtab/                    # repo (local folder may still be nortabs-web)
 ├── enrichment/<letter>.json  # per-letter enrichment checkpoints
 ├── private-bundle.json       # gitignored — shipped UG bundle, intentionally absent
 │                             #   until we ship a cleanly-licensed demo set
-├── home-wordcloud.svg        # decorative background
+├── images/                   # PWA icons, wordcloud background, OAuth logo
 ├── style.css
 ├── .github/workflows/
 │   └── crawl.yml             # nightly incremental crawl + Sunday full crawl

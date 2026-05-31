@@ -148,7 +148,7 @@ def main():
     p = argparse.ArgumentParser(description="Generate guitar-shaped wordcloud SVG")
     p.add_argument("--catalog", default="catalog.json")
     p.add_argument("--enrichment", default="enrichment.json")
-    p.add_argument("--out", default="home-wordcloud.svg")
+    p.add_argument("--out", default="images/home-wordcloud.svg")
     p.add_argument("--width", type=int, default=1400)
     p.add_argument("--height", type=int, default=900)
     p.add_argument("--max-words", type=int, default=400)

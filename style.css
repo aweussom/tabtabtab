@@ -387,7 +387,7 @@ li.ug-import::after {
   left: 0;
   right: 0;
   bottom: 0;
-  background-image: url('home-wordcloud.svg');
+  background-image: url('images/home-wordcloud.svg');
   background-repeat: no-repeat;
   background-position: center center;
   /* Rotert SVG må holdes liten nok til at hjørnene ikke krysser

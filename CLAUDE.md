@@ -86,7 +86,7 @@ Enrichment scripts (all in `crawler/`):
 - `enrich.py` — local LLM enrichment via the `claude` CLI; needs `pip install json5`.
 - `enrich-gpt.py` — OpenAI API variant (concurrent); needs `pip install openai` + `OPENAI_API_KEY`.
 - `merge-enrichment.py` — combines per-letter `enrichment/<letter>.json` files into the shipped `enrichment.json`.
-- `generate-wordcloud.py` — regenerates `home-wordcloud.svg`; needs `pip install wordcloud pillow numpy`.
+- `generate-wordcloud.py` — regenerates `images/home-wordcloud.svg`; needs `pip install wordcloud pillow numpy`.
 - `run-enrich.ps1` / `run-enrich-parallel.ps1` / `scheduled-enrich.ps1` — quota-aware drivers (Windows Task Scheduler runs the scheduled one at 06:00 Oslo).
 - `enrich-private.py` + `build-private-bundle.py` — private-tabs pipeline (see below).
 
