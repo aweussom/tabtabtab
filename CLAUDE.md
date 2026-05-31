@@ -121,7 +121,7 @@ For fast iteration during dev, `crawler/sample-ug-export.py` produces a small ra
 
 **Legacy Python pipeline** (cross-check / build-bundle, kept though no longer the primary path):
 
-- `crawler/private/ug-import.json` — accumulated raw exports (committed for transparency).
+- `crawler/private/` (gitignored) — local-only place to keep raw UG exports + their LLM-enriched counterparts. Used to be committed "for transparency" while the repo was private, but went out when the repo went public — personal UG libraries are copyright grey-area and shouldn't ship.
 - `crawler/enrich-private.py` — LLM-enriches private tabs into `crawler/private/ug-enrichment.json` (STRICT_SUFFIX prompt + JSON salvage + `--retry-thin`). Useful as a QA cross-check against the on-device model.
 - `crawler/build-private-bundle.py` — emits `private-bundle.json` if/when we ship a demo bundle. Gitignored output; `git add -f` to commit deliberately.
 

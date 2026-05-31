@@ -14,6 +14,12 @@ ug/ug-export-sample-*.json
 # regenerates it locally; just don't auto-commit Tommy's personal lib.
 private-bundle.json
 
+# Raw UG-import + on-device-enrichment source data. Used to live in this
+# directory committed "for transparency" while the repo was private; now
+# it's gitignored so personal libraries stay local. enrich-private.py +
+# build-private-bundle.py still work on the local files.
+crawler/private/
+
 # Enrichment per-letter lock files (per-process state, not data)
 enrichment/*.lock
 
