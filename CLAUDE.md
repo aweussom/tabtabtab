@@ -10,7 +10,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 The project is renamed `tabtabtab` (formerly NorTabs). Default branch is `main`; the old `tommy-tester-ug` branch is merged. Phase 1-2 (catalog browse + search + songbooks + chord wrap + playback) is shipped. Phase 2.5 was superseded by an **on-device UG-enrichment** path (Chrome Prompt API / Gemini Nano) — see PLAN.md Phase 2.5 "SUPERSEDED" + the "On-device UG enrichment + local imports" section below. Active polish + features land on `main` directly.
 
-Live URL is in flux: the README says `tabtabtab.no` (deploy in progress, served as static files from Tommy's Azure VM); the old GitHub Pages URL (`aweussom.github.io/nortabs-web`) is dead because the repo went private. Don't rely on either being reachable.
+Live at [nortabs.netlify.app](https://nortabs.netlify.app) — auto-deploys on every push to `main` via Netlify's GitHub integration. `tabtabtab.no` DNS is pending; the old GitHub Pages URL (`aweussom.github.io/nortabs-web`) is dead.
 
 Stack is still **vanilla JS modules + HTML + CSS, no bundler** — no `package.json`, no build step, no test runner, no lint config. Do not invent build/test commands; opening `index.html` (or serving with `python -m http.server`) is the dev loop. Do not introduce node tooling without asking.
 

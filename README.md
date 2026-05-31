@@ -2,7 +2,7 @@
 
 A static, offline-first web app for guitar tabs. Two ways in: **browse** the ~7700-tab [nortabs.net](https://nortabs.net) Norwegian catalog, or **import your own** [Ultimate Guitar](https://www.ultimate-guitar.com) bookmarks and let your *browser* enrich them with an on-device LLM. No backend, no account, no tracking. Optional Google Drive sync for your own imports — your tabs, your Drive, never our servers.
 
-**Home**: [tabtabtab.no](https://tabtabtab.no) *(deploy in progress)*
+**Live**: [nortabs.netlify.app](https://nortabs.netlify.app) (tabtabtab.no DNS pending). Hosted on Netlify — auto-deploys on every commit to `main`.
 
 > Formerly **NorTabs**. The nortabs.net catalog browser is still the core; `tabtabtab` is the same app grown a bring-your-own-tabs half — see [Bring your own tabs](#bring-your-own-tabs--and-your-browser-does-the-ai).
 
@@ -22,7 +22,7 @@ This is a constraint as creative driver, not a religious belief. Backends are fi
 
 **2. Search is almost always stupid, and I wanted to fix that — at least here.** Most search is a substring match with a sprinkle of Levenshtein on top. You can search for the title fragment if you remember it exactly. You cannot search for a *vibe*. You cannot search for "that bittersweet tronderrock song about driving home from a funeral", because no field in any database contains the word "bittersweet" next to "tronderrock". This project's enrichment pipeline + search engine try to do that. See **[Search](#search-the-star-player)** below — it's most of what this project actually *is*.
 
-A small third thing: I had built a [Flet desktop app](../nortabs-app) for the same data, the official nortabs.no shipped their own ad-supported app shortly after, and I wanted somewhere to keep tinkering. So: hobby. No ads, no tracking, no account. Explicit blessing from the nortabs.net owner.
+A small third thing: I had built a Flet desktop app for the same data, the official nortabs.no shipped their own ad-supported app shortly after, and I wanted somewhere to keep tinkering. So: hobby. No ads, no tracking, no account. Explicit blessing from the nortabs.net owner.
 
 ---
 
@@ -158,7 +158,7 @@ That third step is the whole trick. Enrichment is the one thing that *looked* li
 Vanilla JS modules, no build step. Open `index.html` in any browser — it works.
 
 ```
-tabtabtab/                    # repo (local folder may still be nortabs-web)
+tabtabtab/
 ├── index.html                # single root, loads app.js as a module
 ├── app.js                    # router + state + view dispatch
 ├── state.js                  # central state with pub/sub
@@ -189,7 +189,7 @@ tabtabtab/                    # repo (local folder may still be nortabs-web)
 │   ├── enrich.py             # catalog LLM enrichment via `claude -p`
 │   ├── enrich-gpt.py         # OpenAI API variant (concurrent)
 │   ├── merge-enrichment.py   # combine per-letter → enrichment.json
-│   ├── generate-wordcloud.py # build home-wordcloud.svg
+│   ├── generate-wordcloud.py # regenerates images/home-wordcloud.svg
 │   ├── run-enrich.ps1        # quota-aware serial wrapper for Claude
 │   ├── run-enrich-parallel.ps1 # disjoint-letter parallel driver
 │   ├── scheduled-enrich.ps1  # daily 06:00 Oslo Task Scheduler entry
@@ -200,7 +200,7 @@ tabtabtab/                    # repo (local folder may still be nortabs-web)
 └── archive/                  # superseded cloud-proxy era — see archive/README.md
 ```
 
-See `CLAUDE.md` for operational details and `PLAN.md` for the design log and backlog.
+See `CLAUDE.md` for operational details, `PLAN.md` for the design log, `TODO.md` for the focused open backlog, `TODONT.md` for explicit non-features, and `DRIVE-SETUP.md` for the OAuth setup if you want to enable Drive sync on your own deploy.
 
 ---
 
