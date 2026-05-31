@@ -24,7 +24,7 @@ export function render(state, root) {
     <h1>Importer Ultimate Guitar-bokmerker</h1>
     <p class="muted">
       Slipp en <code>nortabs-ug-import-*.json</code> her — eksportert med
-      <a href="https://github.com/aweussom/tabtabtab/blob/main/crawler/userscripts/nortabs-ug-exporter.user.js" target="_blank">Tampermonkey-skriptet</a>.
+      Tampermonkey-skriptet. <strong>Førstegangs? <a href="docs/import-ug-guide.html" target="_blank">Steg-for-steg-guide &rarr;</a></strong>
       Hver tab blir lest og tagget av <strong>Gemini Nano på din egen maskin</strong>
       (Chrome sin innebygde AI) — null server, null nøkkel, ingenting lastet opp.
       Tabsene legger seg i biblioteket ditt og dukker opp i søk sammen med katalogen.

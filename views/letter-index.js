@@ -21,7 +21,10 @@ export function render(state, root) {
               : `<span class="disabled">${label}</span>`;
           }).join('')}
         </nav>
-        <p class="home-links"><a href="#/songbooks">Sangbøker &rarr;</a></p>
+        <p class="home-links">
+          <a href="#/songbooks">Sangbøker &rarr;</a>
+          <a href="docs/import-ug-guide.html" style="margin-left:1rem">Importere UG-tabs &rarr;</a>
+        </p>
       </div>
     `;
     return;

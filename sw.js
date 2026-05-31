@@ -73,10 +73,18 @@ self.addEventListener('fetch', (event) => {
   if (url.origin !== location.origin) return;
 
   if (req.mode === 'navigate') {
-    event.respondWith(
-      caches.match('./index.html').then((cached) => cached ?? fetch(req))
-    );
-    return;
+    // Only serve cached index.html for the SPA's root path. Deeper
+    // navigation (docs/import-ug-guide.html, etc.) falls through to the
+    // cache-first handler below so the actual HTML is served — not the
+    // SPA shell. Pages outside the SPA route's hash-fragment land here.
+    const path = url.pathname;
+    const isSpaRoot = path === '/' || path === '' || path === '/index.html';
+    if (isSpaRoot) {
+      event.respondWith(
+        caches.match('./index.html').then((cached) => cached ?? fetch(req))
+      );
+      return;
+    }
   }
 
   event.respondWith(
