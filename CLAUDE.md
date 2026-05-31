@@ -166,5 +166,5 @@ Don't remove any of these without re-testing on a physical iPhone:
 
 ## Working artifacts outside the repo
 
-- `C:\Users\wossn\catalog_a.json` and `nortabs_crawl_test.py` — early unpaginated samples; superseded by `crawler/crawl.py`. Keep for historical reference only.
-- `C:\Users\wossn\nortabs_a.json`, `nortabs_artist.json`, `nortabs_tab.json` — raw single-endpoint samples for verifying API shape.
+- `C:\Users\<user>\catalog_a.json` and `nortabs_crawl_test.py` — early unpaginated samples; superseded by `crawler/crawl.py`. Keep for historical reference only.
+- `C:\Users\<user>\nortabs_a.json`, `nortabs_artist.json`, `nortabs_tab.json` — raw single-endpoint samples for verifying API shape.

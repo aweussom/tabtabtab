@@ -20,6 +20,11 @@ private-bundle.json
 # build-private-bundle.py still work on the local files.
 crawler/private/
 
+# Per-LLM enrichment checkpoint (OpenAI side). Used by crawler/enrich-gpt.py
+# as an intermediate write target; the merged result lands in enrichment.json
+# (which IS tracked + shipped). Local-only build artifact.
+enrichment-gpt.json
+
 # Enrichment per-letter lock files (per-process state, not data)
 enrichment/*.lock
 
