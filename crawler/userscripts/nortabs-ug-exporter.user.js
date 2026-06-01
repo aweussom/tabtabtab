@@ -1,15 +1,17 @@
 // ==UserScript==
-// @name           NorTabs UG Exporter
-// @namespace      https://github.com/aweussom/nortabs-web
-// @version        0.2
-// @description    Eksporter Ultimate Guitar bookmarks (med chord/lyric-body) til NorTabs-JSON
+// @name           TabTabTab UG Exporter
+// @namespace      https://github.com/aweussom/tabtabtab
+// @version        0.3
+// @description    Eksporter Ultimate Guitar bookmarks (med chord/lyric-body) til TabTabTab-JSON
 // @match          https://www.ultimate-guitar.com/user/mytabs*
-// @grant          none
+// @grant          GM.xmlHttpRequest
+// @connect        tabs.ultimate-guitar.com
+// @connect        ultimate-guitar.com
 // ==/UserScript==
 
 // Install in Tampermonkey / Violentmonkey / Greasemonkey, then visit
 // https://www.ultimate-guitar.com/user/mytabs and set page-size filter to "All"
-// before clicking the floating "Eksporter til NorTabs" button.
+// before clicking the floating "Eksporter til TabTabTab" button.
 //
 // What it does:
 //   1. Scrapes the bookmark list from the DOM (article[isdesktop=true] rows).
@@ -17,7 +19,7 @@
 //      paid Official Tabs unlock for Pro/Lifetime UG subscribers.
 //   3. Extracts wiki_tab.content from the page's <div class="js-store"> JSON
 //      state, decodes HTML entities, harvests chord names from inline [ch]X[/ch].
-//   4. Downloads nortabs-ug-import-YYYY-MM-DD.json.
+//   4. Downloads tabtabtab-ug-import-YYYY-MM-DD.json.
 //
 // Empirical: 253 OK / 6 failed on Tommy's 259-bookmark run. The 6 failures are
 // all UG Official Tabs with publisher protection that returns an empty content
@@ -28,7 +30,7 @@
 
 (function () {
   'use strict';
-  console.log('[NorTabs UG] script loaded — bookmarks page detected');
+  console.log('[TabTabTab UG] script loaded — bookmarks page detected');
 
   const DELAY_MS = 800; // politeness mellom requests; bump til 1500-2000 hvis UG hangler
 
@@ -57,19 +59,43 @@
 
   // Dekode HTML entities (UG lagrer Ä/ø/å som &Auml;/&oslash;/&aring;).
   // UG-spesifikk markup ([ch], [tab], [Verse], #-preamble) bevares —
-  // NorTabs konverterer downstream.
+  // TabTabTab konverterer downstream.
   function decodeBody(raw) {
     const decoder = document.createElement('textarea');
     decoder.innerHTML = raw;
     return decoder.value;
   }
 
+  // Cross-origin GET via the userscript manager's privileged XHR. The
+  // bookmark page lives on www.ultimate-guitar.com; tab pages live on
+  // tabs.ultimate-guitar.com — different subdomains, so a plain fetch()
+  // hits CORS. GM.xmlHttpRequest bypasses CORS for the hosts declared
+  // in @connect above, and sends cookies automatically (so Pro/Lifetime
+  // users get their unlocked Official Tabs content).
+  function gmGet(url) {
+    return new Promise((resolve, reject) => {
+      GM.xmlHttpRequest({
+        method: 'GET',
+        url,
+        onload: (res) => {
+          if (res.status >= 200 && res.status < 300) {
+            resolve({ ok: true, text: res.responseText });
+          } else {
+            resolve({ ok: false, status: res.status });
+          }
+        },
+        onerror: () => reject(new Error('Network error')),
+        ontimeout: () => reject(new Error('Timeout')),
+      });
+    });
+  }
+
   // Hent én tab-side, parse js-store, returnér body + chord-navn
   async function fetchTabBody(url) {
     const fullUrl = url.startsWith('http') ? url : `https://www.ultimate-guitar.com${url}`;
-    const resp = await fetch(fullUrl, { credentials: 'same-origin' });
+    const resp = await gmGet(fullUrl);
     if (!resp.ok) return { error: `HTTP ${resp.status}` };
-    const html = await resp.text();
+    const html = resp.text;
 
     const m = html.match(/<div[^>]*class="js-store"[^>]*data-content="([^"]+)"/);
     if (!m) return { error: 'no js-store element' };
@@ -124,7 +150,7 @@
         const body = await fetchTabBody(entry.link);
         if (body.error) {
           failed.push({ ...entry, error: body.error });
-          console.warn(`[NorTabs UG] FAIL ${entry.artist} — ${entry.title}: ${body.error}`);
+          console.warn(`[TabTabTab UG] FAIL ${entry.artist} — ${entry.title}: ${body.error}`);
         } else {
           const fullUrl = entry.link.startsWith('http') ? entry.link : `https://www.ultimate-guitar.com${entry.link}`;
           results.push({
@@ -141,7 +167,7 @@
         }
       } catch (e) {
         failed.push({ ...entry, error: e.message });
-        console.warn(`[NorTabs UG] EXC ${entry.artist} — ${entry.title}: ${e.message}`);
+        console.warn(`[TabTabTab UG] EXC ${entry.artist} — ${entry.title}: ${e.message}`);
       }
       if (i < list.length - 1) await new Promise(r => setTimeout(r, DELAY_MS));
     }
@@ -160,23 +186,23 @@
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `nortabs-ug-import-${new Date().toISOString().slice(0, 10)}.json`;
+    a.download = `tabtabtab-ug-import-${new Date().toISOString().slice(0, 10)}.json`;
     a.click();
     URL.revokeObjectURL(url);
 
     btn.textContent = `Ferdig: ${results.length} OK / ${failed.length} feilet`;
     btn.disabled = false;
-    console.log('[NorTabs UG] complete:', { ok: results.length, failed: failed.length });
+    console.log('[TabTabTab UG] complete:', { ok: results.length, failed: failed.length });
   }
 
   // Flytende knapp øverst til høyre — uavhengig av UGs DOM-struktur
   function addButton() {
-    if (document.getElementById('nortabs-ug-btn')) return;
+    if (document.getElementById('tabtabtab-ug-btn')) return;
     if (!document.body) return;
 
     const btn = document.createElement('button');
-    btn.id = 'nortabs-ug-btn';
-    btn.textContent = '⬇ Eksporter til NorTabs';
+    btn.id = 'tabtabtab-ug-btn';
+    btn.textContent = '⬇ Eksporter til TabTabTab';
     btn.style.cssText = `
       position: fixed;
       top: 80px;
@@ -195,11 +221,11 @@
     `;
     btn.onclick = () => exportAll(btn);
     document.body.appendChild(btn);
-    console.log('[NorTabs UG] button injected');
+    console.log('[TabTabTab UG] button injected');
   }
 
   const interval = setInterval(() => {
     addButton();
-    if (document.getElementById('nortabs-ug-btn')) clearInterval(interval);
+    if (document.getElementById('tabtabtab-ug-btn')) clearInterval(interval);
   }, 1000);
 })();
