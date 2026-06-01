@@ -23,7 +23,7 @@ export function render(state, root) {
         </nav>
         <p class="home-links">
           <a href="#/songbooks">Sangbøker &rarr;</a>
-          <a href="docs/import-ug-guide.html" style="margin-left:1rem">Importere UG-tabs &rarr;</a>
+          <a href="#/import/ug" style="margin-left:1rem">Importere UG-tabs &rarr;</a>
         </p>
       </div>
     `;

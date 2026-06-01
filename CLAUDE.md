@@ -94,7 +94,7 @@ Enrichment scripts (all in `crawler/`):
 
 UG enrichment runs **on the user's machine** via Chrome's Prompt API (Gemini Nano). No backend, no API key, no upload of copyrighted content. User flow:
 
-1. User runs `crawler/userscripts/nortabs-ug-exporter.user.js` (Tampermonkey) on UG bookmarks → downloads `nortabs-ug-import-*.json`.
+1. User runs `userscripts/tabtabtab-ug-exporter.user.js` (Tampermonkey on Chrome, Violentmonkey/Tampermonkey on Firefox) on UG bookmarks → downloads `tabtabtab-ug-import-*.json`. Cross-origin via `GM.xmlHttpRequest` so cookies flow and `tabs.ultimate-guitar.com` subdomain isn't CORS-blocked (`@connect` allow-list).
 2. User opens `#/import/ug` and **drops the JSON** (no separate button click — the drop is the action).
    - **Chrome (Prompt API available)**: auto-enqueue into the background-enrichment queue (`enrich-queue.js`). `enrichOne(tab)` runs per tab (~9-10 s/tab on RTX 5090, ~10-20 s on regular hardware).
    - **Anywhere else**: literal-only import. `addLocalImport(tab, {})` per tab + `rebuildIndex()`. Tabs surface via plain text search (artist/song/body) but skip the LLM vibe layer (theme/mood/occasion). The availability card frames this positively: "💡 Bruk Google Chrome — da blir søket MYE smartere".

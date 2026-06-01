@@ -181,7 +181,9 @@ tabtabtab/
 ├── private-bundle.json       # gitignored — shipped UG bundle, intentionally absent
 │                             #   until we ship a cleanly-licensed demo set
 ├── images/                   # PWA icons, wordcloud background, OAuth logo
+├── docs/                     # screenshots + import-ug-guide.html
 ├── style.css
+├── userscripts/              # client-side UG bookmark exporter (Tampermonkey/etc.)
 ├── .github/workflows/
 │   └── crawl.yml             # nightly incremental crawl + Sunday full crawl
 ├── crawler/                  # local-only tooling — never ships to the browser
@@ -194,7 +196,6 @@ tabtabtab/
 │   ├── run-enrich-parallel.ps1 # disjoint-letter parallel driver
 │   ├── scheduled-enrich.ps1  # daily 06:00 Oslo Task Scheduler entry
 │   ├── sample-ug-export.py   # random small UG-sample generator (fast iteration)
-│   ├── userscripts/          # UG bookmark exporter (Tampermonkey)
 │   ├── enrich-private.py     # UG enrichment — kept as a QA cross-check
 │   └── build-private-bundle.py # builds private-bundle.json (for future demo bundle)
 └── archive/                  # superseded cloud-proxy era — see archive/README.md

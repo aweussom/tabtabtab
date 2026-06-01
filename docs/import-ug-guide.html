@@ -18,20 +18,19 @@
     font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
     color: var(--fg);
     background: var(--bg);
-    max-width: 760px;
+    max-width: 800px;
     margin: 0 auto;
     padding: 1.5rem 1rem 4rem;
   }
-  header {
-    margin-bottom: 1.5rem;
-  }
+  header { margin-bottom: 1.5rem; }
   header a { color: var(--link); text-decoration: none; font-size: 0.95em; }
   header a:hover { text-decoration: underline; }
   h1 { font-size: 1.8rem; margin: 0.4rem 0 0.6rem; }
   h2 { font-size: 1.2rem; margin: 2rem 0 0.4rem; padding-top: 0.4rem; border-top: 1px solid var(--border); }
   h2 .step { color: var(--muted); font-weight: normal; margin-right: 0.4em; }
+  h3 { font-size: 1rem; margin: 1.2rem 0 0.3rem; color: var(--muted); }
   p { margin: 0.6rem 0; }
-  ul { padding-left: 1.25rem; }
+  ul, ol { padding-left: 1.25rem; }
   li { margin: 0.3rem 0; }
   code { background: #00000010; padding: 1px 5px; border-radius: 3px; font-size: 0.92em; }
   a { color: var(--link); }
@@ -39,7 +38,7 @@
   .screenshot {
     display: block;
     max-width: 100%;
-    margin: 0.8rem 0 1.2rem;
+    margin: 0.6rem 0 1rem;
     border: 1px solid var(--border);
     border-radius: 4px;
     background: #fff;
@@ -63,6 +62,17 @@
   .toc h3 { margin: 0.3rem 0 0.4rem; font-size: 0.95em; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
   .toc ol { margin: 0; padding-left: 1.2rem; }
   .toc li { margin: 0.15rem 0; }
+  .install-btn {
+    display: inline-block;
+    background: var(--link);
+    color: #fff;
+    padding: 0.5rem 0.9rem;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: 600;
+    margin: 0.4rem 0;
+  }
+  .install-btn:hover { filter: brightness(1.1); text-decoration: none; }
   footer { margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.9em; }
 </style>
 </head>
@@ -76,30 +86,28 @@
 
 <p class="lead">
   Ta dine egne <a href="https://www.ultimate-guitar.com">Ultimate Guitar</a>-bokmerker
-  og legg dem i biblioteket ditt i TabTabTab. Tabsene blir søkbare ved siden av
-  nortabs.net-katalogen. I Chrome blir hver tab i tillegg taget av en
-  on-device AI (Gemini Nano) for tema/stemning/tekstlinje-søk &mdash; alt skjer
-  i din egen nettleser, ingenting går til en server.
+  inn i TabTabTab. I Chrome blir hver tab i tillegg taget av on-device AI
+  (Gemini Nano) for vibe-s&oslash;k &mdash; alt skjer i din egen nettleser.
 </p>
 
 <div class="toc">
   <h3>Steg</h3>
   <ol>
-    <li><a href="#step-1">Installer en userscript-manager</a></li>
-    <li><a href="#step-2">Installer TabTabTab UG-eksportør-skriptet</a></li>
-    <li><a href="#step-3">Gå til dine UG-bokmerker og sett til &laquo;All&raquo;</a></li>
+    <li><a href="#step-1">Installer Tampermonkey</a></li>
+    <li><a href="#step-2">Lim inn TabTabTab UG-eksport&oslash;ren</a></li>
+    <li><a href="#step-3">G&aring; til dine UG-bokmerker</a></li>
     <li><a href="#step-4">Eksporter</a></li>
-    <li><a href="#step-5">Importer JSON-filen i TabTabTab</a></li>
-    <li><a href="#step-6">Søk på vibe</a></li>
+    <li><a href="#step-5">Importer i TabTabTab</a></li>
+    <li><a href="#step-6">S&oslash;k</a></li>
   </ol>
 </div>
 
-<h2 id="step-1"><span class="step">1.</span> Installer en userscript-manager</h2>
+<h2 id="step-1"><span class="step">1.</span> Installer Tampermonkey</h2>
 
 <p>
-  Eksportøren er et userscript &mdash; et lite JavaScript-fragment som kjører
-  i nettleseren din n&aring;r du er p&aring; Ultimate Guitar. Du trenger en
-  utvidelse som styrer slike skript:
+  TabTabTab UG-eksport&oslash;ren er et <em>userscript</em> &mdash; en liten JavaScript-snutt
+  som kj&oslash;rer i nettleseren din n&aring;r du er p&aring; Ultimate Guitar. Du trenger en
+  utvidelse som kj&oslash;rer slike skript:
 </p>
 
 <ul>
@@ -112,149 +120,136 @@
     <a href="https://apps.apple.com/app/userscripts/id1463298887" target="_blank" rel="noopener">Userscripts</a> (App Store)</li>
 </ul>
 
+<p>Klikk &laquo;Legg til&raquo;/&laquo;Install&raquo; for &aring; installere utvidelsen.</p>
+
+<img class="screenshot" src="screenshots/ug-1.png" alt="Tampermonkey i Chrome Web Store">
+
+<h3>1.1 Fest Tampermonkey til verkt&oslash;ylinja</h3>
+<p>Klikk puzzle-ikonet i Chrome og &laquo;pin&raquo; Tampermonkey s&aring; den er lett tilgjengelig.</p>
+<img class="screenshot" src="screenshots/ug-1.1-sticky.png" alt="Pin Tampermonkey til verktøylinja">
+
+<h3>1.2 Tillat userscripts (Chrome 138+)</h3>
 <p>
-  Klikk &laquo;Legg til&raquo;/&laquo;Install&raquo; for &aring; installere
-  utvidelsen. Du f&aring;r et lite ikon i verkt&oslash;ylinja n&aring;r den er
-  aktiv.
+  Nyere Chrome-versjoner krever at du eksplisitt godkjenner at utvidelser kj&oslash;rer
+  userscripts. F&oslash;rste gang du klikker p&aring; Tampermonkey-ikonet vil du m&aring;tte g&aring;
+  gjennom denne tre-stegs godkjenningen:
 </p>
-
-<img class="screenshot" src="screenshots/ug-1.png" alt="Tampermonkey installasjons-side i Chrome Web Store">
-
-<h2 id="step-2"><span class="step">2.</span> Installer TabTabTab UG-eksportør-skriptet</h2>
-
-<p>
-  Klikk lenken under for &aring; &aring;pne r&aring;-skriptet. Tampermonkey
-  (eller Violentmonkey/Greasemonkey) skal automatisk gjenkjenne <code>.user.js</code>-filer
-  og vise en installasjons-side:
-</p>
-
-<p>
-  <strong>&rarr; <a href="https://raw.githubusercontent.com/aweussom/tabtabtab/main/crawler/userscripts/nortabs-ug-exporter.user.js" target="_blank" rel="noopener">Installer TabTabTab UG-eksportør</a></strong>
-</p>
-
-<p>
-  P&aring; installasjons-siden klikker du &laquo;Install&raquo;.
-  Skriptet er rundt 200 linjer JavaScript og kj&oslash;rer kun n&aring;r du er p&aring;
-  <code>ultimate-guitar.com/user/mytabs</code>-siden.
-</p>
-
-<img class="screenshot" src="screenshots/ug-2.png" alt="Tampermonkey viser TabTabTab UG-eksportør installert">
+<img class="screenshot" src="screenshots/ug-1.2-allow-userscripts-1.png" alt="Allow user scripts, steg 1">
+<img class="screenshot" src="screenshots/ug-1.3-allow-userscripts-2.png" alt="Allow user scripts, steg 2">
+<img class="screenshot" src="screenshots/ug-1.4-allow-userscripts-3.png" alt="Allow user scripts, steg 3">
 
 <div class="note">
-  <strong>Hva skriptet gj&oslash;r:</strong> det leser bokmerkene dine
-  direkte fra Ultimate Guitar i nettleseren din og lager en JSON-fil med
-  alle akkord-/lyrikk-tabs. Skriptet er <a href="https://github.com/aweussom/tabtabtab/blob/main/crawler/userscripts/nortabs-ug-exporter.user.js" target="_blank" rel="noopener">open source</a>
-  &mdash; du kan lese hva det gj&oslash;r f&oslash;r du installerer det.
+  <strong>Hvis du bruker Firefox/Violentmonkey:</strong> du slipper dette steget &mdash; Firefox krever ikke ekstra permission. G&aring; rett til steg 2.
 </div>
 
-<h2 id="step-3"><span class="step">3.</span> G&aring; til dine UG-bokmerker og sett til &laquo;All&raquo;</h2>
+<h2 id="step-2"><span class="step">2.</span> Lim inn TabTabTab UG-eksport&oslash;r-skriptet</h2>
 
 <p>
-  Logg inn p&aring; <a href="https://www.ultimate-guitar.com">ultimate-guitar.com</a>
-  og &aring;pne din egen <strong>bokmerke-side</strong> (My Tabs &rarr; Favorites
-  eller direkte til <code>ultimate-guitar.com/user/mytabs</code>).
+  &Aring;pne r&aring;-skriptet i en ny fane og kopier hele innholdet:
 </p>
 
 <p>
-  <strong>Viktig:</strong> sett side-st&oslash;rrelses-filteret til
-  &laquo;All&raquo; (i stedet for 50/100). Eksport&oslash;ren leser kun
-  bokmerker som er synlige i DOM-en &mdash; med &laquo;All&raquo; er det alle
-  bokmerkene dine p&aring; samme side.
+  <a class="install-btn" href="https://raw.githubusercontent.com/aweussom/tabtabtab/main/userscripts/tabtabtab-ug-exporter.user.js" target="_blank" rel="noopener">&rarr; &Aring;pne skriptet (raw GitHub)</a>
 </p>
 
-<img class="screenshot" src="screenshots/ug-3.png" alt="UG-bokmerke-siden med &laquo;All&raquo;-filter aktivt og floating eksport-knapp synlig">
+<p>
+  N&aring;r du er p&aring; raw-siden: <strong>Ctrl+A</strong> (velg alt), deretter <strong>Ctrl+C</strong> (kopier).
+</p>
+
+<h3>2.1 Opprett et nytt skript i Tampermonkey</h3>
+<p>Klikk Tampermonkey-ikonet &rarr; &laquo;Create a new script&hellip;&raquo;.</p>
+<img class="screenshot" src="screenshots/ug-2-opprett-nytt-script.png" alt="Tampermonkey: Create a new script">
+
+<h3>2.2 Slett template-koden og lim inn TabTabTab-skriptet</h3>
+<p>I editoren som &aring;pnes: <strong>Ctrl+A</strong> (velg alt template-tekst), <strong>Delete</strong> (slett).</p>
+<img class="screenshot" src="screenshots/ug-2.1-slett-og-lim-inn.png" alt="Tampermonkey-editor med template-koden valgt">
+<img class="screenshot" src="screenshots/ug-2.2-slettet.png" alt="Tampermonkey-editor tom etter slett">
+
+<p>Lim inn TabTabTab-skriptet (<strong>Ctrl+V</strong>) og lagre (<strong>Ctrl+S</strong> eller File &rarr; Save).</p>
+<img class="screenshot" src="screenshots/ug-2.2-lim-inn-lagre.png" alt="TabTabTab-skriptet limt inn og klart til lagring">
+
+<div class="note">
+  <strong>Skriptet er <a href="https://github.com/aweussom/tabtabtab/blob/main/userscripts/tabtabtab-ug-exporter.user.js" target="_blank" rel="noopener">open source</a></strong>
+  &mdash; du kan lese kildekoden (~200 linjer) f&oslash;r du installerer det.
+</div>
+
+<h2 id="step-3"><span class="step">3.</span> G&aring; til dine UG-bokmerker, sett til &laquo;All&raquo;</h2>
+
+<p>
+  Logg inn p&aring; <a href="https://www.ultimate-guitar.com">ultimate-guitar.com</a> og
+  &aring;pne din egen <strong>bokmerke-side</strong>
+  (<code>ultimate-guitar.com/user/mytabs</code>).
+</p>
+
+<p>
+  <strong>Viktig:</strong> sett side-st&oslash;rrelses-filteret til &laquo;All&raquo;
+  (i stedet for 50/100). Eksport&oslash;ren leser kun bokmerker som er synlige i DOM-en,
+  s&aring; med &laquo;All&raquo; f&aring;r du alt p&aring; samme runde.
+</p>
+
+<img class="screenshot" src="screenshots/ug-3.png" alt="UG-bokmerke-siden med &laquo;All&raquo;-filter og flytende eksport-knapp">
 
 <h2 id="step-4"><span class="step">4.</span> Eksporter</h2>
 
 <p>
-  N&aring;r skriptet er aktivt p&aring; bokmerke-siden, ser du en
-  flytende knapp nede til h&oslash;yre med teksten
-  &laquo;&#x2B07; Eksporter til NorTabs&raquo;. Klikk p&aring; den.
-</p>
-
-<p>
-  Skriptet g&aring;r gjennom alle bokmerkene dine, henter hver tab-side, og
-  pakker innholdet i en JSON-fil. Det er en h&oslash;flighet-pause p&aring;
-  ~800 ms mellom hver tab, s&aring; for 250 bokmerker tar det ca. 3-4 minutter
-  &mdash; vinduet kan st&aring; &aring;pent og rulle progresjon i bakgrunnen.
+  Klikk den flytende gule knappen &laquo;&#x2B07; Eksporter til TabTabTab&raquo; &oslash;verst
+  til h&oslash;yre p&aring; siden. Skriptet g&aring;r gjennom hver bokmerket tab, henter
+  innholdet, og pakker alt i &eacute;n JSON-fil. Det er ~800 ms pause mellom hver tab &mdash;
+  for ~250 bokmerker tar det ca. 3-4 minutter.
 </p>
 
 <img class="screenshot" src="screenshots/ug-4.png" alt="Eksport pågår, viser progresjon (X av N tabs hentet)">
 
-<p>
-  N&aring;r alt er ferdig laster skriptet automatisk ned en fil med navn
-  <code>nortabs-ug-import-&lt;dato&gt;.json</code>. Du finner den i
-  Downloads-mappa di.
-</p>
+<p>N&aring;r alt er ferdig laster skriptet automatisk ned en fil <code>tabtabtab-ug-import-&lt;dato&gt;.json</code>.</p>
 
 <img class="screenshot" src="screenshots/ug-5.png" alt="Nedlastet JSON-fil i Downloads-mappa">
 
 <div class="note">
-  <strong>Hvis noen tabs feiler:</strong> ~2&nbsp;% av UG &laquo;Official
-  Tabs&raquo; (typisk store r&aring;dio-l&aring;ter) er ekstra beskyttet mot
-  scraping. De ender opp i <code>failed[]</code>-listen i JSON-en med en
-  begrunnelse. Workaround: bokmerk den frie <code>-chords-</code>-versjonen
-  av samme l&aring;t i stedet &mdash; den fungerer som regel.
+  <strong>Noen tabs feiler:</strong> ~2&nbsp;% av UG &laquo;Official Tabs&raquo;
+  (store r&aring;dio-l&aring;ter) er ekstra beskyttet mot scraping og kommer med tom body.
+  De havner i <code>failed[]</code>-listen i JSON-en. Workaround: bokmerk den frie
+  <code>-chords-</code>-versjonen av samme l&aring;t i stedet.
 </div>
 
 <h2 id="step-5"><span class="step">5.</span> Importer JSON-filen i TabTabTab</h2>
 
 <p>
-  G&aring; til <a href="../#/import/ug">TabTabTab &rarr; Sangb&oslash;ker
-  &rarr; &#x2913; Importer UG-tabs</a>. Slipp JSON-filen p&aring;
-  drop-sonen, eller klikk for &aring; velge fra fil-velgeren.
+  G&aring; til <a href="../#/import/ug">Sangb&oslash;ker &rarr; &#x2913; Importer UG-tabs</a>,
+  slipp JSON-filen p&aring; drop-sonen (eller klikk for filvelger).
 </p>
 
 <img class="screenshot" src="screenshots/ug-6.png" alt="Import-skjermen i TabTabTab med drop-sone">
 
-<p><strong>Hva som skjer videre avhenger av nettleseren:</strong></p>
-
 <ul>
-  <li><strong>I Chrome:</strong> hver tab blir lest av Gemini Nano (Chromes
-    on-device AI) og tagget med tema, stemning, anledning og 3-5 tekstlinjer.
-    Tar ~10 sekunder per tab. En liten progress-pille i hj&oslash;rnet f&oslash;lger
-    deg rundt selv om du navigerer bort &mdash; jobben fortsetter i bakgrunnen.</li>
-  <li><strong>I andre nettlesere:</strong> tabsene legges rett i biblioteket
-    med tekst-s&oslash;k (artist, sang, lyrikk). Vibe-s&oslash;ket (tema/stemning)
-    krever Chromes innebygde AI &mdash; men du f&aring;r alt det andre med
-    en gang.</li>
+  <li><strong>I Chrome:</strong> hver tab blir tagget av Gemini Nano med tema, stemning, og 3-5 tekstlinjer. ~10 sek/tab. Du kan navigere bort &mdash; jobben fortsetter, og pillen nederst-til-h&oslash;yre f&oslash;lger deg.</li>
+  <li><strong>Andre nettlesere:</strong> tabsene legges rett i biblioteket med tekst-s&oslash;k (artist, sang, lyrikk). Vibe-s&oslash;ket krever Chromes innebygde AI.</li>
 </ul>
 
-<img class="screenshot" src="screenshots/ug-7.png" alt="Indeksering pågår i Chrome, progress-pillet vises nederst-til-høyre">
+<img class="screenshot" src="screenshots/ug-7.png" alt="Indeksering pågår, progress-pill nederst-til-høyre">
 
-<h2 id="step-6"><span class="step">6.</span> S&oslash;k p&aring; vibe</h2>
-
-<p>
-  N&aring;r jobben er ferdig dukker det opp en sangbok &laquo;Mine
-  UG-importer&raquo; nederst i sangbok-lista, og artistene dine vises under
-  riktig bokstav i bokstav-bla. UG-tabs har en liten r&oslash;d <span style="color:#d33;font-weight:700;font-size:0.85em;vertical-align:super;font-family:Georgia,serif;">U</span>
-  som markør slik at du ser hvilke tabs som er dine.
-</p>
+<h2 id="step-6"><span class="step">6.</span> S&oslash;k</h2>
 
 <p>
-  S&oslash;k p&aring; tema, stemning, eller tekstlinjer i s&oslash;kefeltet
-  &oslash;verst. F.eks. <code>melankolsk roadtrip</code>, eller en
-  husket lyrikk-linje &mdash; dine importerte tabs ligger n&aring; i
-  samme indeks som katalogen, med en liten boost slik at de du selv
-  importerte rangerer h&oslash;yere enn tilfeldig-tagged katalog-l&aring;ter.
+  N&aring;r ferdig: artistene dukker opp under riktig bokstav med en liten r&oslash;d
+  <span style="color:#d33;font-weight:700;font-size:0.85em;vertical-align:super;font-family:Georgia,serif;">U</span>-markør,
+  og en sangbok &laquo;Mine UG-importer&raquo; vises i sangbok-lista. S&oslash;k p&aring;
+  tema/stemning/tekstlinjer &mdash; dine importerte tabs har en liten relevance-boost
+  s&aring; de rangerer h&oslash;yere enn tangentielt-taggede katalog-l&aring;ter.
 </p>
 
-<img class="screenshot" src="screenshots/ug-8.png" alt="Søk på &laquo;melankolsk roadtrip&raquo; viser importerte UG-tabs med rød U-markør">
+<img class="screenshot" src="screenshots/ug-8.png" alt="Søk på en vibe-term viser importerte UG-tabs med rød U-markør">
 
 <div class="note">
-  <strong>P&aring; tvers av enheter:</strong> hvis du logger inn med Google
-  Drive (Sangb&oslash;ker &rarr; &laquo;Logg inn med Google&raquo;), syncer
-  importene dine til en skjult mappe i din egen Drive. &Aring;pne TabTabTab
-  p&aring; en annen enhet, logg inn med samme Google-konto, og alle tabsene
-  dukker opp der ogs&aring;. <a href="../DRIVE-SETUP.md">Drive-oppsett
-  &rarr;</a>
+  <strong>Cross-device-sync</strong>: hvis du logger inn med Google Drive i Sangb&oslash;ker
+  (&laquo;Logg inn med Google&raquo;), syncer importene til en skjult mappe i din egen Drive.
+  &Aring;pne TabTabTab p&aring; en annen enhet, logg inn med samme Google-konto, og alle
+  tabsene dukker opp der ogs&aring;.
 </div>
 
 <footer>
-  Spørsmål eller problemer? Sjekk
-  <a href="https://github.com/aweussom/tabtabtab" target="_blank" rel="noopener">prosjektets
-  GitHub</a> eller åpne en issue. Userscriptet og hele appen er
-  open source under MIT-lisens.
+  Sp&oslash;rsm&aring;l eller problemer? Sjekk
+  <a href="https://github.com/aweussom/tabtabtab" target="_blank" rel="noopener">prosjektets GitHub</a>
+  eller &aring;pne en issue. Userscriptet og hele appen er open source under MIT-lisens.
 </footer>
 
 </body>

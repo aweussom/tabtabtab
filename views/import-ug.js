@@ -25,9 +25,6 @@ export function render(state, root) {
     <p class="muted">
       Slipp en <code>nortabs-ug-import-*.json</code> her — eksportert med
       Tampermonkey-skriptet. <strong>Førstegangs? <a href="docs/import-ug-guide.html" target="_blank">Steg-for-steg-guide &rarr;</a></strong>
-      Hver tab blir lest og tagget av <strong>Gemini Nano på din egen maskin</strong>
-      (Chrome sin innebygde AI) — null server, null nøkkel, ingenting lastet opp.
-      Tabsene legger seg i biblioteket ditt og dukker opp i søk sammen med katalogen.
     </p>
 
     <div id="ug-avail" class="card"></div>
@@ -120,9 +117,8 @@ function wireImport(root) {
     }
     rebuildIndex();
     statusEl.textContent =
-      `${ok} tabs lagt til biblioteket (${fail} feilet).\n\n` +
-      `Søk på artist, sang, eller tekstlinjer fungerer.\n` +
-      `For at søk på tema, stemning, og vibe også skal funke — bruk Google Chrome (Chrome's on-device AI Gemini Nano leser hver tab og legger på de tagene).`;
+      `${ok} tabs lagt til biblioteket (${fail} feilet).\n` +
+      `Søk på artist, sang, eller tekstlinjer fungerer nå.`;
   }
 
   function refreshLoadedDisplay() {
@@ -204,7 +200,7 @@ function renderQueueText(state) {
   if (failures.length) {
     s += '\n\nFeil:\n' + failures.map(f => `  ✗ ${f.tab.artist} — ${f.tab.song}: ${f.error}`).join('\n');
   }
-  s += `\n\nSøk på tema/stemning/tekstlinjer i søkefeltet øverst — importerte tabs ligger nå i samme indeks som katalogen.`;
+  s += `\n\nSøk på tema, stemning eller tekstlinjer i søkefeltet øverst.`;
   return s;
 }
 
