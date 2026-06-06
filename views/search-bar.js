@@ -1,6 +1,7 @@
 import { search } from '../search.js';
 import { getSongbooks } from '../storage.js';
 import { escapeHtml } from '../util.js';
+import { t } from '../i18n.js';
 
 let _debounce = null;
 
@@ -107,9 +108,9 @@ function runSearch(query, results) {
     setFrame('lyrics', null);
     setFrame(
       'empty',
-      `<p>Ingen treff for &laquo;${escapeHtml(q)}&raquo;. ` +
-      `<a href="${liveSearchHref}" target="_blank" rel="noopener">Søk live på nortabs.net &rarr;</a> ` +
-      `eller <a href="${ugSearchHref}" target="_blank" rel="noopener">søk på Ultimate Guitar &rarr;</a></p>`
+      `<p>${t('no_results', { query: escapeHtml(q) })} ` +
+      `<a href="${liveSearchHref}" target="_blank" rel="noopener">${t('search_live_nortabs')}</a> ` +
+      `${t('or')} <a href="${ugSearchHref}" target="_blank" rel="noopener">${t('search_ug')}</a></p>`
     );
     return;
   }
@@ -121,14 +122,14 @@ function runSearch(query, results) {
   setFrame(
     'empty',
     `<p class="fallthrough-link">` +
-    `<a href="${liveSearchHref}" target="_blank" rel="noopener">Søk også live på nortabs.net &rarr;</a> ` +
-    `&middot; <a href="${ugSearchHref}" target="_blank" rel="noopener">søk på Ultimate Guitar &rarr;</a>` +
+    `<a href="${liveSearchHref}" target="_blank" rel="noopener">${t('search_live_nortabs_also')}</a> ` +
+    `&middot; <a href="${ugSearchHref}" target="_blank" rel="noopener">${t('search_ug')}</a>` +
     `</p>`
   );
 
   setFrame(
     'suggest',
-    r.suggest ? `<p>Mente du <a href="#" data-suggest="${escapeHtml(r.suggest)}">${escapeHtml(r.suggest)}</a>?</p>` : null
+    r.suggest ? `<p>${t('did_you_mean', { suggestion: `<a href="#" data-suggest="${escapeHtml(r.suggest)}">${escapeHtml(r.suggest)}</a>` })}</p>` : null
   );
 
   const ugCls = (obj) => (obj?._source === 'ug' ? ' class="ug-import"' : '');
@@ -136,7 +137,7 @@ function runSearch(query, results) {
   setFrame(
     'artists',
     r.artists.length
-      ? `<h3>Artister (${r.artists.length})</h3><ul>${r.artists.map(a =>
+      ? `<h3>${t('artists')} (${r.artists.length})</h3><ul>${r.artists.map(a =>
           `<li${ugCls(a.artist)}><a href="#/artist/${a.artist.id}">${escapeHtml(a.artist.name)}</a></li>`
         ).join('')}</ul>`
       : null
@@ -145,7 +146,7 @@ function runSearch(query, results) {
   setFrame(
     'songs',
     r.songs.length
-      ? `<h3>Sanger (${r.songs.length})</h3><ul>${r.songs.map(s =>
+      ? `<h3>${t('songs')} (${r.songs.length})</h3><ul>${r.songs.map(s =>
           `<li${ugCls(s.song) || ugCls(s.artist)}><a href="#/song/${s.song.id}">${escapeHtml(s.artist.name)} &mdash; ${escapeHtml(s.song.name)} <span class="muted">(${s.song.tabs.length})</span></a></li>`
         ).join('')}</ul>`
       : null
@@ -154,7 +155,7 @@ function runSearch(query, results) {
   setFrame(
     'lyrics',
     r.bodyHits.length
-      ? `<h3>Tekstlinjer (${r.bodyHits.length})</h3><ul>${r.bodyHits.map(h =>
+      ? `<h3>${t('lyrics')} (${r.bodyHits.length})</h3><ul>${r.bodyHits.map(h =>
           `<li${ugCls(h.song) || ugCls(h.artist)}><a href="#/song/${h.song.id}">${escapeHtml(h.artist.name)} &mdash; ${escapeHtml(h.song.name)} <span class="muted">(${h.song.tabs.length})</span></a></li>`
         ).join('')}</ul>`
       : null

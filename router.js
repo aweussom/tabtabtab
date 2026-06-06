@@ -39,7 +39,7 @@ export function parseHash() {
   if (head === 'import' && arg === 'ug') return { name: 'import-ug' };
   if (head === 'share') {
     const ids = (query.ids || '').split(',').map(Number).filter(n => Number.isFinite(n));
-    return { name: 'share', shareName: query.name || 'Delt sangbok', tab_ids: ids };
+    return { name: 'share', shareName: query.name || t('shared_songbook'), tab_ids: ids };
   }
   return { name: 'home' };
 }
@@ -48,3 +48,4 @@ export function startRouter(onChange) {
   window.addEventListener('hashchange', () => onChange(parseHash()));
   onChange(parseHash());
 }
+import { t } from './i18n.js';

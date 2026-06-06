@@ -1,5 +1,6 @@
 import { getArtistsForLetter } from '../catalog.js';
 import { escapeHtml } from '../util.js';
+import { t } from '../i18n.js';
 
 // Norwegian alphabetical order: a-z, then æ ø å, then digits.
 const LETTERS = [...'abcdefghijklmnopqrstuvwxyzæøå', ...'0123456789'];
@@ -22,8 +23,8 @@ export function render(state, root) {
           }).join('')}
         </nav>
         <p class="home-links">
-          <a href="#/songbooks">Sangbøker &rarr;</a>
-          <a href="#/import/ug" style="margin-left:1rem">Importere UG-tabs &rarr;</a>
+          <a href="#/songbooks">${t('songbooks')} &rarr;</a>
+          <a href="#/import/ug" style="margin-left:1rem">${t('import_ug_short')} &rarr;</a>
         </p>
       </div>
     `;
@@ -34,14 +35,14 @@ export function render(state, root) {
   const label = escapeHtml(route.letter.toUpperCase());
   if (artists === null) {
     root.innerHTML = `
-      <p><a href="#/">&larr; Letters</a></p>
+      <p><a href="#/">&larr; ${t('letters')}</a></p>
       <h1>${label}</h1>
-      <p>Not crawled yet.</p>
+      <p>${t('not_crawled')}</p>
     `;
     return;
   }
   root.innerHTML = `
-    <p><a href="#/">&larr; Letters</a></p>
+    <p><a href="#/">&larr; ${t('letters')}</a></p>
     <h1>${label}</h1>
     <ul>
       ${artists.map(a => {

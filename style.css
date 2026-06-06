@@ -57,7 +57,8 @@ body {
   background: var(--card-bg);
   color: var(--fg);
 }
-#search-btn {
+#search-btn,
+#language-btn {
   flex: 0 0 auto;
   padding: 0.5rem 1rem;
   font: inherit;
@@ -68,7 +69,8 @@ body {
   color: var(--fg);
   cursor: pointer;
 }
-#search-btn:hover { background: #f0f0f0; }
+#search-btn:hover,
+#language-btn:hover { background: #f0f0f0; }
 #search-input:focus {
   outline: 2px solid var(--link);
   outline-offset: -1px;
@@ -581,7 +583,8 @@ button.heart:hover { background: rgba(221, 51, 51, 0.1); }
   /* Search header */
   #search-bar { padding: 0.4rem 0.6rem; }
   .search-bar-row { gap: 0.35rem; }
-  #home-link, #search-btn { padding: 0.45rem 0.55rem; }
+  #home-link, #search-btn, #language-btn { padding: 0.45rem 0.55rem; }
+  #language-btn { font-size: 0.8rem; }
   #search-input { padding: 0.45rem 0.6rem; }
 
   /* Tab page */

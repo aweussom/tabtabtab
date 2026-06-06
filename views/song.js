@@ -2,11 +2,12 @@ import { getSong } from '../catalog.js';
 import { getSongbook } from '../storage.js';
 import { escapeHtml } from '../util.js';
 import { renderTabUI } from './tab.js';
+import { songbookDisplayName, t } from '../i18n.js';
 
 export function render(state, root) {
   const result = getSong(state.route.id);
   if (!result) {
-    root.innerHTML = `<p><a href="#/">&larr; Letters</a></p><p>Song not found.</p>`;
+    root.innerHTML = `<p><a href="#/">&larr; ${t('letters')}</a></p><p>${t('song_not_found')}</p>`;
     return;
   }
   const { song, artist } = result;
@@ -21,7 +22,7 @@ export function render(state, root) {
     const sbId = state.route.sb;
     const sb = sbId ? getSongbook(sbId) : null;
     const backLink = sb
-      ? { href: `#/songbook/${encodeURIComponent(sb.id)}`, label: sb.name }
+      ? { href: `#/songbook/${encodeURIComponent(sb.id)}`, label: songbookDisplayName(sb) }
       : { href: `#/artist/${artist.id}`, label: artist.name };
     renderTabUI(root, { tab, song, artist }, backLink, {
       songbookId: sb ? null : sbId,
@@ -33,9 +34,9 @@ export function render(state, root) {
     <p><a href="#/artist/${artist.id}">&larr; ${escapeHtml(artist.name)}</a></p>
     <h1>${escapeHtml(song.name)}</h1>
     ${song.tabs.length === 0
-      ? '<p>No tabs.</p>'
+      ? `<p>${t('no_tabs')}</p>`
       : `<ul>${song.tabs.map(t => {
-          const by = t.uploaded_by_name ? ` by ${escapeHtml(t.uploaded_by_name)}` : '';
+          const by = t.uploaded_by_name ? ` ${t('by')} ${escapeHtml(t.uploaded_by_name)}` : '';
           return `<li><a href="#/tab/${t.id}">Tab #${t.id}${by}</a></li>`;
         }).join('')}</ul>`}
   `;

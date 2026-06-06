@@ -2,6 +2,7 @@ import { getAvailability } from '../enrich-ondevice.js';
 import { enqueue, subscribe as subscribeEnrich, getState as getQueueState, getLastSummary, getFailures, isRunning } from '../enrich-queue.js';
 import { addLocalImport } from '../catalog.js';
 import { rebuildIndex } from '../app.js';
+import { t } from '../i18n.js';
 
 /**
  * #/import/ug — drop a Tampermonkey-exported Ultimate Guitar bookmarks JSON
@@ -20,23 +21,23 @@ import { rebuildIndex } from '../app.js';
  */
 export function render(state, root) {
   root.innerHTML = `
-    <p><a href="#/songbooks">&larr; Sangbøker</a></p>
-    <h1>Importer Ultimate Guitar-bokmerker</h1>
+    <p><a href="#/songbooks">&larr; ${t('songbooks')}</a></p>
+    <h1>${t('import_ug_heading')}</h1>
     <p class="muted">
-      Slipp en <code>nortabs-ug-import-*.json</code> her — eksportert med
-      Tampermonkey-skriptet. <strong>Førstegangs? <a href="docs/import-ug-guide.html" target="_blank">Steg-for-steg-guide &rarr;</a></strong>
+      ${t('import_ug_intro')}
+      <strong>${t('first_time')} <a href="docs/import-ug-guide.html" target="_blank">${t('step_guide')}</a></strong>
     </p>
 
     <div id="ug-avail" class="card"></div>
 
     <div id="ug-drop" class="card">
       <div class="ug-drop-zone">
-        Slipp UG-eksporten her, eller
+        ${t('drop_export')}
         <input type="file" id="ug-file" accept="application/json,.json">
       </div>
       <p>
         <span id="ug-loaded" class="muted"></span>
-        <button id="ug-enrich" hidden>Indekser på nytt</button>
+        <button id="ug-enrich" hidden>${t('reindex')}</button>
       </p>
     </div>
 
@@ -53,19 +54,19 @@ async function wireAvailability(root) {
   const el = root.querySelector('#ug-avail');
   const avail = await getAvailability();
   if (avail === 'available') {
-    el.innerHTML = `<strong>✓ On-device AI klar</strong> — Chrome's Prompt API er tilgjengelig (Gemini Nano provisjonert).`;
+    el.innerHTML = `<strong>${t('ai_ready')}</strong> — ${t('ai_ready_detail')}`;
     return;
   }
   if (avail === 'downloadable' || avail === 'downloading') {
-    el.innerHTML = `<strong>⏳ Modell ${avail}</strong> — slipp UG-eksporten under så starter (eller fortsetter) nedlasting av Gemini Nano (~2-4 GB) med progress. Alternativ manuelt: <code>chrome://components</code> &rarr; "Optimization Guide On Device Model" &rarr; "Check for update".`;
+    el.innerHTML = `<strong>${t('model_downloadable', { status: avail })}</strong> — ${t('model_download_detail')}`;
     return;
   }
   if (avail === 'no-api') {
-    el.innerHTML = `<strong>💡 Bruk <a href="https://www.google.com/chrome/" target="_blank" rel="noopener">Google Chrome</a>:</strong> da blir søket MYE smartere — Chrome's on-device AI (Gemini Nano) leser hver importert tab og gjør den søkbar på tema, stemning og tekstlinjer.`;
+    el.innerHTML = `<strong>${t('use_chrome').replace('Google Chrome', '<a href="https://www.google.com/chrome/" target="_blank" rel="noopener">Google Chrome</a>')}</strong> ${t('use_chrome_detail')}`;
     root.querySelector('#ug-enrich').disabled = true;
     return;
   }
-  el.innerHTML = `<strong>💡 Aktiver Chrome's on-device AI</strong> så blir søket MYE smartere. I Chrome: <code>chrome://flags/#prompt-api-for-gemini-nano</code> på, <code>#optimization-guide-on-device-model</code> = "Enabled BypassPerfRequirement", restart, og last ned modellen via <code>chrome://components</code>.`;
+  el.innerHTML = `<strong>${t('enable_chrome_ai')}</strong> — ${t('enable_chrome_ai_detail')}`;
   root.querySelector('#ug-enrich').disabled = true;
 }
 
@@ -88,7 +89,7 @@ function wireImport(root) {
     // semantic vibe layer only Chrome unlocks).
     if (_loadedTabs.length === 0) return;
     if (isRunning()) {
-      statusEl.textContent = 'En annen batch kjører fortsatt. Vent til den er ferdig — eller naviger til pillen nederst-til-høyre for å se status.';
+      statusEl.textContent = t('another_batch');
       progressCard.hidden = false;
       return;
     }
@@ -104,7 +105,7 @@ function wireImport(root) {
     progressCard.hidden = false;
     enrichBtn.hidden = true;
     enqueue(_loadedTabs.slice()).catch(err => {
-      statusEl.textContent = `Kunne ikke starte: ${err.message}`;
+      statusEl.textContent = t('could_not_start', { error: err.message });
     });
   }
 
@@ -117,12 +118,11 @@ function wireImport(root) {
     }
     rebuildIndex();
     statusEl.textContent =
-      `${ok} tabs lagt til biblioteket (${fail} feilet).\n` +
-      `Søk på artist, sang, eller tekstlinjer fungerer nå.`;
+      t('literal_import_done', { ok, fail });
   }
 
   function refreshLoadedDisplay() {
-    if (_loadedTabs.length) loadedEl.textContent = `${_loadedTabs.length} tabs lastet`;
+    if (_loadedTabs.length) loadedEl.textContent = t('tabs_loaded', { count: _loadedTabs.length });
     // The button is a "re-trigger" affordance — only useful AFTER an initial
     // run completed (idle state with a last summary) so the user can re-run
     // (e.g. after migrating from a non-Chrome browser to Chrome).
@@ -137,7 +137,7 @@ function wireImport(root) {
   fileInput.addEventListener('change', async e => {
     const f = e.target.files[0]; if (!f) return;
     try { await onLoaded(JSON.parse(await f.text())); }
-    catch (err) { loadedEl.textContent = '✗ feil JSON: ' + err.message; }
+    catch (err) { loadedEl.textContent = t('invalid_json', { error: err.message }); }
   });
   ['dragover', 'dragenter'].forEach(ev => dropZone.addEventListener(ev, e => {
     e.preventDefault(); dropZone.classList.add('over');
@@ -148,12 +148,12 @@ function wireImport(root) {
   dropZone.addEventListener('drop', async e => {
     const f = e.dataTransfer.files[0]; if (!f) return;
     try { await onLoaded(JSON.parse(await f.text())); }
-    catch (err) { loadedEl.textContent = '✗ feil JSON: ' + err.message; }
+    catch (err) { loadedEl.textContent = t('invalid_json', { error: err.message }); }
   });
 
   enrichBtn.addEventListener('click', async () => {
     if (isRunning()) {
-      statusEl.textContent = 'En batch kjører allerede. Vent til den er ferdig.';
+      statusEl.textContent = t('batch_running');
       return;
     }
     const avail = await getAvailability();
@@ -175,32 +175,37 @@ function wireImport(root) {
 }
 
 function renderQueueText(state) {
-  if (state.error) return `Feil: ${state.error}`;
+  if (state.error) return t('error', { error: state.error });
   if (state.modelDownload) {
     const gb = (state.modelDownload.loaded / (1024 ** 3)).toFixed(2);
     if (state.modelDownload.total) {
       const totalGb = (state.modelDownload.total / (1024 ** 3)).toFixed(2);
       const pct = Math.round(100 * state.modelDownload.loaded / state.modelDownload.total);
-      return `Laster ned Gemini Nano: ${gb} / ${totalGb} GB (${pct}%)`;
+      return t('downloading_model', { progress: `${gb} / ${totalGb} GB (${pct}%)` });
     }
-    return `Laster ned Gemini Nano: ${gb} GB`;
+    return t('downloading_model', { progress: `${gb} GB` });
   }
   if (state.running) {
     const finished = state.done + state.failed;
-    let s = `Indekserer ${finished}/${state.total} — ${state.done} OK, ${state.failed} feilet`;
-    if (state.current) s += `\nNå: ${state.current.artist} — ${state.current.song}`;
-    s += '\n\nDu kan navigere bort — det kjører i bakgrunnen. Indeksen oppdateres når batchen er ferdig.';
+    let s = t('indexing_status', {
+      finished,
+      total: state.total,
+      done: state.done,
+      failed: state.failed,
+    });
+    if (state.current) s += `\n${t('current_item', state.current)}`;
+    s += `\n\n${t('background_notice')}`;
     return s;
   }
   // Idle. Show last-completed summary if we have one this session.
   const last = getLastSummary();
   if (!last) return '';
   const failures = getFailures();
-  let s = `Ferdig: ${last.ok} OK, ${last.fail} feilet på ${last.secs}s — lagret lokalt, søkeindeksen er oppdatert.`;
+  let s = t('finished_status', last);
   if (failures.length) {
-    s += '\n\nFeil:\n' + failures.map(f => `  ✗ ${f.tab.artist} — ${f.tab.song}: ${f.error}`).join('\n');
+    s += `\n\n${t('failures')}\n` + failures.map(f => `  ✗ ${f.tab.artist} — ${f.tab.song}: ${f.error}`).join('\n');
   }
-  s += `\n\nSøk på tema, stemning eller tekstlinjer i søkefeltet øverst.`;
+  s += `\n\n${t('search_tip')}`;
   return s;
 }
 

@@ -25,6 +25,7 @@ import * as playback from '../playback.js';
 import { wrapTabBody, measureMaxCols, isChordLine, CHORD_TOKEN_RE } from '../chord-wrap.js';
 import { renderChordSvg } from '../chord-diagrams.js';
 import { getChordFingering } from '../chord-data.js';
+import { songbookDisplayName, t } from '../i18n.js';
 
 let _keyHandler = null;
 let _scrollListener = null;
@@ -57,12 +58,12 @@ function renderPicker(tabId) {
   const containingList = getSongbooksContaining(tabId);
   const containing = new Set(containingList.map(s => s.id));
   const summary = containingList.length === 0
-    ? 'Legg til i sangbok'
-    : 'Legg til i ny/annen sangbok';
+    ? t('add_to_songbook')
+    : t('add_to_another_songbook');
   const rows = all.map(sb => `
     <label>
       <input type="checkbox" data-songbook="${escapeHtml(sb.id)}" ${containing.has(sb.id) ? 'checked' : ''}>
-      ${escapeHtml(sb.name)}
+      ${escapeHtml(songbookDisplayName(sb))}
     </label>
   `).join('');
   return `
@@ -70,7 +71,7 @@ function renderPicker(tabId) {
       <summary>${escapeHtml(summary)}</summary>
       <div class="songbook-picker-body">
         ${rows}
-        <button class="new-songbook-btn">+ Ny sangbok…</button>
+        <button class="new-songbook-btn">${t('new_songbook_ellipsis')}</button>
       </div>
     </details>
   `;
@@ -80,22 +81,22 @@ function renderSongbookBack(sbId) {
   if (!sbId) return '';
   const sb = getSongbook(sbId);
   if (!sb) return '';
-  return `<a href="#/songbook/${encodeURIComponent(sb.id)}" class="songbook-back-btn">&larr; Tilbake til ${escapeHtml(sb.name)}</a>`;
+  return `<a href="#/songbook/${encodeURIComponent(sb.id)}" class="songbook-back-btn">&larr; ${t('back_to', { name: escapeHtml(songbookDisplayName(sb)) })}</a>`;
 }
 
 function formatRemaining(seconds) {
   const s = Math.max(0, Math.round(seconds));
-  if (s < 60) return `${s} sek igjen`;
+  if (s < 60) return t('seconds_left', { seconds: s });
   const min = Math.floor(s / 60);
   const sec = s % 60;
-  if (sec === 0) return `${min} min igjen`;
-  return `${min} min ${sec} sek igjen`;
+  if (sec === 0) return t('minutes_left', { minutes: min });
+  return t('minutes_seconds_left', { minutes: min, seconds: sec });
 }
 
 export function render(state, root) {
   const result = getTab(state.route.id);
   if (!result) {
-    root.innerHTML = `<p><a href="#/">&larr; Letters</a></p><p>Tab not found.</p>`;
+    root.innerHTML = `<p><a href="#/">&larr; ${t('letters')}</a></p><p>${t('tab_not_found')}</p>`;
     return;
   }
   // When the user navigated from a songbook (?sb= in URL), the natural
@@ -132,11 +133,11 @@ export function renderTabUI(root, refs, backLink, opts = {}) {
   const chordnames = Array.isArray(tab.chordnames) ? tab.chordnames : [];
   const chords = chordnames.length
     ? `<details class="chords-foldout">
-         <summary><span class="chords">Chords: ${escapeHtml(chordnames.join(' '))}</span></summary>
+         <summary><span class="chords">${t('chords')}: ${escapeHtml(chordnames.join(' '))}</span></summary>
          <div class="chord-mode-row" hidden>
            <button type="button" class="chord-mode-toggle"></button>
          </div>
-         <div class="chord-diagrams" aria-label="Akkorddiagrammer"></div>
+         <div class="chord-diagrams" aria-label="${t('chord_diagrams')}"></div>
        </details>`
     : '';
   // LLM-tagged noise suppression (per PLAN.md Phase 2.5): if the enrichment
@@ -158,8 +159,8 @@ export function renderTabUI(root, refs, backLink, opts = {}) {
     <p><a href="${escapeHtml(backLink.href)}">&larr; ${escapeHtml(backLink.label)}</a></p>
     <div class="tab-header">
       <h1>${escapeHtml(artist.name)} &mdash; ${escapeHtml(song.name)}</h1>
-      <button class="heart" id="heart-btn" title="Legg til/fjern fra Favoritter">${renderHeart(tab.id)}</button>
-      <button id="play-btn" title="Start auto-scroll fra gjeldende posisjon">▶ Auto-scroll</button>
+      <button class="heart" id="heart-btn" title="${t('favorite_title')}">${renderHeart(tab.id)}</button>
+      <button id="play-btn" title="${t('play_title')}">▶ Auto-scroll</button>
     </div>
     <div class="picker-row">
       ${renderPicker(tab.id)}
@@ -167,9 +168,9 @@ export function renderTabUI(root, refs, backLink, opts = {}) {
     </div>
     ${chords}
     <div class="tab-bleed"><pre class="tab-body">${escapeHtml(cleanedBody)}</pre></div>
-    <div id="text-size-ctl" aria-label="Endre tekststørrelse">
-      <button data-action="larger" title="Større tekst">A+</button>
-      <button data-action="smaller" title="Mindre tekst">a−</button>
+    <div id="text-size-ctl" aria-label="${t('text_size')}">
+      <button data-action="larger" title="${t('larger_text')}">A+</button>
+      <button data-action="smaller" title="${t('smaller_text')}">a−</button>
     </div>
     <div id="playback-hud" data-phase="idle">
       <div class="hud-time" id="hud-time"></div>
@@ -227,7 +228,7 @@ function wireChordDiagrams(root, chordnames) {
     const btn = root.querySelector('.chord-mode-toggle');
     row.hidden = false;
     const updateLabel = () => {
-      btn.textContent = getChordMode() === 'barre' ? '← Vis visegrep' : 'Vis barré-grep →';
+      btn.textContent = getChordMode() === 'barre' ? t('show_open_chords') : t('show_barre_chords');
     };
     updateLabel();
     btn.addEventListener('click', () => {
@@ -364,7 +365,7 @@ function wirePicker(root, tabId) {
   const newBtn = root.querySelector('.songbook-picker .new-songbook-btn');
   if (newBtn) {
     newBtn.addEventListener('click', () => {
-      const name = prompt('Navn på sangbok:');
+      const name = prompt(t('songbook_name_prompt'));
       if (!name || !name.trim()) return;
       const sbId = createSongbook(name.trim());
       addToSongbook(sbId, tabId);
@@ -391,20 +392,20 @@ function wirePlayback(root, tabId) {
     hud.dataset.phase = phase;
     if (phase === 'idle') {
       hudTime.textContent = formatRemaining(estimateIdleRemaining());
-      hudControls.innerHTML = `<button data-action="start">▶ Start</button>`;
+      hudControls.innerHTML = `<button data-action="start">▶ ${t('start')}</button>`;
     } else if (phase === 'countdown') {
-      hudControls.innerHTML = `<button data-action="cancel">Avbryt</button>`;
+      hudControls.innerHTML = `<button data-action="cancel">${t('cancel')}</button>`;
     } else if (phase === 'playing') {
       hudControls.innerHTML = `
-        <button data-action="slower" title="Tregere (←)">−</button>
-        <button data-action="faster" title="Raskere (→)">+</button>
-        <button data-action="pause">⏸ Pause</button>
+        <button data-action="slower" title="${t('slower')}">−</button>
+        <button data-action="faster" title="${t('faster')}">+</button>
+        <button data-action="pause">⏸ ${t('pause')}</button>
       `;
     } else if (phase === 'paused') {
       hudControls.innerHTML = `
-        <button data-action="slower" title="Tregere (←)">−</button>
-        <button data-action="faster" title="Raskere (→)">+</button>
-        <button data-action="resume">▶ Fortsett</button>
+        <button data-action="slower" title="${t('slower')}">−</button>
+        <button data-action="faster" title="${t('faster')}">+</button>
+        <button data-action="resume">▶ ${t('resume')}</button>
       `;
     }
   }
@@ -416,18 +417,18 @@ function wirePlayback(root, tabId) {
     } else if (phase === 'countdown') {
       playBtn.disabled = true;
     } else if (phase === 'playing') {
-      playBtn.textContent = '⏸ Pause';
+      playBtn.textContent = `⏸ ${t('pause')}`;
       playBtn.disabled = false;
     } else if (phase === 'paused') {
-      playBtn.textContent = '▶ Fortsett';
+      playBtn.textContent = `▶ ${t('resume')}`;
       playBtn.disabled = false;
     }
   }
 
   const onCountdown = (n) => {
     if (n > 0) {
-      hudTime.textContent = `Klargjør… ${n}`;
-      playBtn.textContent = `Klargjør… ${n}`;
+      hudTime.textContent = t('preparing', { count: n });
+      playBtn.textContent = t('preparing', { count: n });
       playBtn.disabled = true;
     } else {
       hudTime.textContent = formatRemaining(playback.getRemainingSeconds() ?? 0);
@@ -473,7 +474,7 @@ function wirePlayback(root, tabId) {
     setPlaybackStartY(tabId, Math.round(window.scrollY));
     const duration = getPlaybackDuration(tabId);
     const started = playback.start(duration, { onCountdown, onTick, onStop, onPhaseChange });
-    if (!started) alert('Ingenting å scrolle — du er allerede på bunnen.');
+    if (!started) alert(t('nothing_to_scroll'));
   }
 
   // Click on the top button OR HUD: figure out action from current phase.

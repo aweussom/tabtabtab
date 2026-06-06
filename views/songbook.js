@@ -8,10 +8,11 @@ import {
 import { getTab } from '../catalog.js';
 import { escapeHtml } from '../util.js';
 import { buildExportHTML, exportFilename } from '../exporter.js';
+import { getLanguage, songbookDisplayName, t } from '../i18n.js';
 
 function buildShareUrl(songbook) {
   const ids = songbook.tab_ids.join(',');
-  const name = encodeURIComponent(songbook.name);
+  const name = encodeURIComponent(songbookDisplayName(songbook));
   const base = `${location.origin}${location.pathname}`;
   return `${base}#/share?name=${name}&ids=${ids}`;
 }
@@ -19,7 +20,7 @@ function buildShareUrl(songbook) {
 export function render(state, root) {
   const sb = getSongbook(state.route.id);
   if (!sb) {
-    root.innerHTML = `<p><a href="#/songbooks">&larr; Sangbøker</a></p><p>Sangbok ikke funnet.</p>`;
+    root.innerHTML = `<p><a href="#/songbooks">&larr; ${t('songbooks')}</a></p><p>${t('songbook_not_found')}</p>`;
     return;
   }
 
@@ -32,16 +33,16 @@ export function render(state, root) {
   const tabRows = sb.tab_ids.map((tid, idx) => {
     const reorderBtns = isSynthetic ? '' : `
       <span class="reorder">
-        <button data-action="up" data-tab="${tid}" ${idx === 0 ? 'disabled' : ''} title="Flytt opp">↑</button>
-        <button data-action="down" data-tab="${tid}" ${idx === total - 1 ? 'disabled' : ''} title="Flytt ned">↓</button>
+        <button data-action="up" data-tab="${tid}" ${idx === 0 ? 'disabled' : ''} title="${t('move_up')}">↑</button>
+        <button data-action="down" data-tab="${tid}" ${idx === total - 1 ? 'disabled' : ''} title="${t('move_down')}">↓</button>
       </span>
     `;
-    const removeBtn = isSynthetic ? '' : `<button data-action="remove" data-tab="${tid}">Fjern</button>`;
+    const removeBtn = isSynthetic ? '' : `<button data-action="remove" data-tab="${tid}">${t('remove')}</button>`;
     const r = getTab(tid);
     if (!r) {
       return `<li class="missing">
         ${reorderBtns}
-        <span class="muted">Tab #${tid} (ikke i lokal katalog)</span>
+        <span class="muted">${t('missing_local_tab', { id: tid })}</span>
         ${removeBtn}
       </li>`;
     }
@@ -59,16 +60,16 @@ export function render(state, root) {
   const canRename = !isFav && !isSynthetic;
 
   root.innerHTML = `
-    <p><a href="#/songbooks">&larr; Sangbøker</a></p>
-    <h1>${escapeHtml(sb.name)}</h1>
+    <p><a href="#/songbooks">&larr; ${t('songbooks')}</a></p>
+    <h1>${escapeHtml(songbookDisplayName(sb))}</h1>
     <div class="songbook-actions">
-      <button id="share-btn">Del lenke</button>
-      <button id="export-btn">Eksporter HTML</button>
-      ${canRename ? `<button id="rename-btn">Endre navn</button>` : ''}
-      ${canDelete ? `<button id="delete-btn" class="danger">Slett sangbok</button>` : ''}
+      <button id="share-btn">${t('share_link')}</button>
+      <button id="export-btn">${t('export_html')}</button>
+      ${canRename ? `<button id="rename-btn">${t('rename')}</button>` : ''}
+      ${canDelete ? `<button id="delete-btn" class="danger">${t('delete_songbook')}</button>` : ''}
     </div>
     ${sb.tab_ids.length === 0
-      ? '<p class="muted">Ingen tabs ennå. Bruk hjerteknappen eller "Legg til i sangbok" når du ser på en tab.</p>'
+      ? `<p class="muted">${t('empty_songbook')}</p>`
       : `<ol class="songbook-tabs">${tabRows}</ol>`}
   `;
 
@@ -76,9 +77,9 @@ export function render(state, root) {
     const url = buildShareUrl(sb);
     try {
       await navigator.clipboard.writeText(url);
-      alert(`Lenke kopiert!\n\n${url}`);
+      alert(t('link_copied', { url }));
     } catch {
-      prompt('Kopier denne lenken:', url);
+      prompt(t('copy_link'), url);
     }
   });
 
@@ -94,7 +95,12 @@ export function render(state, root) {
         chordnames: ref.tab.chordnames || [],
       };
     });
-    const html = buildExportHTML({ name: sb.name, tabs, exportedAt: new Date() });
+    const html = buildExportHTML({
+      name: songbookDisplayName(sb),
+      tabs,
+      exportedAt: new Date(),
+      language: getLanguage(),
+    });
     const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
     const url = URL.createObjectURL(blob);
     // Open in new tab so the user can verify the content looks right.
@@ -112,7 +118,7 @@ export function render(state, root) {
 
   if (canRename) {
     root.querySelector('#rename-btn').addEventListener('click', () => {
-      const name = prompt('Nytt navn:', sb.name);
+      const name = prompt(t('new_name'), sb.name);
       if (!name || !name.trim()) return;
       renameSongbook(sb.id, name.trim());
       render(state, root);
@@ -121,7 +127,7 @@ export function render(state, root) {
 
   if (canDelete) {
     root.querySelector('#delete-btn').addEventListener('click', () => {
-      if (!confirm(`Slett "${sb.name}"? Tabs i sangboken slettes ikke fra katalogen.`)) return;
+      if (!confirm(t('delete_confirm', { name: sb.name }))) return;
       deleteSongbook(sb.id);
       location.hash = '#/songbooks';
     });

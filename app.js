@@ -13,6 +13,7 @@ import { render as renderSongbooks } from './views/songbooks.js';
 import { render as renderSongbook } from './views/songbook.js';
 import { render as renderShare } from './views/share.js';
 import { render as renderImportUG, teardownImportUg } from './views/import-ug.js';
+import { getLanguage, t, toggleLanguage } from './i18n.js';
 
 const VIEWS = {
   home: renderLetterIndex,
@@ -33,6 +34,28 @@ function renderCurrent(state) {
   const view = VIEWS[state.route.name] ?? renderLetterIndex;
   view(state, root);
   window.scrollTo(0, 0);
+}
+
+function updateLanguageChrome() {
+  document.documentElement.lang = getLanguage();
+  const homeLink = document.getElementById('home-link');
+  const input = document.getElementById('search-input');
+  const searchBtn = document.getElementById('search-btn');
+  const languageBtn = document.getElementById('language-btn');
+  if (homeLink) {
+    homeLink.textContent = `⌂ ${t('home')}`;
+    homeLink.title = t('home_title');
+  }
+  if (input) input.placeholder = t('search_placeholder');
+  if (searchBtn) {
+    searchBtn.textContent = t('search');
+    searchBtn.title = t('search_title');
+  }
+  if (languageBtn) {
+    languageBtn.textContent = t('language_switch');
+    languageBtn.title = t('language_switch_title');
+  }
+  if (input?.value.trim()) input.dispatchEvent(new Event('input'));
 }
 
 let _shippedPrivate = null;  // private-bundle.json (fetched once)
@@ -77,7 +100,7 @@ async function main() {
   const root = document.getElementById('app');
   root.innerHTML = `
     <div class="app-loading">
-      <p>Laster TabTabTab…</p>
+      <p>${t('loading')}</p>
       <p id="loading-detail" class="muted"></p>
     </div>
   `;
@@ -85,11 +108,11 @@ async function main() {
   try {
     await loadCatalog({
       onProgress: ({ loaded }) => {
-        detail.textContent = `${(loaded / (1024 * 1024)).toFixed(1)} MB lastet`;
+        detail.textContent = t('loaded_mb', { mb: (loaded / (1024 * 1024)).toFixed(1) });
       },
     });
   } catch (err) {
-    root.textContent = `Failed to load catalog: ${err.message}`;
+    root.textContent = t('catalog_load_failed', { error: err.message });
     return;
   }
   // Both private sources are optional — absence is fine, app continues with
@@ -99,6 +122,12 @@ async function main() {
   _enrichment = await loadEnrichment();
   rebuildIndex();
   mountSearchBar();
+  updateLanguageChrome();
+  document.getElementById('language-btn')?.addEventListener('click', toggleLanguage);
+  window.addEventListener('tabtabtab:languagechange', () => {
+    updateLanguageChrome();
+    setState({ ...getState() });
+  });
   wireEnrichPill();
   subscribe(renderCurrent);
   startRouter(route => setState({ route }));
@@ -160,7 +189,7 @@ function wireEnrichPill() {
         pill.textContent = `↓ Gemini Nano ${gb} GB…`;
       } else {
         const finished = state.done + state.failed;
-        pill.textContent = `⚙ Indekserer ${finished}/${state.total}…`;
+        pill.textContent = t('indexing_pill', { finished, total: state.total });
       }
     } else {
       pill.hidden = true;

@@ -212,56 +212,117 @@ const EXPORT_JS = `
 })();
 `;
 
-function formatChords(chordnames) {
-  if (!Array.isArray(chordnames) || !chordnames.length) return '';
-  return `<p class="chords">Chords: ${escapeHtml(chordnames.join(' '))}</p>`;
+const EXPORT_TEXT = {
+  no: {
+    seconds: ' sek igjen',
+    minute: ' min igjen',
+    minutesSeconds: (m, s) => m + ' min ' + s + ' sek igjen',
+    pause: '⏸ Pause',
+    autoScroll: '▶ Auto-scroll',
+    chords: 'Akkorder',
+    missingTab: id => `Tab #${id} kunne ikke finnes.`,
+    source: 'Kilde',
+    link: 'lenke',
+    back: '↑ Til innhold',
+    missing: 'mangler',
+    titleSuffix: 'sangbok',
+    exported: 'Eksportert fra TabTabTab',
+    tab: 'tab',
+    tabs: 'tabs',
+    contents: 'Innhold',
+    slower: 'Tregere (←)',
+    faster: 'Raskere (→)',
+  },
+  en: {
+    seconds: 's left',
+    minute: ' min left',
+    minutesSeconds: (m, s) => m + ' min ' + s + 's left',
+    pause: '⏸ Pause',
+    autoScroll: '▶ Auto-scroll',
+    chords: 'Chords',
+    missingTab: id => `Tab #${id} could not be found.`,
+    source: 'Source',
+    link: 'link',
+    back: '↑ Back to contents',
+    missing: 'missing',
+    titleSuffix: 'songbook',
+    exported: 'Exported from TabTabTab',
+    tab: 'tab',
+    tabs: 'tabs',
+    contents: 'Contents',
+    slower: 'Slower (←)',
+    faster: 'Faster (→)',
+  },
+};
+
+function exportJs(language) {
+  const x = EXPORT_TEXT[language] ?? EXPORT_TEXT.no;
+  return EXPORT_JS
+    .replace("s + ' sek igjen'", `s + ${JSON.stringify(x.seconds)}`)
+    .replace("m + ' min igjen'", `m + ${JSON.stringify(x.minute)}`)
+    .replace(
+      "return m + ' min ' + r + ' sek igjen';",
+      language === 'en'
+        ? "return m + ' min ' + r + 's left';"
+        : "return m + ' min ' + r + ' sek igjen';",
+    )
+    .replace("'⏸ Pause'", JSON.stringify(x.pause))
+    .replace("'▶ Auto-scroll'", JSON.stringify(x.autoScroll));
 }
 
-function renderArticle(idx, tab) {
+function formatChords(chordnames, language) {
+  if (!Array.isArray(chordnames) || !chordnames.length) return '';
+  const x = EXPORT_TEXT[language] ?? EXPORT_TEXT.no;
+  return `<p class="chords">${x.chords}: ${escapeHtml(chordnames.join(' '))}</p>`;
+}
+
+function renderArticle(idx, tab, language) {
+  const x = EXPORT_TEXT[language] ?? EXPORT_TEXT.no;
   if (!tab) {
     return `<article id="tab-${idx}" class="missing">
-      <p>Tab #${idx} kunne ikke løses (ikke i lokal katalog og ingen privat tab funnet).</p>
+      <p>${x.missingTab(idx)}</p>
     </article>`;
   }
   const heading = `${escapeHtml(tab.artist)} &mdash; ${escapeHtml(tab.song)}`;
   const source = tab.source === 'ultimate-guitar'
-    ? `<p class="source">Kilde: Ultimate Guitar${tab.source_url ? ` &mdash; <a href="${escapeHtml(tab.source_url)}">link</a>` : ''}</p>`
+    ? `<p class="source">${x.source}: Ultimate Guitar${tab.source_url ? ` &mdash; <a href="${escapeHtml(tab.source_url)}">${x.link}</a>` : ''}</p>`
     : '';
   return `<article id="tab-${idx}">
   <header>
     <h2>${idx}. ${heading}</h2>
     ${source}
-    ${formatChords(tab.chordnames)}
+    ${formatChords(tab.chordnames, language)}
   </header>
   <pre>${escapeHtml(tab.body || '')}</pre>
-  <p class="back"><a href="#top">↑ Til innhold</a></p>
+  <p class="back"><a href="#top">${x.back}</a></p>
 </article>`;
 }
 
-export function buildExportHTML({ name, tabs, exportedAt }) {
+export function buildExportHTML({ name, tabs, exportedAt, language = 'no' }) {
+  const x = EXPORT_TEXT[language] ?? EXPORT_TEXT.no;
   const date = (exportedAt instanceof Date ? exportedAt : new Date()).toISOString().slice(0, 10);
   const tocItems = tabs.map((t, i) => {
     const label = t
       ? `${escapeHtml(t.artist)} &mdash; ${escapeHtml(t.song)}`
-      : `Tab (mangler)`;
+      : `Tab (${x.missing})`;
     return `<li><a href="#tab-${i + 1}">${label}</a></li>`;
   }).join('\n      ');
-  const articles = tabs.map((t, i) => renderArticle(i + 1, t)).join('\n');
+  const articles = tabs.map((t, i) => renderArticle(i + 1, t, language)).join('\n');
   return `<!doctype html>
-<html lang="no">
+<html lang="${language === 'en' ? 'en' : 'no'}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>${escapeHtml(name)} — TabTabTab sangbok</title>
+<title>${escapeHtml(name)} — TabTabTab ${x.titleSuffix}</title>
 <style>${EXPORT_CSS}</style>
 </head>
 <body id="top">
 <header>
   <h1>${escapeHtml(name)}</h1>
-  <p class="meta">Eksportert fra TabTabTab · ${date} · ${tabs.length} ${tabs.length === 1 ? 'tab' : 'tabs'}</p>
+  <p class="meta">${x.exported} · ${date} · ${tabs.length} ${tabs.length === 1 ? x.tab : x.tabs}</p>
 </header>
 <nav class="toc">
-  <h2>Innhold</h2>
+  <h2>${x.contents}</h2>
   <ol>
       ${tocItems}
   </ol>
@@ -272,11 +333,11 @@ ${articles}
 <button id="start-btn">▶ Auto-scroll</button>
 <div id="hud" hidden>
   <span class="hud-time"></span>
-  <button data-act="slower" title="Tregere (←)">−</button>
-  <button data-act="faster" title="Raskere (→)">+</button>
+  <button data-act="slower" title="${x.slower}">−</button>
+  <button data-act="faster" title="${x.faster}">+</button>
   <button data-act="stop">■</button>
 </div>
-<script>${EXPORT_JS}</script>
+<script>${exportJs(language)}</script>
 </body>
 </html>
 `;
