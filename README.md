@@ -2,7 +2,7 @@
 
 A static, offline-first web app for guitar tabs. Two ways in: **browse** the ~7700-tab [nortabs.net](https://nortabs.net) Norwegian catalog, or **import your own** [Ultimate Guitar](https://www.ultimate-guitar.com) bookmarks and let your *browser* enrich them with an on-device LLM. No backend, no account, no tracking. Optional Google Drive sync for your own imports — your tabs, your Drive, never our servers.
 
-**Home**: [tabtabtab.no](https://tabtabtab.no) *(deploy in progress)*
+**Home**: [nortabs.netflify.app](https://nortabs.netlify.app)
 
 > Formerly **NorTabs**. The nortabs.net catalog browser is still the core; `tabtabtab` is the same app grown a bring-your-own-tabs half — see [Bring your own tabs](#bring-your-own-tabs--and-your-browser-does-the-ai).
 
