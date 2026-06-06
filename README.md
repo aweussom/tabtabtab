@@ -2,9 +2,9 @@
 
 A static, offline-first web app for guitar tabs. Two ways in: **browse** the ~7700-tab [nortabs.net](https://nortabs.net) Norwegian catalog, or **import your own** [Ultimate Guitar](https://www.ultimate-guitar.com) bookmarks and let your *browser* enrich them with an on-device LLM. No backend, no account, no tracking. Optional Google Drive sync for your own imports — your tabs, your Drive, never our servers.
 
-**Live**: [nortabs.netlify.app](https://nortabs.netlify.app) (tabtabtab.no DNS pending). Hosted on Netlify — auto-deploys on every commit to `main`.
+**Home**: [nortabs.netflify.app](https://nortabs.netlify.app)
 
-> Formerly **NorTabs**. The nortabs.net catalog browser is still the core; `tabtabtab` is the same app grown a bring-your-own-tabs half — see [Bring your own tabs](#bring-your-own-tabs--and-your-browser-does-the-ai).
+> The nortabs.net catalog browser is still the core; `tabtabtab` is the same app grown a bring-your-own-tabs half — see [Bring your own tabs](#bring-your-own-tabs--and-your-browser-does-the-ai).
 
 ---
 
@@ -22,7 +22,7 @@ This is a constraint as creative driver, not a religious belief. Backends are fi
 
 **2. Search is almost always stupid, and I wanted to fix that — at least here.** Most search is a substring match with a sprinkle of Levenshtein on top. You can search for the title fragment if you remember it exactly. You cannot search for a *vibe*. You cannot search for "that bittersweet tronderrock song about driving home from a funeral", because no field in any database contains the word "bittersweet" next to "tronderrock". This project's enrichment pipeline + search engine try to do that. See **[Search](#search-the-star-player)** below — it's most of what this project actually *is*.
 
-A small third thing: I had built a Flet desktop app for the same data, the official nortabs.no shipped their own ad-supported app shortly after, and I wanted somewhere to keep tinkering. So: hobby. No ads, no tracking, no account. Explicit blessing from the nortabs.net owner.
+A small third thing: I had built a [Flet desktop app](../nortabs-app) for the same data, the official nortabs.no shipped their own ad-supported app shortly after, and I wanted somewhere to keep tinkering. So: hobby. No ads, no tracking, no account. Explicit blessing from the nortabs.net owner.
 
 ---
 
@@ -85,7 +85,7 @@ A query goes through several stages:
 3. **Match.** Short queries use prefix expansion on names (`ryba` → `rybak`, `barnsanger` → `barnesanger`), with an `exact > prefix` score multiplier. Body matches are always exact, but weighted by IDF.
 4. **Propagate body matches upward.** When a lyric matches a tab, the *song* it belongs to gets a 3× boost on the song frame. So typing a half-remembered line lands you on the right song, not just the right tab.
 5. **Dedup multi-tab songs.** A song with five user-uploaded tabs would otherwise score 5× a song with one — unfair. The body score is the *max* across the song's tabs, not the sum.
-6. **Songbook + UG-import boost.** Tabs in a user-curated songbook get a 4× multiplier — if you've added Bjørn Eidsvåg to a sangbok, his name wins over a less-known same-letter artist. Separately, anything you imported from Ultimate Guitar gets a 2.5× boost in its own right: you actively sought that tab out, so it's a stronger relevance signal than a tangentially-tagged catalog entry. Prefix-expansion contributions are also deduped per query token, so a song whose enrichment mentions both `mountain` and `mountains` doesn't double-score over one that mentions only `mountain`.
+6. **Songbook boost.** Tabs the user has bookmarked get a 4× multiplier — if you've added Bjørn Eidsvåg to a songbook, his name wins over a less-known same-letter artist.
 7. **Three result frames** — Songs, Artists, Lyrics, in that order, twenty entries each.
 8. **"Mente du …?"** Only when nothing hit and the query was a single token. Multi-token zero-result is usually a hopeless query and Damerau-Levenshtein guessing makes it worse, not better.
 9. **Fall-through.** Zero hits always shows a `Søk live på nortabs.net` link at the bottom — honest UX, no embedded iframe, just a new tab.
@@ -147,7 +147,7 @@ How it works:
 
 That third step is the whole trick. Enrichment is the one thing that *looked* like it needed a backend — you can't run a decent LLM in a browser, surely? Except now you can: Chrome ships one. Your copyrighted tabs never touch anyone's server; they're enriched by your own machine, and (optionally) synced across your devices through *your own* Google Drive — a hidden per-app folder (`appDataFolder`, scope `drive.appdata`) that's invisible to everyone, including me.
 
-**Status — honest, it's a hobby in motion:** the userscript, the drop-it-in-yourself import UI (`#/import/ug`), on-device enrichment, and cross-device sync via your own Google Drive are all *shipped*. The drop is the action — Chrome auto-enqueues your tabs into a background queue (Gemini Nano tags each in your own browser; you can navigate away and watch the progress pill in the corner), and non-Chrome browsers literal-import the same JSON so artist/song/body search still works. The model itself prefetches in the background on app start so the first enrichment doesn't sit through a 2-4 GB wait. Your imports land in the same search index as the catalog with a small relevance boost (so the song you imported beats a tangentially-tagged catalog one), the auto-synthesized "Mine UG-importer" songbook is always present in your sangbok-list, UG artists show under their letter alongside the catalog (a tiny red "U" marks user-imported entries), and back-navigation works the way you'd expect. Sign into Drive once and your library auto-syncs to a hidden per-app folder (scope `drive.appdata`) — invisible in your normal Drive UI, never touching our infrastructure — with per-tab push during enrichment and auto-pull on every app boot so a tab you imported on the laptop shows up on your phone next time you open it.
+**Status — honest, it's a hobby in motion:** the userscript and the catalog-side bundling are shipped. On-device enrichment is *validated* (Chrome 148, Gemini Nano; semantic quality matched the cloud models that built the catalog). The drop-it-in-yourself import UI and Drive sync are in progress.
 
 **Chrome-only, by choice.** On-device AI is a Chrome feature today (Edge/other Chromium will inherit it; feature-detection means they light up automatically when they do). Other browsers still get full *literal* search over your imports — artist, title, lyric, chord text — they just don't get the AI semantic layer in-browser. An acceptable asymmetry for a design that refuses to run a backend.
 
@@ -158,32 +158,24 @@ That third step is the whole trick. Enrichment is the one thing that *looked* li
 Vanilla JS modules, no build step. Open `index.html` in any browser — it works.
 
 ```
-tabtabtab/
+tabtabtab/                    # repo (local folder may still be nortabs-web)
 ├── index.html                # single root, loads app.js as a module
 ├── app.js                    # router + state + view dispatch
 ├── state.js                  # central state with pub/sub
 ├── router.js                 # hash routing
-├── catalog.js                # loads catalog.json + local UG-imports, indexes by id
+├── catalog.js                # loads catalog.json once, indexes by id
 ├── search.js                 # the star player — see above
 ├── chord-wrap.js             # context-sensitive line wrapping for mobile
-├── storage.js                # localStorage for songbooks + playback (synthesizes UG songbook)
+├── storage.js                # localStorage for songbooks + playback
 ├── playback.js               # auto-scroll engine
 ├── exporter.js               # songbook → standalone HTML export
-├── enrich-ondevice.js        # on-device UG enrichment via Chrome Prompt API
-├── enrich-queue.js           # background-enrichment queue (subscribe-able state)
-├── drive-sync.js             # opt-in sync to user's own Drive appDataFolder (OAuth GIS)
-├── vendor/json5.min.js       # JSON5 (vendored, lenient parser for LLM output)
 ├── version.js                # cache-busting stamp (auto-bumped on commit)
 ├── views/                    # one file per screen
 ├── catalog.json              # crawler output (committed, ~23 MB raw / 5 MB gzipped)
 ├── enrichment.json           # merged LLM enrichment (committed)
 ├── enrichment/<letter>.json  # per-letter enrichment checkpoints
-├── private-bundle.json       # gitignored — shipped UG bundle, intentionally absent
-│                             #   until we ship a cleanly-licensed demo set
-├── images/                   # PWA icons, wordcloud background, OAuth logo
-├── docs/                     # screenshots + import-ug-guide.html
+├── home-wordcloud.svg        # decorative background
 ├── style.css
-├── userscripts/              # client-side UG bookmark exporter (Tampermonkey/etc.)
 ├── .github/workflows/
 │   └── crawl.yml             # nightly incremental crawl + Sunday full crawl
 ├── crawler/                  # local-only tooling — never ships to the browser
@@ -191,17 +183,17 @@ tabtabtab/
 │   ├── enrich.py             # catalog LLM enrichment via `claude -p`
 │   ├── enrich-gpt.py         # OpenAI API variant (concurrent)
 │   ├── merge-enrichment.py   # combine per-letter → enrichment.json
-│   ├── generate-wordcloud.py # regenerates images/home-wordcloud.svg
+│   ├── generate-wordcloud.py # build home-wordcloud.svg
 │   ├── run-enrich.ps1        # quota-aware serial wrapper for Claude
 │   ├── run-enrich-parallel.ps1 # disjoint-letter parallel driver
 │   ├── scheduled-enrich.ps1  # daily 06:00 Oslo Task Scheduler entry
-│   ├── sample-ug-export.py   # random small UG-sample generator (fast iteration)
+│   ├── userscripts/          # UG bookmark exporter (Tampermonkey)
 │   ├── enrich-private.py     # UG enrichment — kept as a QA cross-check
-│   └── build-private-bundle.py # builds private-bundle.json (for future demo bundle)
+│   └── build-private-bundle.py # builds private-bundle.json (personal/QA)
 └── archive/                  # superseded cloud-proxy era — see archive/README.md
 ```
 
-See `CLAUDE.md` for operational details, `PLAN.md` for the design log, `TODO.md` for the focused open backlog, `TODONT.md` for explicit non-features, and `DRIVE-SETUP.md` for the OAuth setup if you want to enable Drive sync on your own deploy.
+See `CLAUDE.md` for operational details and `PLAN.md` for the design log and backlog.
 
 ---
 
