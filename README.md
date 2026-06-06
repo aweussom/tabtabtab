@@ -4,7 +4,7 @@ A static, offline-first web app for guitar tabs. Two ways in: **browse** the ~77
 
 **Home**: [nortabs.netflify.app](https://nortabs.netlify.app)
 
-> Formerly **NorTabs**. The nortabs.net catalog browser is still the core; `tabtabtab` is the same app grown a bring-your-own-tabs half — see [Bring your own tabs](#bring-your-own-tabs--and-your-browser-does-the-ai).
+> The nortabs.net catalog browser is still the core; `tabtabtab` is the same app grown a bring-your-own-tabs half — see [Bring your own tabs](#bring-your-own-tabs--and-your-browser-does-the-ai).
 
 ---
 
