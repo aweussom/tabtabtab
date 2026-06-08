@@ -4,7 +4,7 @@ const DEFAULT_LANGUAGE = 'no';
 const STRINGS = {
   no: {
     language_name: 'Norsk',
-    language_switch: 'English',
+    language_switch: 'Language: English',
     language_switch_title: 'Switch to English',
     home: 'Hjem',
     home_title: 'Tilbake til forsiden',
@@ -138,7 +138,7 @@ const STRINGS = {
   },
   en: {
     language_name: 'English',
-    language_switch: 'Norsk',
+    language_switch: 'Språk: Norsk',
     language_switch_title: 'Bytt til norsk',
     home: 'Home',
     home_title: 'Back to the home page',
