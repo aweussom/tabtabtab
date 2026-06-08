@@ -275,6 +275,18 @@ def merge_checkpoints(checkpoint_dir, out_path, log):
             merged["letters"][letter] = json.loads(cp.read_text(encoding="utf-8"))
         except Exception as e:
             log(f"  ! could not read checkpoint {cp}: {e}")
+
+    # Preserve the previous crawled_at when nothing else changed. Otherwise a
+    # fresh timestamp every run makes catalog.json differ on every crawl, which
+    # triggers a commit + push + Netlify rebuild even with zero new tabs.
+    if out_path.exists():
+        try:
+            prev = json.loads(out_path.read_text(encoding="utf-8"))
+            if prev.get("letters") == merged["letters"]:
+                merged["crawled_at"] = prev.get("crawled_at", merged["crawled_at"])
+        except Exception as e:
+            log(f"  ! could not read existing {out_path} for diff: {e}")
+
     write_json(out_path, merged)
     raw = out_path.read_bytes()
     gz = gzip.compress(raw)
