@@ -4,9 +4,8 @@ Open work, near-term to far-term. Detailed design notes live in `PLAN.md`; this 
 
 ## Near-term — likely next pass
 
-- **Personal library import (Word docs + ChordPro)**. Thousands of personal `.docx` files (single songs + multi-song "sangbøker") + a small set of ChordPro `.chopro` files belong in the same private-tabs store as UG imports, with different `source` tags. ChordPro is straightforward (~80 lines JS, well-defined format). Word is trickier — single-song parsing via heuristics is ~150 lines, multi-song splitting needs an LLM (same pipeline as catalog enrichment).
 - **Songbook share URLs handling for private tabs**. A shared songbook URL containing `ug-12345` IDs is meaningless to recipients — their TabTabTab install has no body for that ID. v1: render placeholders with "Privat tab — be avsender om eksport". v2: inline the tab body in the share URL.
-- **IndexedDB fallback when localStorage fills up**. Word/sangbok import will easily exceed the 5-10 MB localStorage budget. Migrate the local-imports store to IndexedDB once we hit that ceiling — one-shot migration on first run after the cutover. Songbooks (small, ID-only) stay in localStorage.
+- **Drive merge correctness**. Merge artist `song_ids` and song `tab_ids` by union so concurrent imports on two devices cannot make retained tabs unreachable after a sync round-trip. Add deterministic regression coverage for the merge contract.
 
 ## Mid-term — interesting but not blocking
 
@@ -23,6 +22,8 @@ Open work, near-term to far-term. Detailed design notes live in `PLAN.md`; this 
 
 ## Parked — accepted as-is until evidence says otherwise
 
+- **Personal Word / `.docx` imports**. Single-song documents, multi-song "sangbøker", and the unified multi-format import screen are deferred. Revisit only when there is a concrete use case and time allocated to data-quality review.
+- **IndexedDB migration for private imports**. UG libraries fit comfortably in localStorage today. Move local imports to IndexedDB only after measured storage pressure or another large import source makes the migration necessary.
 - **iOS chord-wrap defensive shotgun minimization**. Five overlapping defenses landed together and fixed the iOS bug. CLAUDE.md "iOS chord-wrap" section enumerates them. Bisection would identify the minimum-necessary subset (likely 1 + one of {3,4} + 5) but the iOS user count for this app is effectively zero and the shotgun cost is near-nothing. If/when someone wants to minimize: revert one defense at a time on a branch, re-test rotation + A−/A+ on a physical iPhone.
 - **0-tab songs in catalog**. The crawler occasionally returns songs with `tabs: []`. Currently kept (they render as "No tabs"). Open question whether to filter at crawl time; low impact.
 - **Chord lines with embedded commentary** (`Am (Hold this)` style). The chord-styling heuristic threshold (≥70% chord-shaped tokens) misses these. Rare; revisit with explicit BB-markup parsing if it shows up in real usage.
