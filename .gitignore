@@ -6,8 +6,13 @@ crawler/data/
 crawler/enrich_data/
 crawler/*.log
 
-# Per-run UG export samples (derivative of ug-export-*.json)
-ug/ug-export-sample-*.json
+# Raw UG exports (personal libraries + per-run samples). Same rationale as
+# crawler/private/ below: personal UG libraries are copyright grey-area and
+# stay local — never auto-committed/shipped.
+ug/ug-export-*.json
+
+# Dev.to challenge article draft — local writing artifact, not part of the app.
+DEV-SUBMISSION.md
 
 # Shipped UG-bundle artifact — intentionally absent until we ship a
 # cleanly-licensed demo bundle. crawler/build-private-bundle.py still
