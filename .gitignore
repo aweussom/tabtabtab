@@ -1,6 +1,4 @@
 # Local Claude Code settings (per-user)
-.claude/*
-!.claude/memory/
 # Crawler outputs that are regenerable / local-only
 crawler/data/
 crawler/enrich_data/
