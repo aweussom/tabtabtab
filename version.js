@@ -4,4 +4,4 @@
  * Do not edit manually — your value will be overwritten at commit time.
  * (Activate the hook with `git config core.hooksPath .githooks` once per clone.)
  */
-export const APP_VERSION = '1792829147';
+export const APP_VERSION = '1792923241';
