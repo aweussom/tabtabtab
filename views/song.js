@@ -35,9 +35,9 @@ export function render(state, root) {
     <h1>${escapeHtml(song.name)}</h1>
     ${song.tabs.length === 0
       ? `<p>${t('no_tabs')}</p>`
-      : `<ul>${song.tabs.map(t => {
-          const by = t.uploaded_by_name ? ` ${t('by')} ${escapeHtml(t.uploaded_by_name)}` : '';
-          return `<li><a href="#/tab/${t.id}">Tab #${t.id}${by}</a></li>`;
+      : `<ul>${song.tabs.map(tab => {
+          const by = tab.uploaded_by_name ? ` ${t('by')} ${escapeHtml(tab.uploaded_by_name)}` : '';
+          return `<li><a href="#/tab/${tab.id}">Tab #${tab.id}${by}</a></li>`;
         }).join('')}</ul>`}
   `;
 }
