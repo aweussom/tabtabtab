@@ -1,4 +1,5 @@
 # Local Claude Code settings (per-user)
+.claude/settings.local.json
 # Crawler outputs that are regenerable / local-only
 crawler/data/
 crawler/enrich_data/
@@ -47,3 +48,20 @@ venv/
 
 # Node, if it ever sneaks in
 node_modules/
+
+# ACE doctrine working state (adopted 2026-11-26): local to each machine,
+# not published. brain/TODONT.md is the exception; it was tracked at root
+# before adoption and stays public.
+brain/*
+!brain/TODONT.md
+.claude-memory/
+.claude/settings.json
+.claude/skills/
+STATUS.md
+check_docs.py
+docs-toolkit.json
+docs/DOCUMENTING-A-CODEBASE.md
+docs/LANGUAGE-NOTES.md
+sync-memories.sh
+ace-brain-main/
+CLAUDE.md

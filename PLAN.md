@@ -4,8 +4,8 @@ Canonical product and architecture plan for the current application.
 
 Historical experiments and superseded deployment designs live under
 `archive/`. Operational details for a coding session live in `CLAUDE.md`.
-The focused open backlog is `TODO.md`; settled non-features are in
-`TODONT.md`.
+The focused open backlog is `brain/todo/`, one file per item; settled non-features are in
+`brain/TODONT.md`.
 
 ## Current status
 
@@ -343,7 +343,7 @@ JSON responses after first use.
 
 ### Explicitly not planned
 
-See `TODONT.md`. In particular:
+See `brain/TODONT.md`. In particular:
 
 - No production app backend
 - No analytics/tracking
