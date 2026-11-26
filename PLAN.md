@@ -3,7 +3,7 @@
 Canonical product and architecture plan for the current application.
 
 Historical experiments and superseded deployment designs live under
-`archive/`. Operational details for a coding session live in `CLAUDE.md`.
+`archive/`. Operational details for a coding session live in a local, untracked `CLAUDE.md`.
 The focused open backlog is `brain/todo/`, one file per item; settled non-features are in
 `brain/TODONT.md`.
 
@@ -13,7 +13,7 @@ TabTabTab is a shipped static, offline-first guitar-tab web app.
 
 - **Live:** <https://nortabs.netlify.app>
 - **Hosting:** Netlify, automatically deployed from `main`
-- **Custom domain:** `tabtabtab.no` DNS is pending
+- **Custom domain:** `tabtabtab.no` redirects to the Netlify host
 - **Stack:** vanilla JavaScript modules, HTML, and CSS
 - **Build:** none
 - **Production backend:** none
@@ -313,44 +313,6 @@ current epoch and stages it. The value is used for:
 
 The service worker precaches the app shell and opportunistically caches large
 JSON responses after first use.
-
-## Roadmap
-
-### Active / likely next
-
-- Correct recursive Drive merge semantics and cover them with deterministic
-  tests.
-- Add a small zero-dependency regression harness for pure logic:
-  search ranking, routing, chord wrapping, storage migration, and merging.
-- Improve shared-songbook placeholders for private tabs.
-- Capo-first `visegrep` transposition.
-- Export to basic ChordPro.
-
-### Deferred
-
-- **Personal Word / `.docx` imports are explicitly deferred.**
-  They are not part of the active or near-term roadmap.
-- Multi-song Word document splitting is also deferred.
-- A unified multi-format import screen is deferred with Word import.
-- IndexedDB migration is deferred until measured localStorage pressure or
-  another large import source makes it necessary.
-- Full-Fat single-file export containing the entire app and catalog.
-- Dark mode.
-- Automated playback-duration discovery and smart scroll start.
-- Anonymous crowd-derived playback defaults.
-- Backend accounts, collaborative libraries, or hosted user content.
-- Non-Chrome cloud-LLM fallback for imported-tab semantic enrichment.
-
-### Explicitly not planned
-
-See `brain/TODONT.md`. In particular:
-
-- No production app backend
-- No analytics/tracking
-- No npm build stack
-- No CDN dependencies
-- No shipped personal UG library
-- No drag-and-drop songbook reorder replacing touch-friendly buttons
 
 ## Resolved API facts
 

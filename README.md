@@ -2,7 +2,7 @@
 
 A static, offline-first web app for guitar tabs. Two ways in: **browse** the ~7700-tab [nortabs.net](https://nortabs.net) Norwegian catalog, or **import your own** [Ultimate Guitar](https://www.ultimate-guitar.com) bookmarks and let your *browser* enrich them with an on-device LLM. No backend, no account, no tracking. Optional Google Drive sync for your own imports — your tabs, your Drive, never our servers.
 
-**Home**: [nortabs.netflify.app](https://nortabs.netlify.app)
+**Home**: [nortabs.netlify.app](https://nortabs.netlify.app)
 
 > The nortabs.net catalog browser is still the core; `tabtabtab` is the same app grown a bring-your-own-tabs half — see [Bring your own tabs](#bring-your-own-tabs--and-your-browser-does-the-ai).
 
@@ -16,13 +16,13 @@ Two motivations, and neither of them is "there's a market for this":
 
 > **If it can be done in JavaScript, it shall be done in JavaScript.**
 
-No bundler, no transpiler, no framework, no backend. Vanilla ES modules, one HTML file, one `<div id="app">`. Open `index.html` in a browser — it works. Open it offline — it still works. Drop it on a USB stick — works there too. The entire site, including ~7600 tabs of lyric/chord data, ships as one ~5 MB gzipped JSON file embedded in the page.
+No bundler, no transpiler, no framework, no backend. Vanilla ES modules, one HTML file, one `<div id="app">`. Open `index.html` in a browser — it works. Open it offline — it still works. Drop it on a USB stick — works there too. The entire site, including ~7700 tabs of lyric/chord data, ships as one ~5 MB gzipped JSON file embedded in the page.
 
 This is a constraint as creative driver, not a religious belief. Backends are fine. I just wanted to see how far the "browser is a complete computer" idea goes when you take it seriously. The latest milestone: even the *AI* runs in the browser now. The enrichment layer — the one thing that genuinely looked like it needed a server — turns out not to, because Chrome ships an on-device LLM (Gemini Nano, via the Prompt API). So the rule survives even the AI. See [Bring your own tabs](#bring-your-own-tabs--and-your-browser-does-the-ai).
 
 **2. Search is almost always stupid, and I wanted to fix that — at least here.** Most search is a substring match with a sprinkle of Levenshtein on top. You can search for the title fragment if you remember it exactly. You cannot search for a *vibe*. You cannot search for "that bittersweet tronderrock song about driving home from a funeral", because no field in any database contains the word "bittersweet" next to "tronderrock". This project's enrichment pipeline + search engine try to do that. See **[Search](#search-the-star-player)** below — it's most of what this project actually *is*.
 
-A small third thing: I had built a [Flet desktop app](../nortabs-app) for the same data, the official nortabs.no shipped their own ad-supported app shortly after, and I wanted somewhere to keep tinkering. So: hobby. No ads, no tracking, no account. Explicit blessing from the nortabs.net owner.
+A small third thing: I had built a Flet desktop app (`nortabs-app`) for the same data, the official nortabs.no shipped their own ad-supported app shortly after, and I wanted somewhere to keep tinkering. So: hobby. No ads, no tracking, no account. Explicit blessing from the nortabs.net owner.
 
 ---
 
@@ -76,7 +76,7 @@ None of those terms exist in the raw nortabs.net data. They come from an LLM-gen
 
 ### What the search engine actually does
 
-Implementation lives entirely in [`search.js`](search.js) (~360 lines, no dependencies). At page load it builds three inverted indexes — `artistIndex`, `songIndex`, `bodyIndex` — folded to ASCII-friendly form, plus three IDF maps so common tokens (`jeg`, `vil`, `på`) get near-zero weight and distinctive ones (`tjene`, `kroppen`, `fairytale`) dominate.
+Implementation lives entirely in [`search.js`](search.js) (~430 lines, no dependencies). At page load it builds three inverted indexes — `artistIndex`, `songIndex`, `bodyIndex` — folded to ASCII-friendly form, plus three IDF maps so common tokens (`jeg`, `vil`, `på`) get near-zero weight and distinctive ones (`tjene`, `kroppen`, `fairytale`) dominate.
 
 A query goes through several stages:
 
@@ -147,7 +147,7 @@ How it works:
 
 That third step is the whole trick. Enrichment is the one thing that *looked* like it needed a backend — you can't run a decent LLM in a browser, surely? Except now you can: Chrome ships one. Your copyrighted tabs never touch anyone's server; they're enriched by your own machine, and (optionally) synced across your devices through *your own* Google Drive — a hidden per-app folder (`appDataFolder`, scope `drive.appdata`) that's invisible to everyone, including me.
 
-**Status — honest, it's a hobby in motion:** the userscript and the catalog-side bundling are shipped. On-device enrichment is *validated* (Chrome 148, Gemini Nano; semantic quality matched the cloud models that built the catalog). The drop-it-in-yourself import UI and Drive sync are in progress.
+**Status:** all of it is shipped: the userscript, the drop-it-in import, on-device enrichment (validated on Chrome 148 with Gemini Nano; semantic quality matched the cloud models that built the catalog) and Drive sync.
 
 **Chrome-only, by choice.** On-device AI is a Chrome feature today (Edge/other Chromium will inherit it; feature-detection means they light up automatically when they do). Other browsers still get full *literal* search over your imports — artist, title, lyric, chord text — they just don't get the AI semantic layer in-browser. An acceptable asymmetry for a design that refuses to run a backend.
 
@@ -158,7 +158,7 @@ That third step is the whole trick. Enrichment is the one thing that *looked* li
 Vanilla JS modules, no build step. Open `index.html` in any browser — it works.
 
 ```
-tabtabtab/                    # repo (local folder may still be nortabs-web)
+tabtabtab/
 ├── index.html                # single root, loads app.js as a module
 ├── app.js                    # router + state + view dispatch
 ├── state.js                  # central state with pub/sub
@@ -166,15 +166,24 @@ tabtabtab/                    # repo (local folder may still be nortabs-web)
 ├── catalog.js                # loads catalog.json once, indexes by id
 ├── search.js                 # the star player — see above
 ├── chord-wrap.js             # context-sensitive line wrapping for mobile
+├── chord-data.js             # chord fingerings, with vise and barré alternatives
+├── chord-diagrams.js         # SVG chord diagram renderer
 ├── storage.js                # localStorage for songbooks + playback
 ├── playback.js               # auto-scroll engine
 ├── exporter.js               # songbook → standalone HTML export
+├── enrich-ondevice.js        # on-device enrichment via Chrome's Prompt API
+├── enrich-queue.js           # background queue for the on-device enrichment
+├── drive-sync.js             # optional sync to the user's own Google Drive
+├── i18n.js, util.js          # UI strings and shared helpers
+├── sw.js, manifest.json      # service worker and PWA manifest
 ├── version.js                # cache-busting stamp (auto-bumped on commit)
 ├── views/                    # one file per screen
-├── catalog.json              # crawler output (committed, ~23 MB raw / 5 MB gzipped)
+├── catalog.json              # crawler output (committed, ~25 MB raw / 5 MB gzipped)
 ├── enrichment.json           # merged LLM enrichment (committed)
 ├── enrichment/<letter>.json  # per-letter enrichment checkpoints
-├── home-wordcloud.svg        # decorative background
+├── images/                   # icons and the home wordcloud
+├── vendor/json5.min.js       # the one vendored library
+├── userscripts/              # UG bookmark exporter (Tampermonkey)
 ├── style.css
 ├── .github/workflows/
 │   └── crawl.yml             # nightly incremental crawl + Sunday full crawl
@@ -183,17 +192,16 @@ tabtabtab/                    # repo (local folder may still be nortabs-web)
 │   ├── enrich.py             # catalog LLM enrichment via `claude -p`
 │   ├── enrich-gpt.py         # OpenAI API variant (concurrent)
 │   ├── merge-enrichment.py   # combine per-letter → enrichment.json
-│   ├── generate-wordcloud.py # build home-wordcloud.svg
+│   ├── generate-wordcloud.py # build images/home-wordcloud.svg
 │   ├── run-enrich.ps1        # quota-aware serial wrapper for Claude
 │   ├── run-enrich-parallel.ps1 # disjoint-letter parallel driver
 │   ├── scheduled-enrich.ps1  # daily 06:00 Oslo Task Scheduler entry
-│   ├── userscripts/          # UG bookmark exporter (Tampermonkey)
 │   ├── enrich-private.py     # UG enrichment — kept as a QA cross-check
 │   └── build-private-bundle.py # builds private-bundle.json (personal/QA)
 └── archive/                  # superseded cloud-proxy era — see archive/README.md
 ```
 
-See `CLAUDE.md` for operational details and `PLAN.md` for the design log and backlog.
+See `PLAN.md` for the design and `brain/TODONT.md` for what was deliberately left out.
 
 ---
 
